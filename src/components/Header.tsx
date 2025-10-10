@@ -1,30 +1,38 @@
 'use client'
 
 import { useState } from 'react'
+// import Link from 'next/link' // Using standard <a> tags to resolve build errors.
 import { motion } from 'framer-motion'
 import { Menu, X, ShoppingCart, User, Search, Heart } from 'lucide-react'
-// Assuming these components exist in your project
-// import CartDrawer from './CartDrawer'
-// import { useCart } from './CartContext'
+// The following imports are commented out as the files may not exist yet.
+// import CartDrawer from './CartDrawer' 
+// import { useCart } from './CartContext' 
 
-// Mock CartDrawer and useCart for demonstration purposes
+// Mock implementation for useCart to allow the component to render.
+const useCart = () => ({ items: [] });
+
+// Mock implementation for CartDrawer.
 const CartDrawer = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) => {
   if (!isOpen) return null;
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex justify-end">
-      <div className="w-full max-w-md bg-midnight-3 text-silver p-6">
-        <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-bold">Your Cart</h2>
-          <button onClick={onClose}><X size={24} /></button>
+    <div className="fixed inset-0 bg-black/50 z-[100] flex justify-end" onClick={onClose}>
+      <div className="w-full max-w-md bg-midnight text-silver p-6" onClick={(e) => e.stopPropagation()}>
+        <div className="flex justify-between items-center border-b border-glass-border pb-4">
+          <h2 className="text-2xl font-bold font-display">Your Cart</h2>
+          <button onClick={onClose} className="p-2 rounded-full hover:bg-white/10"><X size={24} /></button>
         </div>
-        <div className="mt-8 text-center">Your cart is empty.</div>
+        <div className="mt-8 text-center text-silver-dark">Your cart is currently empty.</div>
       </div>
     </div>
   );
 };
-const useCart = () => ({ items: [{ quantity: 1 }, { quantity: 1 }] });
-// Mock Link component for non-Next.js environments
-const Link = ({ href, children, className }: { href: string, children: React.ReactNode, className?: string }) => <a href={href} className={className}>{children}</a>;
+
+// Using <a> tag instead of Next.js Link for broader compatibility.
+const Link = ({ href, children, className, onClick }: { href: string, children: React.ReactNode, className?: string, onClick?: () => void }) => (
+  <a href={href} className={className} onClick={onClick}>
+    {children}
+  </a>
+);
 
 
 export default function Header() {
@@ -32,7 +40,7 @@ export default function Header() {
   const [isCartOpen, setIsCartOpen] = useState(false)
   const { items } = useCart()
 
-  const cartItemsCount = items.reduce((total, item) => total + item.quantity, 0)
+  const cartItemsCount = items.reduce((total, item: { quantity: number }) => total + item.quantity, 0)
 
   return (
     <>
@@ -51,7 +59,6 @@ export default function Header() {
 
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center space-x-8">
-              {/* --- ADDED HOME LINK --- */}
               <Link href="/" className="text-silver hover:text-teal transition-colors">
                 Home
               </Link>
@@ -71,17 +78,12 @@ export default function Header() {
 
             {/* Right side actions */}
             <div className="flex items-center space-x-4">
-              {/* Search */}
               <button className="p-2 text-silver hover:text-teal transition-colors">
                 <Search size={20} />
               </button>
-
-              {/* Wishlist */}
               <button className="p-2 text-silver hover:text-teal transition-colors">
                 <Heart size={20} />
               </button>
-
-              {/* User Account */}
               <button className="p-2 text-silver hover:text-teal transition-colors">
                 <User size={20} />
               </button>
@@ -120,7 +122,6 @@ export default function Header() {
             className="md:hidden overflow-hidden"
           >
             <nav className="py-4 space-y-2">
-               {/* --- ADDED HOME LINK --- */}
                <Link 
                 href="/" 
                 className="block px-4 py-2 text-silver hover:text-teal transition-colors"
@@ -161,8 +162,8 @@ export default function Header() {
         </div>
       </header>
 
-      {/* Cart Drawer */}
       <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
     </>
   )
 }
+
