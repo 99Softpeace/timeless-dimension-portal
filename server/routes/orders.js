@@ -2,12 +2,12 @@ const express = require('express')
 const Order = require('../models/Order')
 const Product = require('../models/Product')
 const router = express.Router()
+const { auth, admin } = require('../middleware/auth')
 
 // GET /api/orders - Get user orders
-router.get('/', async (req, res) => {
+router.get('/', auth, async (req, res) => {
   try {
-    // TODO: Add authentication middleware
-    const userId = req.user?.id
+    const userId = req.user._id
     const { page = 1, limit = 10, status } = req.query
 
     const options = {
@@ -40,10 +40,9 @@ router.get('/', async (req, res) => {
 })
 
 // GET /api/orders/:id - Get single order
-router.get('/:id', async (req, res) => {
+router.get('/:id', auth, async (req, res) => {
   try {
-    // TODO: Add authentication middleware
-    const userId = req.user?.id
+    const userId = req.user._id
     const { id } = req.params
 
     const order = await Order.findOne({ _id: id, user: userId })
@@ -71,10 +70,9 @@ router.get('/:id', async (req, res) => {
 })
 
 // POST /api/orders - Create new order
-router.post('/', async (req, res) => {
+router.post('/', auth, async (req, res) => {
   try {
-    // TODO: Add authentication middleware
-    const userId = req.user?.id
+    const userId = req.user._id
     const {
       items,
       shippingAddress,
@@ -174,7 +172,7 @@ router.post('/', async (req, res) => {
 })
 
 // PUT /api/orders/:id/status - Update order status (Admin only)
-router.put('/:id/status', async (req, res) => {
+router.put('/:id/status', auth, admin, async (req, res) => {
   try {
     // TODO: Add admin authentication middleware
     const { id } = req.params
@@ -206,10 +204,10 @@ router.put('/:id/status', async (req, res) => {
 })
 
 // PUT /api/orders/:id/payment-status - Update payment status
-router.put('/:id/payment-status', async (req, res) => {
+router.put('/:id/payment-status', auth, async (req, res) => {
   try {
     // TODO: Add authentication middleware
-    const userId = req.user?.id
+    const userId = req.user._id
     const { id } = req.params
     const { paymentStatus, paymentIntentId } = req.body
 
@@ -249,10 +247,10 @@ router.put('/:id/payment-status', async (req, res) => {
 })
 
 // POST /api/orders/:id/cancel - Cancel order
-router.post('/:id/cancel', async (req, res) => {
+router.post('/:id/cancel', auth, async (req, res) => {
   try {
     // TODO: Add authentication middleware
-    const userId = req.user?.id
+    const userId = req.user._id
     const { id } = req.params
     const { reason } = req.body
 
@@ -298,7 +296,7 @@ router.post('/:id/cancel', async (req, res) => {
 })
 
 // GET /api/orders/stats - Get order statistics (Admin only)
-router.get('/stats', async (req, res) => {
+router.get('/stats', auth, admin, async (req, res) => {
   try {
     // TODO: Add admin authentication middleware
     const { startDate, endDate } = req.query
