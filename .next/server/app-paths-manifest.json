@@ -1,6 +1,8 @@
 {
-  "/shop/page": "app/shop/page.js",
+  "/warranty/page": "app/warranty/page.js",
   "/page": "app/page.js",
-  "/login/page": "app/login/page.js",
-  "/register/page": "app/register/page.js"
+  "/collections/page": "app/collections/page.js",
+  "/shop/page": "app/shop/page.js",
+  "/contact/page": "app/contact/page.js",
+  "/about/page": "app/about/page.js"
 }

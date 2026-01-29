@@ -48,10 +48,19 @@ router.post('/register', async (req, res) => {
     })
   } catch (error) {
     console.error('Registration error:', error)
+    // If it's a duplicate key error (E11000)
+    if (error.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        message: 'User already exists with this email'
+      })
+    }
+
     res.status(400).json({
       success: false,
-      message: 'Registration failed',
-      error: error.message
+      message: 'Registration failed: ' + error.message,
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     })
   }
 })
@@ -161,7 +170,7 @@ router.post('/reset-password', async (req, res) => {
 
     // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key')
-    
+
     const user = await User.findOne({
       _id: decoded.userId,
       passwordResetToken: token,
@@ -199,7 +208,7 @@ router.post('/reset-password', async (req, res) => {
 router.get('/me', async (req, res) => {
   try {
     const token = req.headers.authorization?.replace('Bearer ', '')
-    
+
     if (!token) {
       return res.status(401).json({
         success: false,

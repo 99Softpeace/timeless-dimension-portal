@@ -1,15 +1,48 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { CreditCard, Truck, Shield, Lock } from 'lucide-react'
 import { useCart } from '@/components/CartContext'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useFlutterwave, closePaymentModal } from 'flutterwave-react-v3'
 
 export default function CheckoutContent() {
+  const router = useRouter()
   const { items, getTotalPrice, clearCart } = useCart()
   const [step, setStep] = useState(1)
+
+  // Auth check
+  useEffect(() => {
+    // Check for token in localStorage
+    const token = localStorage.getItem('token')
+    const userStr = localStorage.getItem('user')
+
+    if (!token || !userStr) {
+      // Not logged in, redirect to login
+      // using router.push directly might be fast, but let's check properly
+      router.push('/login?redirect=/checkout')
+      return
+    }
+
+    // Pre-fill form data if available
+    try {
+      const user = JSON.parse(userStr)
+      setFormData(prev => ({
+        ...prev,
+        email: user.email || '',
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        phone: user.phone || ''
+      }))
+    } catch (e) {
+      console.error("Error parsing user data", e)
+    }
+
+  }, [router])
+
   const [formData, setFormData] = useState({
     email: '',
     firstName: '',
@@ -35,11 +68,63 @@ export default function CheckoutContent() {
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
+  const config = {
+    public_key: process.env.NEXT_PUBLIC_FLW_PUBLIC_KEY || 'FLWPUBK_TEST-xxxxxxxxxx',
+    tx_ref: Date.now().toString(),
+    amount: getTotalPrice(),
+    currency: 'NGN',
+    payment_options: 'card,mobilemoney,ussd',
+    customer: {
+      email: formData.email,
+      phone_number: formData.phone,
+      name: `${formData.firstName} ${formData.lastName}`,
+    },
+    customizations: {
+      title: 'Timeless Dimension Portal',
+      description: 'Payment for items in cart',
+      logo: 'https://st2.depositphotos.com/4403291/7418/v/450/depositphotos_74189661-stock-illustration-online-shop-log.jpg',
+    },
+  }
+
+  const handleFlutterwavePayment = useFlutterwave(config)
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    console.log('Checkout data:', formData)
-    alert('✅ Order placed successfully! (Demo)')
-    clearCart()
+
+    handleFlutterwavePayment({
+      callback: (response) => {
+        console.log('Payment response:', response)
+        closePaymentModal()
+
+        if (response.status === 'successful') {
+          // Verify on backend
+          verifyPayment(response.transaction_id)
+        }
+      },
+      onClose: () => {
+        console.log('Payment modal closed')
+      },
+    })
+  }
+
+  const verifyPayment = async (transactionId: number) => {
+    try {
+      // You can call your backend verify endpoint here if needed
+      // For now we will just assume success and clear cart
+
+      /* 
+      const res = await fetch(\`/api/payment/verify?transaction_id=\${transactionId}\`)
+      const data = await res.json()
+      if (!data.success) throw new Error('Payment verification failed')
+      */
+
+      alert('✅ Payment successful! Order placed.')
+      clearCart()
+      router.push('/') // Redirect to home or order success page
+    } catch (error) {
+      console.error('Payment Error:', error)
+      alert('Payment verification failed. Please contact support.')
+    }
   }
 
   if (items.length === 0) {
@@ -93,11 +178,10 @@ export default function CheckoutContent() {
                   {stepItem.number}
                 </motion.div>
                 <span
-                  className={`ml-2 text-sm ${
-                    step >= stepItem.number
-                      ? 'text-silver'
-                      : 'text-silver-dark'
-                  }`}
+                  className={`ml-2 text-sm ${step >= stepItem.number
+                    ? 'text-silver'
+                    : 'text-silver-dark'
+                    }`}
                 >
                   {stepItem.title}
                 </span>
@@ -271,7 +355,7 @@ export default function CheckoutContent() {
                     type="submit"
                     className="btn-primary ml-auto"
                   >
-                    Place Order
+                    Place Order & Pay
                   </motion.button>
                 )}
               </div>

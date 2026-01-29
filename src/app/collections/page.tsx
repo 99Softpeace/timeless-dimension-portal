@@ -1,220 +1,133 @@
-"use client"
+'use client'
+
 import { motion } from 'framer-motion'
-import ProductCard from '@/components/ProductCard'
+import Image from 'next/image'
 import Link from 'next/link'
+import ProductCard from '@/components/ProductCard'
+import { allProducts } from '@/lib/products'
+import { ArrowRight } from 'lucide-react'
 
-// Mock data for collections
 const collections = [
-  {
-    id: 'heritage',
-    name: 'Heritage Collection',
-    description: 'Timeless pieces that honor Nigerian traditions and craftsmanship',
-    image: '/assets/images/heritage-collection.svg',
-    productCount: 12,
-    featured: true,
-  },
-  {
-    id: 'modern',
-    name: 'Modern Collection',
-    description: 'Contemporary designs for the urban professional',
-    image: '/assets/images/modern-collection.svg',
-    productCount: 8,
-  },
-  {
-    id: 'luxury',
-    name: 'Luxury Collection',
-    description: 'Premium timepieces for the discerning collector',
-    image: '/assets/images/luxury-collection.svg',
-    productCount: 15,
-  },
-  {
-    id: 'nigerian-pride',
-    name: 'Nigerian Pride',
-    description: 'Celebrating the spirit and culture of Nigeria',
-    image: '/assets/images/nigerian-pride-collection.svg',
-    productCount: 6,
-  },
-]
-
-const featuredProducts = [
-  {
-    id: '1',
-    name: 'Heritage Classic',
-    slug: 'heritage-classic',
-    price: 250000,
-    image: '/assets/images/heritage-classic.svg',
-    model3d: '/assets/models/heritage-classic.glb',
-    description: 'A timeless piece that embodies classic elegance',
-    isNew: true,
-  },
-  {
-    id: '2',
-    name: 'Nigerian Pride',
-    slug: 'nigerian-pride',
-    price: 180000,
-    image: '/assets/images/nigerian-pride.svg',
-    model3d: '/assets/models/nigerian-pride.glb',
-    description: 'Celebrating Nigerian heritage with modern craftsmanship',
-    isBestSeller: true,
-  },
-  {
-    id: '3',
-    name: 'Lagos Nights',
-    slug: 'lagos-nights',
-    price: 320000,
-    image: '/assets/images/lagos-nights.svg',
-    model3d: '/assets/models/lagos-nights.glb',
-    description: 'Inspired by the vibrant energy of Lagos',
-    discount: 15,
-  },
-  {
-    id: '4',
-    name: 'Golden Hour',
-    slug: 'golden-hour',
-    price: 280000,
-    image: '/assets/images/golden-hour.svg',
-    model3d: '/assets/models/golden-hour.glb',
-    description: 'Capturing the magic of golden hour in Nigeria',
-  },
+    {
+        id: 'heritage',
+        name: 'The Heritage Series',
+        subtitle: 'Timeless Nigerian craftsmanship.',
+        description: 'A tribute to the roots that ground us. The Heritage Series combines traditional Nigerian motifs with the exacting standards of Swiss horology.',
+        image: '/assets/images/heritage-collection-poster.png',
+        theme: 'light'
+    },
+    {
+        id: 'modern',
+        name: 'Modern Architecture',
+        subtitle: 'Designed for the new age.',
+        description: 'Clean lines, minimalist dials, and robust materials. For the visionary building the future of Lagos and beyond.',
+        image: '/assets/images/modern-collection-poster.png', // Fallback or reuse suitable image
+        theme: 'dark'
+    },
+    {
+        id: 'luxury',
+        name: 'Senator Reserve',
+        subtitle: 'The pinnacle of success.',
+        description: 'Rare materials, diamond indices, and our most complex movements. Reserved for those who have truly arrived.',
+        image: '/assets/images/luxury-collection-poster.png',
+        theme: 'light'
+    }
 ]
 
 export default function CollectionsPage() {
-  return (
-    <div className="pt-16">
-      {/* Hero Section */}
-      <section className="relative py-20 overflow-hidden">
-        <div className="absolute inset-0 nigerian-pattern opacity-10"></div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <h1 className="text-5xl font-display font-bold text-silver mb-6">
-              Our <span className="text-gradient">Collections</span>
-            </h1>
-            <p className="text-xl text-silver-dark max-w-3xl mx-auto leading-relaxed">
-              Discover our carefully curated collections, each one telling a unique story 
-              of craftsmanship, heritage, and modern innovation.
-            </p>
-        </div>
-      </section>
+    return (
+        <div className="bg-white">
+            {/* Intro */}
+            <div className="pt-32 pb-16 px-6 text-center max-w-4xl mx-auto">
+                <motion.span
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="font-mono text-xs uppercase tracking-widest text-slate-500 mb-4 block"
+                >
+                    EST. 2026 — LAGOS
+                </motion.span>
+                <motion.h1
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                    className="text-5xl md:text-7xl font-serif font-bold text-slate-900 mb-8"
+                >
+                    Curated Chapters
+                </motion.h1>
+                <motion.p
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className="text-xl text-slate-600 font-light leading-relaxed"
+                >
+                    Timepieces are not just instruments; they are stories. Explore our three distinct collections, each narrating a different dimension of the Nigerian experience.
+                </motion.p>
+            </div>
 
-      {/* Collections Grid */}
-      <section className="py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {collections.map((collection) => {
-              return (
-                <div className="group relative" key={collection.id}>
-                  <Link href={`/collections/${collection.id}`}>
-                    <div className="glass-card overflow-hidden">
-                      <div className="relative aspect-square mb-4 overflow-hidden rounded-xl bg-midnight-3">
-                        <div className="w-full h-full bg-gradient-to-br from-teal/20 to-gold/20 flex items-center justify-center">
-                          <span className="text-4xl">⌚</span>
-                        </div>
-                        {collection.featured && (
-                          <div className="absolute top-3 left-3">
-                            <span className="px-2 py-1 bg-teal text-midnight text-xs font-semibold rounded-full">
-                              Featured
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                      <div className="space-y-2">
-                        <h3 className="text-xl font-display font-semibold text-silver group-hover:text-teal transition-colors">
-                          {collection.name}
-                        </h3>
-                        <p className="text-silver-dark text-sm leading-relaxed">
-                          {collection.description}
-                        </p>
-                        <div className="flex items-center justify-between pt-2">
-                          <span className="text-teal font-semibold text-sm">
-                            {collection.productCount} watches
-                          </span>
-                          <span className="text-silver-dark text-sm group-hover:text-teal transition-colors">
-                            View Collection →
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
+            {/* Vertical Chapters */}
+            <div className="space-y-0">
+                {collections.map((collection, index) => {
+                    // Filter products for this collection
+                    // (Approximation: match category to collection id roughly)
+                    const collectionProducts = allProducts.filter(p => {
+                        if (collection.id === 'heritage') return p.category === 'heritage' || p.category === 'classic';
+                        if (collection.id === 'modern') return p.category === 'modern';
+                        if (collection.id === 'luxury') return p.category === 'luxury';
+                        return false;
+                    }).slice(0, 4); // Limit to 4 for the editorial row
 
-      {/* Featured Products */}
-      <section className="py-20 bg-midnight-3/30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="text-4xl font-display font-bold text-silver mb-4">
-              Featured Timepieces
-            </h2>
-            <p className="text-silver-dark text-lg max-w-2xl mx-auto">
-              Handpicked watches from our most popular collections
-            </p>
+                    const isDark = collection.theme === 'dark';
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {featuredProducts.map((product, index) => (
-              <motion.div
-                key={product.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1, duration: 0.8 }}
-                viewport={{ once: true }}
-              >
-                <ProductCard product={product} index={index} />
-              </motion.div>
-            ))}
-          </div>
+                    return (
+                        <section key={collection.id} className="relative group">
+                            {/* Editorial Banner */}
+                            <div className="relative h-[80vh] w-full overflow-hidden">
+                                <Image
+                                    src={collection.image}
+                                    alt={collection.name}
+                                    fill
+                                    className="object-cover transition-transform duration-[2s] ease-out group-hover:scale-105"
+                                />
+                                <div className="absolute inset-0 bg-black/20" /> {/* Subtle overlay */}
 
-            <Link href="/shop" className="btn-primary">
-              Explore All Watches
-            </Link>
-        </div>
-      </section>
+                                {/* Floating Text Content */}
+                                <div className="absolute inset-0 flex items-center justify-center text-center p-8">
+                                    <div className="max-w-2xl text-white">
+                                        <h2 className="text-4xl md:text-6xl font-serif font-bold mb-4 drop-shadow-lg">
+                                            {collection.name}
+                                        </h2>
+                                        <p className="text-lg md:text-xl font-light mb-8 drop-shadow-md text-white/90">
+                                            {collection.description}
+                                        </p>
+                                        <Link
+                                            href={`/shop?category=${collection.id === 'heritage' ? 'heritage' : collection.id}`} // Simple mapping
+                                            className="inline-flex items-center gap-2 bg-white text-black px-8 py-4 rounded-full font-medium hover:bg-slate-100 transition-colors"
+                                        >
+                                            Shop Collection <ArrowRight size={18} />
+                                        </Link>
+                                    </div>
+                                </div>
+                            </div>
 
-      {/* Collection Features */}
-      <section className="py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="text-4xl font-display font-bold text-silver mb-4">
-              Why Our Collections Matter
-            </h2>
-            <p className="text-silver-dark text-lg max-w-3xl mx-auto">
-              Each collection is carefully curated to represent different aspects of 
-              Nigerian culture and modern luxury.
-            </p>
+                            {/* Integrated Product Row */}
+                            <div className="bg-white py-16 px-4 sm:px-6 lg:px-8 border-b border-slate-100">
+                                <div className="max-w-7xl mx-auto">
+                                    <div className="flex justify-between items-end mb-8">
+                                        <h3 className="text-2xl font-serif text-slate-900">Featured in {collection.name}</h3>
+                                        <Link href="/shop" className="text-sm font-medium text-slate-500 hover:text-slate-900">View All</Link>
+                                    </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                title: 'Cultural Heritage',
-                description: 'Every piece tells a story of Nigerian traditions and values',
-                icon: '🏛️',
-              },
-              {
-                title: 'Modern Craftsmanship',
-                description: 'Combining traditional techniques with contemporary design',
-                icon: '⚡',
-              },
-              {
-                title: 'Personal Expression',
-                description: 'Find the perfect watch that reflects your unique style',
-                icon: '✨',
-              },
-            ].map((feature) => {
-              return (
-                <div className="glass-card text-center" key={feature.title}>
-                  <div className="text-5xl mb-4">{feature.icon}</div>
-                  <h3 className="text-xl font-display font-semibold text-silver mb-3">
-                    {feature.title}
-                  </h3>
-                  <p className="text-silver-dark leading-relaxed">
-                    {feature.description}
-                  </p>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-    </div>
-  )
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                                        {collectionProducts.map((product, idx) => (
+                                            <ProductCard key={product.id} product={product} index={idx} />
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    )
+                })}
+            </div>
+        </div>
+    )
 }

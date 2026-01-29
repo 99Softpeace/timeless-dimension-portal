@@ -1,22 +1,18 @@
-import { RegisterForm } from '@/components/AuthForms'
-import { Metadata } from 'next'
+'use client'
 
-export const metadata: Metadata = {
-    title: 'Create Account - Timeless Dimension Portal',
-    description: 'Register for a new account'
-}
+import { RegisterForm } from '@/components/AuthForms'
 
 export default function RegisterPage() {
     return (
-        <div className="min-h-screen pt-24 pb-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
-            <div className="w-full max-w-md space-y-8 glass p-8 rounded-2xl">
-                <div className="text-center">
-                    <h1 className="text-3xl font-display font-bold text-silver">
-                        Create Account
+        <div className="min-h-screen bg-white pt-32 pb-20 flex flex-col items-center justify-center px-4">
+            <div className="w-full max-w-md">
+                <div className="mb-12 text-center">
+                    <span className="font-mono text-xs uppercase tracking-widest text-slate-500 mb-4 block">
+                        SENATOR ACCOUNT
+                    </span>
+                    <h1 className="text-4xl md:text-5xl font-serif font-bold text-slate-900 mb-2">
+                        Join the Circle.
                     </h1>
-                    <p className="mt-2 text-silver-dark">
-                        Join the Timeless Dimension Portal
-                    </p>
                 </div>
                 <RegisterForm />
             </div>

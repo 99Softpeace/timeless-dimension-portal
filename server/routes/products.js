@@ -1,5 +1,6 @@
 const express = require('express')
 const Product = require('../models/Product')
+const { auth, admin } = require('../middleware/auth')
 const router = express.Router()
 
 // GET /api/products - Get all products with filtering and pagination
@@ -171,9 +172,9 @@ router.get('/search', async (req, res) => {
 // GET /api/products/:slug - Get single product by slug
 router.get('/:slug', async (req, res) => {
   try {
-    const product = await Product.findOne({ 
-      slug: req.params.slug, 
-      isActive: true 
+    const product = await Product.findOne({
+      slug: req.params.slug,
+      isActive: true
     })
 
     if (!product) {
@@ -206,9 +207,8 @@ router.get('/:slug', async (req, res) => {
 })
 
 // POST /api/products - Create new product (Admin only)
-router.post('/', async (req, res) => {
+router.post('/', auth, admin, async (req, res) => {
   try {
-    // TODO: Add admin authentication middleware
     const product = new Product(req.body)
     await product.save()
 
@@ -228,9 +228,8 @@ router.post('/', async (req, res) => {
 })
 
 // PUT /api/products/:id - Update product (Admin only)
-router.put('/:id', async (req, res) => {
+router.put('/:id', auth, admin, async (req, res) => {
   try {
-    // TODO: Add admin authentication middleware
     const product = await Product.findByIdAndUpdate(
       req.params.id,
       req.body,
@@ -260,9 +259,8 @@ router.put('/:id', async (req, res) => {
 })
 
 // DELETE /api/products/:id - Delete product (Admin only)
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', auth, admin, async (req, res) => {
   try {
-    // TODO: Add admin authentication middleware
     const product = await Product.findByIdAndUpdate(
       req.params.id,
       { isActive: false },

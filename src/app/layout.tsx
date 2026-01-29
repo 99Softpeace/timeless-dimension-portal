@@ -4,6 +4,7 @@ import "./globals.css"
 import Header from "@/components/Header"
 import Footer from "@/components/Footer"
 import { CartProvider } from "@/components/CartContext"
+import { AuthProvider } from "@/context/AuthContext"
 import { Toaster } from "@/components/ui/toaster"
 
 const inter = Inter({
@@ -20,23 +21,23 @@ const poppins = Poppins({
 })
 
 export const metadata: Metadata = {
-  title: "Timeless Dimension Portal | Luxury Watches Nigeria",
+  title: "Senator Watches | Luxury Timepieces Nigeria",
   description:
-    "Fragments of forever — luxury wristwatches crafted for the Nigerian market. Experience time in a new dimension with our curated collection of mechanical and hybrid timepieces.",
+    "Fragments of forever — luxury wristwatches crafted for the Nigerian market. Experience time in a new dimension with the Senator Collection.",
   keywords:
-    "luxury watches, Nigeria, wristwatches, mechanical watches, hybrid watches, 3D models, ecommerce",
-  authors: [{ name: "Timeless Dimension Portal" }],
+    "luxury watches, Nigeria, Senator watches, wristwatches, mechanical watches, hybrid watches, 3D models, ecommerce",
+  authors: [{ name: "Senator Watches" }],
   openGraph: {
-    title: "Timeless Dimension Portal | Luxury Watches Nigeria",
+    title: "Senator Watches | Luxury Timepieces Nigeria",
     description:
       "Fragments of forever — luxury wristwatches crafted for the Nigerian market.",
     type: "website",
     locale: "en_NG",
-    siteName: "Timeless Dimension Portal",
+    siteName: "Senator Watches",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Timeless Dimension Portal | Luxury Watches Nigeria",
+    title: "Senator Watches | Luxury Timepieces Nigeria",
     description:
       "Fragments of forever — luxury wristwatches crafted for the Nigerian market.",
   },
@@ -54,14 +55,16 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${poppins.variable}`}>
       <body
-        className={`${inter.className} bg-midnight-2 text-silver antialiased`}
+        className={`${inter.className} bg-[#F5F5F7] text-midnight antialiased`}
       >
         <CartProvider>
-          <div className="min-h-screen hero-bg flex flex-col">
-            <Header />
-            <main className="flex-1 relative">{children}</main>
-            <Footer />
-          </div>
+          <AuthProvider>
+            <div className="min-h-screen hero-bg flex flex-col">
+              <Header />
+              <main className="flex-1 relative">{children}</main>
+              <Footer />
+            </div>
+          </AuthProvider>
         </CartProvider>
 
         {/* Toaster lives outside so it can overlay everything */}

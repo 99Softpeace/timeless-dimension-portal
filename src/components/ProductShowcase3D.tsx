@@ -2,47 +2,36 @@
 
 import React, { Suspense, useRef } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { PresentationControls, Environment, Html, useGLTF, Center } from '@react-three/drei'
+import { PresentationControls, Environment, Html, useGLTF, Center, ContactShadows, Float } from '@react-three/drei'
 import * as THREE from 'three'
 
-// The props interface is now in the same file
 export interface ProductShowcase3DProps {
   modelUrl?: string
   autoRotate?: boolean
   className?: string
 }
 
-/**
- * Renders the 3D watch model with a gentle floating animation and responsive scaling.
- */
 function WatchModel({ url, autoRotate = true }: { url: string; autoRotate?: boolean }) {
   const { scene } = useGLTF(url)
-  const meshRef = useRef<THREE.Group>(null)
-  const { viewport } = useThree() // Hook to get viewport dimensions for responsiveness
+  const { viewport } = useThree()
 
-  // Calculate a responsive scale based on the viewport width, with a maximum size cap.
-  // This makes the model smaller on mobile and larger on desktop.
-  const responsiveScale = Math.min(viewport.width / 3.5, 1.2)
+  // Oura style: Large, dominant, clear.
+  const isMobile = viewport.width < 5
+  // Increase scale slightly more for that "macro" feel
+  const responsiveScale = Math.min(viewport.width / (isMobile ? 1.4 : 2.2), 2)
 
   useFrame((state) => {
-    // Apply a subtle sin-wave rotation for a "breathing" effect
-    if (meshRef.current && autoRotate) {
-      meshRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.5) * 0.1
+    if (autoRotate) {
+      // Slower, heavy, premium rotation
+      scene.rotation.y = state.clock.elapsedTime * 0.2
     }
   })
 
   return (
-    <group ref={meshRef}>
-      {/* Apply the calculated responsive scale to the model */}
-      <primitive object={scene} scale={responsiveScale} />
-    </group>
+    <primitive object={scene} scale={responsiveScale} />
   )
 }
 
-/**
- * The main 3D showcase component.
- * This now contains all logic and is the component you'll import into your pages.
- */
 export default function ProductShowcase3D({
   modelUrl = '/assets/models/hero-watch.glb',
   autoRotate = true,
@@ -50,45 +39,65 @@ export default function ProductShowcase3D({
 }: ProductShowcase3DProps) {
   return (
     <div className={`relative w-full h-full ${className}`}>
-      <Canvas shadows camera={{ position: [0, 0, 5], fov: 35 }} className="rounded-xl">
-        {/* Lighting setup for the scene */}
-        <ambientLight intensity={0.5} />
-        <directionalLight
-          position={[5, 5, 5]}
-          intensity={1}
+      <Canvas shadows camera={{ position: [0, 0, 4], fov: 45 }} className="rounded-xl">
+        {/* Studio Lighting Setup to mimic Oura's crisp look */}
+
+        {/* soft fill light */}
+        <ambientLight intensity={0.7} />
+
+        {/* Key light - strong, creates definition */}
+        <spotLight
+          position={[10, 10, 10]}
+          angle={0.15}
+          penumbra={1}
+          intensity={2}
           castShadow
-          shadow-mapSize-width={2048}
-          shadow-mapSize-height={2048}
         />
+
+        {/* Rim light - highlights edges, separating from background */}
+        <pointLight position={[-10, 5, -10]} intensity={2} color="#ffffff" />
 
         <Suspense
           fallback={
             <Html center>
               <div className="flex flex-col items-center space-y-4">
                 <div className="w-8 h-8 border-2 border-teal-500 border-t-transparent rounded-full animate-spin"></div>
-                <span className="text-gray-400 text-sm">Loading Model...</span>
               </div>
             </Html>
           }
         >
-          {/* Controls for user interaction (drag to rotate) */}
           <PresentationControls
             global
             rotation={[0, 0, 0]}
-            polar={[-Math.PI / 3, Math.PI / 3]} // Vertical rotation limits
-            azimuth={[-Math.PI / 1.4, Math.PI / 1.4]} // Horizontal rotation limits
+            polar={[-Math.PI / 4, Math.PI / 4]}
+            azimuth={[-Math.PI / 2, Math.PI / 2]}
+            config={{ mass: 2, tension: 400 }} // Heavy feel
+            snap={{ mass: 4, tension: 400 }} // Snap back to center
           >
-            {/* The Center component automatically positions the model in the middle, fixing the upward shift. */}
-            <Center>
-              <WatchModel url={modelUrl} autoRotate={autoRotate} />
-            </Center>
+            <Float
+              speed={2}
+              rotationIntensity={0.2}
+              floatIntensity={0.5}
+              floatingRange={[-0.1, 0.1]}
+            >
+              <Center>
+                <WatchModel url={modelUrl} autoRotate={autoRotate} />
+              </Center>
+            </Float>
           </PresentationControls>
 
-          {/* Environment for realistic lighting and reflections.
-            Ensure 'potsdamer_platz_1k.hdr' is in your /public/assets/hdri/ folder.
-          */}
-          <Environment files="/assets/hdri/potsdamer_platz_1k.hdr" />
+          {/* Realistic grounded shadow */}
+          <ContactShadows
+            position={[0, -1.4, 0]}
+            opacity={0.7}
+            scale={10}
+            blur={2.5}
+            far={4}
+            color="#000000"
+          />
 
+          {/* "City" preset gives great metallic reflections (gold/silver looking real) */}
+          <Environment preset="city" />
         </Suspense>
       </Canvas>
     </div>

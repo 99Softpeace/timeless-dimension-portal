@@ -2,140 +2,127 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { Menu, X, ShoppingCart, User, Search, Heart } from 'lucide-react'
+import { Menu, X, ShoppingCart, User, Heart, LogOut, LayoutDashboard } from 'lucide-react'
 import CartDrawer from './CartDrawer'
 import { useCart } from './CartContext'
+import { useAuth } from '@/context/AuthContext'
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isCartOpen, setIsCartOpen] = useState(false)
   const { items } = useCart()
+  const { user, logout, isAdmin } = useAuth()
+  const pathname = usePathname()
 
   const cartItemsCount = items.reduce((total, item) => total + item.quantity, 0)
 
+  if (pathname.startsWith('/admin')) return null
+
+  // Always White Header - Oura Style
+  // Fixes visibility issues ensuring dark text on light background is always grounded
+  const headerClass = 'bg-white/95 backdrop-blur-md py-4 border-b border-black/5'
+  const textColor = 'text-slate-900'
+  const hoverColor = 'hover:text-teal-600'
+
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-50 glass backdrop-blur-md border-b border-glass-border">
+      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${headerClass}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            {/* Logo */}
-            <Link href="/" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-teal to-gold rounded-lg flex items-center justify-center">
-                <span className="text-midnight font-bold text-sm">S</span>
-              </div>
-              <span className="text-xl font-display font-bold text-gradient">
-                Senator Watches
+          <div className="flex items-center justify-between">
+
+            {/* 1. Logo (Far Left) */}
+            <Link href="/" className="flex items-center gap-2 group">
+              <span className={`text-2xl font-serif font-bold tracking-tighter ${textColor}`}>
+                SENATOR
               </span>
             </Link>
 
-            {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center space-x-8">
-              <Link href="/" className="text-silver hover:text-teal transition-colors">
+            {/* 2. Desktop Navigation (Centered) */}
+            <nav className="hidden md:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
+              <Link href="/" className={`text-sm font-medium ${textColor} ${hoverColor} transition-colors uppercase tracking-wide`}>
                 Home
               </Link>
-              <Link href="/shop" className="text-silver hover:text-teal transition-colors">
+              <Link href="/shop" className={`text-sm font-medium ${textColor} ${hoverColor} transition-colors uppercase tracking-wide`}>
                 Shop
               </Link>
-              <Link href="/collections" className="text-silver hover:text-teal transition-colors">
+              <Link href="/collections" className={`text-sm font-medium ${textColor} ${hoverColor} transition-colors uppercase tracking-wide`}>
                 Collections
               </Link>
-              <Link href="/about" className="text-silver hover:text-teal transition-colors">
-                About
-              </Link>
-              <Link href="/contact" className="text-silver hover:text-teal transition-colors">
-                Contact
+              <Link href="/about" className={`text-sm font-medium ${textColor} ${hoverColor} transition-colors uppercase tracking-wide`}>
+                Our Story
               </Link>
             </nav>
 
-            {/* Right side actions */}
-            <div className="flex items-center space-x-4">
-              <button className="p-2 text-silver hover:text-teal transition-colors">
-                <Search size={20} />
-              </button>
-              <button className="p-2 text-silver hover:text-teal transition-colors">
-                <Heart size={20} />
-              </button>
-              <Link href="/login" className="p-2 text-silver hover:text-teal transition-colors">
-                <User size={20} />
-              </Link>
+            {/* 3. Icons / Actions (Far Right) */}
+            <div className="flex items-center gap-6">
 
-              {/* Cart */}
+              {/* User/Admin */}
+              {user ? (
+                <div className="hidden sm:flex items-center gap-4">
+                  {isAdmin && (
+                    <Link href="/admin" className={`${textColor}/60 ${hoverColor}`}>
+                      <LayoutDashboard size={20} />
+                    </Link>
+                  )}
+                  <button onClick={logout} className={`${textColor}/60 hover:text-red-500`}>
+                    <LogOut size={20} />
+                  </button>
+                </div>
+              ) : (
+                <Link href="/login" className={`hidden sm:block ${textColor} ${hoverColor} font-medium text-sm`}>
+                  Sign In
+                </Link>
+              )}
+
+              {/* Cart - Oura Style circular border */}
               <button
                 onClick={() => setIsCartOpen(true)}
-                className="relative p-2 text-silver hover:text-teal transition-colors"
+                className={`relative group flex items-center justify-center w-10 h-10 rounded-full border border-slate-900/20 hover:border-slate-900/50 transition-all`}
               >
-                <ShoppingCart size={20} />
+                <ShoppingCart size={18} className={`${textColor} group-hover:scale-110 transition-transform`} />
                 {cartItemsCount > 0 && (
-                  <motion.span
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="absolute -top-1 -right-1 bg-teal text-midnight text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold"
-                  >
+                  <span className="absolute -top-1 -right-1 bg-teal-500 text-white text-[10px] font-bold h-4 w-4 rounded-full flex items-center justify-center">
                     {cartItemsCount}
-                  </motion.span>
+                  </span>
                 )}
               </button>
 
-              {/* Mobile menu button */}
+              {/* Mobile Menu Trigger */}
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="md:hidden p-2 text-silver hover:text-teal transition-colors"
+                className={`md:hidden ${textColor} ${hoverColor} transition-colors`}
               >
                 {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
               </button>
             </div>
           </div>
-
-          {/* Mobile Navigation */}
-          <motion.div
-            initial={false}
-            animate={{ height: isMenuOpen ? 'auto' : 0 }}
-            className="md:hidden overflow-hidden"
-          >
-            <nav className="py-4 space-y-2">
-              <Link
-                href="/"
-                className="block px-4 py-2 text-silver hover:text-teal transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Home
-              </Link>
-              <Link
-                href="/shop"
-                className="block px-4 py-2 text-silver hover:text-teal transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Shop
-              </Link>
-              <Link
-                href="/collections"
-                className="block px-4 py-2 text-silver hover:text-teal transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Collections
-              </Link>
-              <Link
-                href="/about"
-                className="block px-4 py-2 text-silver hover:text-teal transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                About
-              </Link>
-              <Link
-                href="/contact"
-                className="block px-4 py-2 text-silver hover:text-teal transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Contact
-              </Link>
-            </nav>
-          </motion.div>
         </div>
       </header>
+
+      {/* Mobile Menu Overlay */}
+      <motion.div
+        initial={false}
+        animate={{
+          opacity: isMenuOpen ? 1 : 0,
+          pointerEvents: isMenuOpen ? 'auto' : 'none'
+        }}
+        className="fixed inset-0 z-40 bg-white/95 backdrop-blur-xl md:hidden pt-24 px-6"
+      >
+        <nav className="flex flex-col space-y-6 text-center">
+          <Link href="/" onClick={() => setIsMenuOpen(false)} className="text-2xl font-serif text-midnight">Home</Link>
+          <Link href="/shop" onClick={() => setIsMenuOpen(false)} className="text-2xl font-serif text-midnight">Shop</Link>
+          <Link href="/collections" onClick={() => setIsMenuOpen(false)} className="text-2xl font-serif text-midnight">Collections</Link>
+          <Link href="/about" onClick={() => setIsMenuOpen(false)} className="text-2xl font-serif text-midnight">Our Story</Link>
+          {/* Mobile Auth */}
+          {!user && (
+            <Link href="/login" onClick={() => setIsMenuOpen(false)} className="text-lg text-midnight/60 mt-4">Sign In</Link>
+          )}
+        </nav>
+      </motion.div>
 
       <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
     </>
   )
 }
-
