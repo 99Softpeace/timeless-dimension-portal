@@ -33,7 +33,7 @@ export function LoginForm() {
         setError('')
 
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api'}/auth/login`, {
+            const res = await fetch('/api/auth/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData)
@@ -134,7 +134,7 @@ export function RegisterForm() {
         setError('')
 
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api'}/auth/register`, {
+            const res = await fetch('/api/auth/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData)
@@ -230,6 +230,85 @@ export function RegisterForm() {
                 <p className="text-slate-500 text-sm mb-4">Already a member?</p>
                 <Link href="/login" className="inline-block border border-slate-200 px-8 py-3 text-sm font-medium hover:border-slate-900 transition-colors">
                     SIGN IN
+                </Link>
+            </div>
+        </form>
+    )
+}
+
+export function ForgotPasswordForm() {
+    const [loading, setLoading] = useState(false)
+    const [sent, setSent] = useState(false)
+    const [email, setEmail] = useState('')
+    const [error, setError] = useState('')
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+        setLoading(true)
+        setError('')
+
+        // Mock API call
+        try {
+            await new Promise(resolve => setTimeout(resolve, 1500))
+            setSent(true)
+        } catch (err) {
+            setError('An error occurred. Please try again.')
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    if (sent) {
+        return (
+            <div className="text-center space-y-6">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <ArrowRight className="text-green-600" size={24} />
+                </div>
+                <h3 className="text-2xl font-serif font-bold text-slate-900">Link Sent.</h3>
+                <p className="text-slate-500 leading-relaxed">
+                    We have sent a password recovery link to <span className="font-medium text-slate-900">{email}</span>. Please check your inbox.
+                </p>
+                <Link href="/login" className="inline-block bg-slate-100 text-slate-900 px-8 py-3 font-medium hover:bg-slate-200 transition-colors mt-4">
+                    Return to Login
+                </Link>
+            </div>
+        )
+    }
+
+    return (
+        <form onSubmit={handleSubmit} className="space-y-12">
+            {error && (
+                <div className="p-4 text-sm text-red-600 bg-red-50 border-l-4 border-red-600">
+                    {error}
+                </div>
+            )}
+
+            <div className="space-y-2">
+                <p className="text-slate-500 text-sm mb-8">
+                    Enter the email address associated with your account and we'll send you a link to reset your password.
+                </p>
+                <input
+                    type="email"
+                    required
+                    className="w-full py-4 bg-transparent border-b border-slate-300 text-slate-900 text-xl focus:outline-none focus:border-slate-900 transition-colors placeholder-slate-400"
+                    placeholder="Email Address"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                />
+            </div>
+
+            <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-slate-900 text-white py-4 flex items-center justify-between px-6 hover:bg-teal-600 transition-colors group"
+            >
+                <span className="font-medium tracking-wide">SEND RECOVERY LINK</span>
+                {loading ? <Loader2 className="animate-spin" size={20} /> : <ArrowRight className="group-hover:translate-x-1 transition-transform" size={20} />}
+            </button>
+
+            <div className="text-center pt-8 border-t border-slate-100">
+                <Link href="/login" className="text-xs font-mono uppercase tracking-widest text-slate-400 hover:text-slate-900 transition-colors">
+                    Wait, I remember now
                 </Link>
             </div>
         </form>

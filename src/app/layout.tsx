@@ -55,7 +55,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${poppins.variable}`}>
       <body
-        className={`${inter.className} bg-[#F5F5F7] text-midnight antialiased`}
+        className={`${inter.className} bg-white text-midnight antialiased overflow-x-hidden`}
       >
         <CartProvider>
           <AuthProvider>

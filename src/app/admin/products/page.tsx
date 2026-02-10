@@ -25,7 +25,7 @@ export default function AdminProductsPage() {
 
     const fetchProducts = async () => {
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api'}/products?limit=100`)
+            const res = await fetch('/api/products?limit=100')
             const data = await res.json()
             if (data.success) {
                 setProducts(data.data)
@@ -43,7 +43,7 @@ export default function AdminProductsPage() {
         try {
             // You'll need to send the auth token here
             const token = localStorage.getItem('token')
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api'}/products/${id}`, {
+            const res = await fetch(`/api/products/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`
