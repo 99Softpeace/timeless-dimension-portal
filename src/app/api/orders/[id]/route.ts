@@ -1,15 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import dbConnect from '@/lib/db'
+import { getUserIdFromRequest } from '@/lib/auth'
 import Order from '@/models/Order'
-// import { getUserIdFromRequest } from '@/lib/auth' // TODO: Implement JWT auth extraction
+import '@/models/Product'
 
 // GET /api/orders/[id] - Get single order
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
     try {
         await dbConnect()
-        // TODO: Extract userId from JWT token in request headers
-        // const userId = getUserIdFromRequest(req)
-        const userId = '' // Placeholder
+        const userId = getUserIdFromRequest(req)
         if (!userId) {
             return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 })
         }

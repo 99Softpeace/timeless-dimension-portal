@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { Menu, X, ShoppingCart, User, Heart, LogOut, LayoutDashboard } from 'lucide-react'
+import { Menu, X, ShoppingCart, LogOut, LayoutDashboard, ShoppingBag } from 'lucide-react'
 import CartDrawer from './CartDrawer'
 import { useCart } from './CartContext'
 import { useAuth } from '@/context/AuthContext'
@@ -61,6 +61,9 @@ export default function Header() {
               {/* User/Admin */}
               {user ? (
                 <div className="hidden sm:flex items-center gap-4">
+                  <Link href="/orders" className={`${textColor}/80 ${hoverColor} text-sm font-medium`}>
+                    My Orders
+                  </Link>
                   {isAdmin && (
                     <Link href="/admin" className={`${textColor}/60 ${hoverColor}`}>
                       <LayoutDashboard size={20} />
@@ -118,6 +121,20 @@ export default function Header() {
           {/* Mobile Auth */}
           {!user && (
             <Link href="/login" onClick={() => setIsMenuOpen(false)} className="text-lg text-midnight/60 mt-4">Sign In</Link>
+          )}
+          {user && (
+            <>
+              <Link href="/orders" onClick={() => setIsMenuOpen(false)} className="text-lg text-midnight/70 mt-2 flex items-center justify-center gap-2">
+                <ShoppingBag size={18} />
+                My Orders
+              </Link>
+              {isAdmin && (
+                <Link href="/admin" onClick={() => setIsMenuOpen(false)} className="text-lg text-midnight/70 flex items-center justify-center gap-2">
+                  <LayoutDashboard size={18} />
+                  Admin Dashboard
+                </Link>
+              )}
+            </>
           )}
         </nav>
       </motion.div>

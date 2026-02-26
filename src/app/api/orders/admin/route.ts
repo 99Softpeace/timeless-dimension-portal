@@ -1,14 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server'
 import dbConnect from '@/lib/db'
+import { getUserIdFromRequest } from '@/lib/auth'
 import Order from '@/models/Order'
-// import { isAdmin } from '@/lib/auth' // TODO: Implement admin check
+import User from '@/models/User'
+
+async function requireAdmin(req: NextRequest) {
+    const userId = getUserIdFromRequest(req)
+    if (!userId) {
+        return { ok: false as const, response: NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 }) }
+    }
+
+    const user = await (User as any).findById(userId).select('role isActive')
+    if (!user || !user.isActive || user.role !== 'admin') {
+        return { ok: false as const, response: NextResponse.json({ success: false, message: 'Forbidden' }, { status: 403 }) }
+    }
+
+    return { ok: true as const, userId }
+}
 
 // GET /api/orders/admin - Get all orders (Admin only)
 export async function GET(req: NextRequest) {
     try {
         await dbConnect()
-        // TODO: Add admin authentication/authorization
-        // if (!isAdmin(req)) return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 })
+        const adminCheck = await requireAdmin(req)
+        if (!adminCheck.ok) {
+            return adminCheck.response
+        }
         const { searchParams } = new URL(req.url)
         const page = parseInt(searchParams.get('page') || '1')
         const limit = parseInt(searchParams.get('limit') || '20')
@@ -20,7 +37,11 @@ export async function GET(req: NextRequest) {
         }
         const query: any = {}
         if (status) query.status = status
-        const orders = await Order.find(query).skip(options.skip).limit(options.limit)
+        const orders = await Order.find(query)
+            .populate('user', 'firstName lastName email')
+            .sort({ createdAt: -1 })
+            .skip(options.skip)
+            .limit(options.limit)
         const total = await Order.countDocuments(query)
         return NextResponse.json({
             success: true,
