@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useCart } from '@/components/CartContext'
 
@@ -29,7 +29,7 @@ type CallbackState = {
   }
 }
 
-export default function PaymentCallbackPage() {
+function PaymentCallbackContent() {
   const router = useRouter()
   const { clearCart } = useCart()
   const searchParams = useSearchParams()
@@ -147,5 +147,26 @@ export default function PaymentCallbackPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function PaymentCallbackPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gray-50 dark:bg-slate-900 pt-24 px-4">
+          <div className="max-w-xl mx-auto bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-2xl p-8 shadow-sm">
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">
+              Payment Callback
+            </h1>
+            <p className="text-slate-600 dark:text-slate-300 mb-6">
+              Verifying payment...
+            </p>
+          </div>
+        </div>
+      }
+    >
+      <PaymentCallbackContent />
+    </Suspense>
   )
 }
