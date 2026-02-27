@@ -64,11 +64,11 @@ export default function AdminProductsPage() {
 
     return (
         <div className="space-y-6">
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
                 <h1 className="text-3xl font-display font-bold text-gradient">Products</h1>
                 <Link
                     href="/admin/products/new"
-                    className="flex items-center px-4 py-2 bg-teal text-midnight font-bold rounded-lg hover:bg-teal/90 transition-colors"
+                    className="inline-flex items-center justify-center px-4 py-2 bg-teal text-midnight font-bold rounded-lg hover:bg-teal/90 transition-colors w-full sm:w-auto"
                 >
                     <Plus className="mr-2 h-5 w-5" />
                     Add Product
@@ -76,7 +76,7 @@ export default function AdminProductsPage() {
             </div>
 
             {/* Search and Filter Bar */}
-            <div className="flex items-center space-x-4 bg-glass p-4 rounded-xl border border-glass-border">
+            <div className="bg-glass p-4 rounded-xl border border-glass-border">
                 <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-silver h-5 w-5" />
                     <input
@@ -92,7 +92,7 @@ export default function AdminProductsPage() {
             {/* Products Table */}
             <div className="bg-glass rounded-xl border border-glass-border overflow-hidden">
                 <div className="overflow-x-auto">
-                    <table className="w-full text-left">
+                    <table className="w-full text-left min-w-[760px]">
                         <thead>
                             <tr className="border-b border-glass-border bg-white/5">
                                 <th className="px-6 py-4 text-sm font-semibold text-teal uppercase tracking-wider">Product</th>

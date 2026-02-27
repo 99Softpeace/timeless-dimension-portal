@@ -14,12 +14,17 @@ const navigation = [
     { name: 'Settings', href: '/admin/settings', icon: Settings },
 ]
 
-export default function AdminSidebar() {
+type AdminSidebarProps = {
+    className?: string
+    onNavigate?: () => void
+}
+
+export default function AdminSidebar({ className, onNavigate }: AdminSidebarProps) {
     const pathname = usePathname()
     const { logout } = useAuth()
 
     return (
-        <div className="flex flex-col w-64 bg-glass border-r border-glass-border min-h-screen">
+        <div className={cn('flex h-full min-h-screen flex-col w-64 bg-glass border-r border-glass-border', className)}>
             <div className="flex items-center justify-center h-16 border-b border-glass-border">
                 <Link href="/" className="flex items-center space-x-2">
                     <div className="w-8 h-8 bg-gradient-to-br from-teal to-gold rounded-lg flex items-center justify-center">
@@ -39,6 +44,7 @@ export default function AdminSidebar() {
                             <Link
                                 key={item.name}
                                 href={item.href}
+                                onClick={onNavigate}
                                 className={cn(
                                     'group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors',
                                     isActive
@@ -62,7 +68,10 @@ export default function AdminSidebar() {
 
             <div className="border-t border-glass-border p-4">
                 <button
-                    onClick={logout}
+                    onClick={() => {
+                        onNavigate?.()
+                        logout()
+                    }}
                     className="flex w-full items-center px-2 py-2 text-sm font-medium text-silver hover:bg-white/5 hover:text-white rounded-md transition-colors"
                 >
                     <LogOut className="mr-3 h-6 w-6 text-silver group-hover:text-white" />

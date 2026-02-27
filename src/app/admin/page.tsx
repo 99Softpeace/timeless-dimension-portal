@@ -91,7 +91,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-8">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <h1 className="text-3xl font-display font-bold text-silver">Dashboard</h1>
           <p className="text-silver-dark text-sm mt-1">
@@ -100,7 +100,7 @@ export default function AdminDashboard() {
         </div>
         <Link
           href="/admin/orders"
-          className="px-4 py-2 bg-teal text-midnight font-bold rounded-lg hover:bg-teal/90 transition-colors"
+          className="w-full sm:w-auto text-center px-4 py-2 bg-teal text-midnight font-bold rounded-lg hover:bg-teal/90 transition-colors"
         >
           Manage Orders
         </Link>
@@ -133,7 +133,7 @@ export default function AdminDashboard() {
       </div>
 
       <div className="glass-card p-6">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
           <h2 className="text-xl font-semibold text-silver">Recent Orders</h2>
           <Link href="/admin/orders" className="text-teal text-sm font-semibold hover:underline">
             View all
@@ -148,7 +148,7 @@ export default function AdminDashboard() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left">
+            <table className="w-full text-left min-w-[700px]">
               <thead>
                 <tr className="border-b border-glass-border">
                   <th className="px-3 py-3 text-xs font-semibold text-teal uppercase tracking-wider">Order</th>
