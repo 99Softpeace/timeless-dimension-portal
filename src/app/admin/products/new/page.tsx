@@ -49,9 +49,9 @@ export default function NewProductPage() {
 
             const result = await res.json()
             if (result.success) {
-                setFormData({ ...formData, image: result.url })
+                setFormData((prev) => ({ ...prev, image: result.url }))
             } else {
-                alert('Upload failed: ' + result.message)
+                alert('Upload failed: ' + (result.error || result.message))
             }
         } catch (error) {
             console.error('Error uploading image:', error)
@@ -67,16 +67,23 @@ export default function NewProductPage() {
 
         try {
             const token = localStorage.getItem('token')
-            const res = await fetch('/api/products', {
+            const stockQuantity = parseInt(formData.stock, 10)
+
+            const res = await fetch('/api/products/admin', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({
-                    ...formData,
                     price: parseFloat(formData.price),
-                    countInStock: parseInt(formData.stock)
+                    name: formData.name,
+                    description: formData.description,
+                    category: formData.category,
+                    images: formData.image ? [formData.image] : [],
+                    stockQuantity,
+                    inStock: stockQuantity > 0,
+                    isFeatured: formData.isFeatured
                 })
             })
 
@@ -85,7 +92,7 @@ export default function NewProductPage() {
             if (data.success) {
                 router.push('/admin/products')
             } else {
-                alert('Failed to create product: ' + data.message)
+                alert('Failed to create product: ' + (data.error || data.message))
             }
         } catch (error) {
             console.error('Error creating product:', error)

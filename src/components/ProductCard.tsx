@@ -3,10 +3,17 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
-import { Product } from '@/lib/products'
+
+export interface ProductCardItem {
+  slug: string
+  name: string
+  image: string
+  price: number
+  isNew?: boolean
+}
 
 interface ProductCardProps {
-  product: Product
+  product: ProductCardItem
   index: number
 }
 

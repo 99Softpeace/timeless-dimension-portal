@@ -6,7 +6,10 @@ export async function GET(req: NextRequest, { params }: { params: { slug: string
     try {
         await dbConnect()
         const { slug } = params
-        const product = await Product.findOne({ slug, isActive: true })
+        const product = await Product.findOne({
+            slug,
+            $or: [{ isActive: true }, { isActive: { $exists: false } }]
+        })
         if (!product) {
             return NextResponse.json({
                 success: false,
@@ -17,7 +20,7 @@ export async function GET(req: NextRequest, { params }: { params: { slug: string
         const relatedProducts = await Product.find({
             category: product.category,
             _id: { $ne: product._id },
-            isActive: true
+            $or: [{ isActive: true }, { isActive: { $exists: false } }]
         }).limit(4)
         return NextResponse.json({
             success: true,

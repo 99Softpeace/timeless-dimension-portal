@@ -6,7 +6,7 @@ export async function GET() {
     try {
         await dbConnect()
         const categories = await Product.aggregate([
-            { $match: { isActive: true } },
+            { $match: { $or: [{ isActive: true }, { isActive: { $exists: false } }] } },
             { $group: { _id: '$category', count: { $sum: 1 } } },
             { $sort: { count: -1 } }
         ])

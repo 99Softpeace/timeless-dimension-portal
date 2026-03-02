@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Plus, Pencil, Trash2, Search } from 'lucide-react'
 import { motion } from 'framer-motion'
+import Image from 'next/image'
 
 interface Product {
     _id: string
@@ -11,7 +12,7 @@ interface Product {
     price: number
     category: string
     inStock: boolean
-    image: string
+    image?: string
 }
 
 export default function AdminProductsPage() {
@@ -41,20 +42,26 @@ export default function AdminProductsPage() {
         if (!confirm('Are you sure you want to delete this product?')) return
 
         try {
-            // You'll need to send the auth token here
             const token = localStorage.getItem('token')
-            const res = await fetch(`/api/products/${id}`, {
+            const res = await fetch('/api/products/admin', {
                 method: 'DELETE',
                 headers: {
+                    'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
-                }
+                },
+                body: JSON.stringify({ id })
             })
 
             if (res.ok) {
                 setProducts(products.filter(p => p._id !== id))
+                return
             }
+
+            const data = await res.json().catch(() => ({}))
+            alert(`Failed to delete product: ${data.error || data.message || 'Unknown error'}`)
         } catch (error) {
             console.error('Error deleting product:', error)
+            alert('Error deleting product')
         }
     }
 
@@ -122,8 +129,17 @@ export default function AdminProductsPage() {
                                         <td className="px-6 py-4">
                                             <div className="flex items-center space-x-4">
                                                 <div className="h-12 w-12 rounded-lg bg-midnight/50 overflow-hidden relative">
-                                                    {/* Add Image component here if you have a valid image URL */}
-                                                    <div className="w-full h-full bg-teal/20 flex items-center justify-center text-teal text-xs">IMG</div>
+                                                    {product.image ? (
+                                                        <Image
+                                                            src={product.image}
+                                                            alt={product.name}
+                                                            fill
+                                                            sizes="48px"
+                                                            className="object-cover"
+                                                        />
+                                                    ) : (
+                                                        <div className="w-full h-full bg-teal/20 flex items-center justify-center text-teal text-xs">IMG</div>
+                                                    )}
                                                 </div>
                                                 <span className="font-medium text-white">{product.name}</span>
                                             </div>

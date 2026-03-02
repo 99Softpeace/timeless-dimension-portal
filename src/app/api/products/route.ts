@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
         const featured = searchParams.get('featured')
         const inStock = searchParams.get('inStock')
 
-        let query: any = { isActive: true }
+        let query: any = { $or: [{ isActive: true }, { isActive: { $exists: false } }] }
         if (search) query.$text = { $search: search }
         if (category && category !== 'all') query.category = category
         if (minPrice || maxPrice) {

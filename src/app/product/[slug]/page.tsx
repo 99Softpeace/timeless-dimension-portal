@@ -1,18 +1,114 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { ShoppingCart, ArrowLeft, Star, Minus, Plus, Truck, ShieldCheck, ArrowRight } from 'lucide-react'
+import { ArrowLeft, Minus, Plus, Truck, ShieldCheck, ArrowRight } from 'lucide-react'
 import { useCart } from '@/components/CartContext'
 import { toast } from 'sonner'
 import { allProducts } from '@/lib/products'
 
+type PageProduct = {
+  id: string
+  slug: string
+  name: string
+  price: number
+  image: string
+  images: string[]
+  description: string
+  category: string
+  isNew?: boolean
+  discount?: number
+  specs?: {
+    movement: string
+    caseSize: string
+    waterResistance: string
+    strapMaterial: string
+  }
+}
+
+function toSlug(value: string) {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+}
+
+function normalizeProduct(raw: any): PageProduct {
+  const slug = raw.slug || toSlug(raw.name || '')
+  const image = raw.image || raw.images?.[0] || '/assets/images/heritage-classic-v2.png'
+  const images = Array.isArray(raw.images) && raw.images.length > 0 ? raw.images : [image]
+
+  return {
+    id: String(raw.id || raw._id || slug),
+    slug,
+    name: raw.name || 'Untitled Product',
+    price: Number(raw.price || 0),
+    image,
+    images,
+    description: raw.description || '',
+    category: String(raw.category || 'Collection'),
+    isNew: Boolean(raw.isNew),
+    discount: raw.discount ? Number(raw.discount) : undefined,
+    specs: raw.specs,
+  }
+}
+
 export default function ProductPage({ params }: { params: { slug: string } }) {
   const { addItem } = useCart()
   const [quantity, setQuantity] = useState(1)
-  const product = allProducts.find(p => p.slug === params.slug)
+  const staticProduct = useMemo(() => allProducts.find((p) => p.slug === params.slug), [params.slug])
+  const [product, setProduct] = useState<PageProduct | null>(() =>
+    staticProduct ? normalizeProduct(staticProduct) : null
+  )
+  const [loading, setLoading] = useState(!staticProduct)
+
+  useEffect(() => {
+    if (staticProduct) {
+      setProduct(normalizeProduct(staticProduct))
+      setLoading(false)
+      return
+    }
+
+    let isCancelled = false
+
+    async function fetchProduct() {
+      setLoading(true)
+      try {
+        const res = await fetch(`/api/products/${params.slug}`, { cache: 'no-store' })
+        const data = await res.json()
+        if (!res.ok || !data?.success || !data?.data) {
+          if (!isCancelled) setProduct(null)
+          return
+        }
+
+        if (!isCancelled) {
+          setProduct(normalizeProduct(data.data))
+        }
+      } catch (error) {
+        console.error('Error fetching product details:', error)
+        if (!isCancelled) setProduct(null)
+      } finally {
+        if (!isCancelled) setLoading(false)
+      }
+    }
+
+    fetchProduct()
+    return () => {
+      isCancelled = true
+    }
+  }, [params.slug, staticProduct])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen pt-32 pb-16 px-4 flex items-center justify-center bg-white text-slate-500">
+        Loading product...
+      </div>
+    )
+  }
 
   if (!product) {
     return (

@@ -7,13 +7,39 @@ const path = require('path')
 // Load environment variables
 dotenv.config()
 
+function loadRoute(modulePath, routeName) {
+  try {
+    return require(modulePath)
+  } catch (error) {
+    const isMissingRouteModule =
+      error &&
+      error.code === 'MODULE_NOT_FOUND' &&
+      typeof error.message === 'string' &&
+      error.message.includes(modulePath)
+
+    if (!isMissingRouteModule) {
+      throw error
+    }
+
+    console.warn(`[server] Missing route module ${modulePath}. ${routeName} endpoints will return 501.`)
+    const router = express.Router()
+    router.all('*', (req, res) => {
+      res.status(501).json({
+        success: false,
+        message: `${routeName} routes are not configured in this workspace.`,
+      })
+    })
+    return router
+  }
+}
+
 // Import routes
-const productRoutes = require('./routes/products')
-const userRoutes = require('./routes/users')
-const orderRoutes = require('./routes/orders')
-const authRoutes = require('./routes/auth')
-const paymentRoutes = require('./routes/payment')
-const uploadRoutes = require('./routes/upload')
+const productRoutes = loadRoute('./routes/products', 'Product')
+const userRoutes = loadRoute('./routes/users', 'User')
+const orderRoutes = loadRoute('./routes/orders', 'Order')
+const authRoutes = loadRoute('./routes/auth', 'Auth')
+const paymentRoutes = loadRoute('./routes/payment', 'Payment')
+const uploadRoutes = loadRoute('./routes/upload', 'Upload')
 
 
 const app = express()

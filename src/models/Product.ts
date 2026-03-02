@@ -2,12 +2,15 @@ import mongoose, { Schema, Model } from 'mongoose'
 
 export interface IProduct {
   name: string
+  slug?: string
   description: string
   price: number
   category: string
   images: string[]
+  image?: string
   inStock: boolean
   stockQuantity: number
+  isActive?: boolean
   isNew: boolean
   isBestSeller: boolean
   isFeatured: boolean
@@ -38,9 +41,20 @@ const productSchema = new Schema<IProduct>(
       type: String,
       required: true,
     },
+    slug: {
+      type: String,
+      trim: true,
+      lowercase: true,
+      index: true,
+    },
     images: {
       type: [String],
       default: [],
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
+      index: true,
     },
     inStock: {
       type: Boolean,
@@ -81,11 +95,43 @@ const productSchema = new Schema<IProduct>(
   },
   {
     timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   }
 )
 
-const Product: Model<IProduct> =
-  mongoose.models.Product ||
-  mongoose.model<IProduct>('Product', productSchema)
+productSchema.pre('validate', function (next) {
+  if (!this.slug && this.name) {
+    this.slug = this.name
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+  }
+  next()
+})
+
+productSchema.virtual('image').get(function () {
+  return this.images?.[0] || ''
+})
+
+function getProductModel() {
+  const existingModel = mongoose.models.Product as Model<IProduct> | undefined
+  if (!existingModel) {
+    return mongoose.model<IProduct>('Product', productSchema)
+  }
+
+  const hasSlugPath = Boolean((existingModel as any).schema?.path('slug'))
+  const hasIsActivePath = Boolean((existingModel as any).schema?.path('isActive'))
+  if (!hasSlugPath || !hasIsActivePath) {
+    delete (mongoose.models as any).Product
+    return mongoose.model<IProduct>('Product', productSchema)
+  }
+
+  return existingModel
+}
+
+const Product: Model<IProduct> = getProductModel()
 
 export default Product

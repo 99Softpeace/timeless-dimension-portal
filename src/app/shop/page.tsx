@@ -1,10 +1,56 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import ProductCard from '@/components/ProductCard'
 import { motion, AnimatePresence } from 'framer-motion'
 import { allProducts } from '@/lib/products'
 import { Suspense } from 'react'
+
+type ShopProduct = {
+  id: string
+  slug: string
+  name: string
+  price: number
+  image: string
+  category: string
+  isNew?: boolean
+}
+
+function toSlug(value: string) {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+}
+
+function normalizeStaticProducts(): ShopProduct[] {
+  return allProducts.map((product) => ({
+    id: product.id,
+    slug: product.slug,
+    name: product.name,
+    price: product.price,
+    image: product.image,
+    category: product.category,
+    isNew: product.isNew,
+  }))
+}
+
+function normalizeApiProduct(product: any): ShopProduct {
+  const slug = product.slug || toSlug(product.name || '')
+  const image = product.image || product.images?.[0] || '/assets/images/heritage-classic-v2.png'
+
+  return {
+    id: String(product.id || product._id || slug),
+    slug,
+    name: product.name || 'Untitled Product',
+    price: Number(product.price || 0),
+    image,
+    category: String(product.category || 'Uncategorized'),
+    isNew: Boolean(product.isNew),
+  }
+}
 
 export default function ShopPage() {
   return (
@@ -16,11 +62,58 @@ export default function ShopPage() {
 
 function ShopContent() {
   const [selectedCategory, setSelectedCategory] = useState('all')
-  const categories = ['all', 'classic', 'modern', 'luxury']
+  const [products, setProducts] = useState<ShopProduct[]>(() => normalizeStaticProducts())
+
+  useEffect(() => {
+    let isCancelled = false
+
+    async function loadProducts() {
+      try {
+        const res = await fetch('/api/products?limit=200', { cache: 'no-store' })
+        const data = await res.json()
+        if (!res.ok || !data?.success || !Array.isArray(data?.data)) return
+
+        const apiProducts = data.data
+          .map(normalizeApiProduct)
+          .filter((product: ShopProduct) => product.slug)
+
+        if (isCancelled) return
+
+        setProducts((prev) => {
+          const combined = [...prev, ...apiProducts]
+          const seen = new Set<string>()
+          return combined.filter((product) => {
+            const key = product.slug
+            if (seen.has(key)) return false
+            seen.add(key)
+            return true
+          })
+        })
+      } catch (error) {
+        console.error('Error fetching shop products:', error)
+      }
+    }
+
+    loadProducts()
+    return () => {
+      isCancelled = true
+    }
+  }, [])
+
+  const categories = useMemo(
+    () => ['all', ...Array.from(new Set(products.map((product) => product.category)))],
+    [products]
+  )
+
+  useEffect(() => {
+    if (selectedCategory !== 'all' && !categories.includes(selectedCategory)) {
+      setSelectedCategory('all')
+    }
+  }, [categories, selectedCategory])
 
   const filteredProducts = selectedCategory === 'all'
-    ? allProducts
-    : allProducts.filter(p => p.category === selectedCategory)
+    ? products
+    : products.filter((product) => product.category === selectedCategory)
 
   return (
     <div className="min-h-screen bg-white pt-24 pb-20">
