@@ -8,8 +8,17 @@ export async function POST(req: Request) {
         await dbConnect()
         const { firstName, lastName, email, password, phone } = await req.json()
 
+        if (!email || typeof email !== 'string' || !password || typeof password !== 'string') {
+            return NextResponse.json(
+                { success: false, message: 'Email and password are required' },
+                { status: 400 }
+            )
+        }
+
+        const normalizedEmail = email.toLowerCase().trim()
+
         // Check if user already exists
-        const existingUser = await (User as any).findByEmail(email)
+        const existingUser = await (User as any).findByEmail(normalizedEmail)
         if (existingUser) {
             return NextResponse.json(
                 { success: false, message: 'User already exists with this email' },
@@ -21,7 +30,7 @@ export async function POST(req: Request) {
         const user = new User({
             firstName,
             lastName,
-            email,
+            email: normalizedEmail,
             password,
             phone
         })

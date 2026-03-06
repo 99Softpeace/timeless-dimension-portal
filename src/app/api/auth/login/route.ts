@@ -8,8 +8,17 @@ export async function POST(req: Request) {
         await dbConnect()
         const { email, password } = await req.json()
 
+        if (!email || typeof email !== 'string' || !password || typeof password !== 'string') {
+            return NextResponse.json(
+                { success: false, message: 'Email and password are required' },
+                { status: 400 }
+            )
+        }
+
+        const normalizedEmail = email.toLowerCase().trim()
+
         // Find user by email
-        const user = await (User as any).findByEmail(email)
+        const user = await (User as any).findByEmail(normalizedEmail)
         if (!user) {
             return NextResponse.json(
                 { success: false, message: 'Invalid email or password' },

@@ -85,7 +85,7 @@ userSchema.methods.getPublicProfile = function () {
 
 // Static method to find by email
 userSchema.statics.findByEmail = function (email: string) {
-    return this.findOne({ email: email.toLowerCase(), isActive: true })
+    return this.findOne({ email: email.toLowerCase().trim(), isActive: true })
 }
 
 const User = mongoose.models.User || mongoose.model('User', userSchema)

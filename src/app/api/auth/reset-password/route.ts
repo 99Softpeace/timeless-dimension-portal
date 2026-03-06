@@ -8,8 +8,29 @@ export async function POST(req: Request) {
         await dbConnect()
         const { token, newPassword } = await req.json()
 
-        // Verify token
-        const decoded: any = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key')
+        if (!token || typeof token !== 'string' || !newPassword || typeof newPassword !== 'string') {
+            return NextResponse.json(
+                { success: false, message: 'Token and new password are required' },
+                { status: 400 }
+            )
+        }
+
+        if (newPassword.length < 6) {
+            return NextResponse.json(
+                { success: false, message: 'Password must be at least 6 characters long' },
+                { status: 400 }
+            )
+        }
+
+        let decoded: any
+        try {
+            decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key')
+        } catch {
+            return NextResponse.json(
+                { success: false, message: 'Invalid or expired reset token' },
+                { status: 400 }
+            )
+        }
 
         const user = await (User as any).findOne({
             _id: decoded.userId,
@@ -24,7 +45,6 @@ export async function POST(req: Request) {
             )
         }
 
-        // Update password
         user.password = newPassword
         user.passwordResetToken = undefined
         user.passwordResetExpires = undefined
@@ -37,8 +57,8 @@ export async function POST(req: Request) {
     } catch (error: any) {
         console.error('Reset password error:', error)
         return NextResponse.json(
-            { success: false, message: 'Failed to reset password', error: error.message },
-            { status: 400 }
+            { success: false, message: 'Failed to reset password' },
+            { status: 500 }
         )
     }
 }

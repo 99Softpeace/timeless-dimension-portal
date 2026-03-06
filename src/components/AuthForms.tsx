@@ -241,15 +241,32 @@ export function ForgotPasswordForm() {
     const [sent, setSent] = useState(false)
     const [email, setEmail] = useState('')
     const [error, setError] = useState('')
+    const [successMessage, setSuccessMessage] = useState('')
+    const [previewResetUrl, setPreviewResetUrl] = useState('')
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setLoading(true)
         setError('')
+        setPreviewResetUrl('')
 
-        // Mock API call
         try {
-            await new Promise(resolve => setTimeout(resolve, 1500))
+            const res = await fetch('/api/auth/forgot-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            })
+            const data = await res.json()
+
+            if (!res.ok || !data.success) {
+                setError(data.message || 'Failed to send recovery link')
+                return
+            }
+
+            setSuccessMessage(data.message || 'If an account exists for this email, a password reset link has been sent.')
+            if (data.previewResetUrl) {
+                setPreviewResetUrl(data.previewResetUrl)
+            }
             setSent(true)
         } catch (err) {
             setError('An error occurred. Please try again.')
@@ -266,8 +283,16 @@ export function ForgotPasswordForm() {
                 </div>
                 <h3 className="text-2xl font-serif font-bold text-slate-900">Link Sent.</h3>
                 <p className="text-slate-500 leading-relaxed">
-                    We have sent a password recovery link to <span className="font-medium text-slate-900">{email}</span>. Please check your inbox.
+                    {successMessage}
                 </p>
+                {previewResetUrl && (
+                    <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-md p-3">
+                        Email is not configured in this environment. Use this preview link:{' '}
+                        <Link href={previewResetUrl} className="underline break-all">
+                            {previewResetUrl}
+                        </Link>
+                    </p>
+                )}
                 <Link href="/login" className="inline-block bg-slate-100 text-slate-900 px-8 py-3 font-medium hover:bg-slate-200 transition-colors mt-4">
                     Return to Login
                 </Link>
@@ -309,6 +334,144 @@ export function ForgotPasswordForm() {
             <div className="text-center pt-8 border-t border-slate-100">
                 <Link href="/login" className="text-xs font-mono uppercase tracking-widest text-slate-400 hover:text-slate-900 transition-colors">
                     Wait, I remember now
+                </Link>
+            </div>
+        </form>
+    )
+}
+
+export function ResetPasswordForm() {
+    const searchParams = useSearchParams()
+    const token = searchParams.get('token') || ''
+    const [loading, setLoading] = useState(false)
+    const [completed, setCompleted] = useState(false)
+    const [error, setError] = useState('')
+    const [newPassword, setNewPassword] = useState('')
+    const [confirmPassword, setConfirmPassword] = useState('')
+    const [showNewPassword, setShowNewPassword] = useState(false)
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+        setError('')
+
+        if (!token) {
+            setError('Invalid reset link. Please request a new password reset link.')
+            return
+        }
+
+        if (newPassword.length < 6) {
+            setError('Password must be at least 6 characters long.')
+            return
+        }
+
+        if (newPassword !== confirmPassword) {
+            setError('Passwords do not match.')
+            return
+        }
+
+        setLoading(true)
+        try {
+            const res = await fetch('/api/auth/reset-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    token,
+                    newPassword
+                })
+            })
+
+            const data = await res.json()
+            if (!res.ok || !data.success) {
+                setError(data.message || 'Failed to reset password')
+                return
+            }
+
+            setCompleted(true)
+        } catch {
+            setError('An error occurred. Please try again.')
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    if (completed) {
+        return (
+            <div className="text-center space-y-6">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <ArrowRight className="text-green-600" size={24} />
+                </div>
+                <h3 className="text-2xl font-serif font-bold text-slate-900">Password Updated.</h3>
+                <p className="text-slate-500 leading-relaxed">
+                    Your password has been reset successfully. You can now sign in with your new password.
+                </p>
+                <Link href="/login" className="inline-block bg-slate-100 text-slate-900 px-8 py-3 font-medium hover:bg-slate-200 transition-colors mt-4">
+                    Go to Login
+                </Link>
+            </div>
+        )
+    }
+
+    return (
+        <form onSubmit={handleSubmit} className="space-y-12">
+            {error && (
+                <div className="p-4 text-sm text-red-600 bg-red-50 border-l-4 border-red-600">
+                    {error}
+                </div>
+            )}
+
+            <div className="space-y-8">
+                <div className="relative group">
+                    <input
+                        type={showNewPassword ? 'text' : 'password'}
+                        required
+                        minLength={6}
+                        className="w-full py-4 bg-transparent border-b border-slate-300 text-slate-900 text-xl focus:outline-none focus:border-slate-900 transition-colors placeholder-slate-400 pr-12"
+                        placeholder="New Password"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                    />
+                    <button
+                        type="button"
+                        onClick={() => setShowNewPassword(!showNewPassword)}
+                        className="absolute right-0 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-900 transition-colors"
+                    >
+                        {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    </button>
+                </div>
+
+                <div className="relative group">
+                    <input
+                        type={showConfirmPassword ? 'text' : 'password'}
+                        required
+                        minLength={6}
+                        className="w-full py-4 bg-transparent border-b border-slate-300 text-slate-900 text-xl focus:outline-none focus:border-slate-900 transition-colors placeholder-slate-400 pr-12"
+                        placeholder="Confirm New Password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                    />
+                    <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute right-0 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-900 transition-colors"
+                    >
+                        {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    </button>
+                </div>
+            </div>
+
+            <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-slate-900 text-white py-4 flex items-center justify-between px-6 hover:bg-teal-600 transition-colors group"
+            >
+                <span className="font-medium tracking-wide">RESET PASSWORD</span>
+                {loading ? <Loader2 className="animate-spin" size={20} /> : <ArrowRight className="group-hover:translate-x-1 transition-transform" size={20} />}
+            </button>
+
+            <div className="text-center pt-8 border-t border-slate-100">
+                <Link href="/login" className="text-xs font-mono uppercase tracking-widest text-slate-400 hover:text-slate-900 transition-colors">
+                    Back to login
                 </Link>
             </div>
         </form>
