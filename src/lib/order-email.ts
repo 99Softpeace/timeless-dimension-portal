@@ -43,7 +43,13 @@ function money(order: OrderEmailOrder) {
 }
 
 function ownerEmailAddress() {
-  return process.env.OWNER_ORDER_EMAIL || process.env.ADMIN_EMAIL || 'Godwinonyema20@yahoo.com'
+  return (
+    process.env.OWNER_ORDER_EMAIL ||
+    process.env.ORDER_NOTIFICATION_EMAIL ||
+    process.env.EMAIL_USER ||
+    process.env.ADMIN_EMAIL ||
+    'senatorsaccessories@gmail.com'
+  )
 }
 
 export async function sendOrderConfirmationEmail(
