@@ -5,6 +5,7 @@ type OrderSuccessPageProps = {
     orderNumber?: string
     orderId?: string
     transactionId?: string
+    paymentMethod?: string
   }
 }
 
@@ -12,15 +13,18 @@ export default function OrderSuccessPage({ searchParams }: OrderSuccessPageProps
   const orderNumber = searchParams?.orderNumber || ''
   const orderId = searchParams?.orderId || ''
   const transactionId = searchParams?.transactionId || ''
+  const isPayOnDelivery = searchParams?.paymentMethod === 'cash_on_delivery'
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-slate-900 pt-24 px-4">
       <div className="max-w-2xl mx-auto bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-2xl p-8 shadow-sm">
         <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">
-          Payment Successful
+          {isPayOnDelivery ? 'Order Placed Successfully' : 'Payment Successful'}
         </h1>
         <p className="text-slate-600 dark:text-slate-300 mb-6">
-          Your payment has been confirmed and your order has been recorded.
+          {isPayOnDelivery
+            ? 'Your order has been recorded. You can pay when your free delivery arrives.'
+            : 'Your payment has been confirmed and your order has been recorded.'}
         </p>
 
         <div className="space-y-2 text-sm text-slate-700 dark:text-slate-300 mb-8">
@@ -37,6 +41,9 @@ export default function OrderSuccessPage({ searchParams }: OrderSuccessPageProps
               <strong>Transaction ID:</strong> {transactionId}
             </p>
           )}
+          <p>
+            <strong>Delivery:</strong> Free in Lagos and outside Lagos
+          </p>
         </div>
 
         <div className="flex flex-wrap gap-3">

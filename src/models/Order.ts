@@ -46,7 +46,7 @@ export interface IOrder extends Document {
   currency: string
   status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'refunded'
   paymentStatus: 'pending' | 'paid' | 'failed' | 'refunded'
-  paymentMethod: 'card' | 'bank_transfer' | 'paypal' | 'stripe' | 'flutterwave'
+  paymentMethod: 'card' | 'bank_transfer' | 'paypal' | 'stripe' | 'flutterwave' | 'cash_on_delivery'
   paymentReference?: string
   paymentIntentId?: string
   trackingNumber?: string
@@ -133,7 +133,7 @@ const orderSchema = new Schema<IOrder>(
 
     paymentMethod: {
       type: String,
-      enum: ['card', 'bank_transfer', 'paypal', 'stripe', 'flutterwave'],
+      enum: ['card', 'bank_transfer', 'paypal', 'stripe', 'flutterwave', 'cash_on_delivery'],
       required: true
     },
 
@@ -157,7 +157,6 @@ const orderSchema = new Schema<IOrder>(
    Indexes
 ========================= */
 
-orderSchema.index({ orderNumber: 1 })
 orderSchema.index({ user: 1, createdAt: -1 })
 orderSchema.index({ status: 1 })
 orderSchema.index({ paymentStatus: 1 })

@@ -7,6 +7,7 @@ export interface IProduct {
   price: number
   category: string
   images: string[]
+  videos?: string[]
   image?: string
   inStock: boolean
   stockQuantity: number
@@ -48,6 +49,10 @@ const productSchema = new Schema<IProduct>(
       index: true,
     },
     images: {
+      type: [String],
+      default: [],
+    },
+    videos: {
       type: [String],
       default: [],
     },
@@ -95,6 +100,7 @@ const productSchema = new Schema<IProduct>(
   },
   {
     timestamps: true,
+    suppressReservedKeysWarning: true,
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
   }

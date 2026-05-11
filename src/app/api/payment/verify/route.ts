@@ -3,9 +3,21 @@ import dbConnect from '@/lib/db'
 import { getUserIdFromRequest } from '@/lib/auth'
 import { getFlutterwaveClient } from '@/lib/flutterwave'
 import Order from '@/models/Order'
-import { allProducts } from '@/lib/products'
 import User from '@/models/User'
-import { sendOrderConfirmationEmail } from '@/lib/order-email'
+import {
+  sendOwnerOrderNotificationEmail,
+  sendOrderConfirmationEmail,
+} from '@/lib/order-email'
+import {
+  amountsMatch,
+  buildAddress,
+  buildOrderItems,
+  generateOrderNumber,
+  normalizeCurrency,
+  toAmount,
+  type CheckoutAddress,
+  type CheckoutCartItem,
+} from '@/lib/order-utils'
 
 type PaymentVerification = {
   id?: number | string
@@ -18,27 +30,6 @@ type PaymentVerification = {
   }
 }
 
-type CheckoutCartItem = {
-  id: string
-  name?: string
-  price?: number
-  image?: string
-  quantity: number
-  slug?: string
-}
-
-type CheckoutAddress = {
-  firstName?: string
-  lastName?: string
-  address1?: string
-  address2?: string
-  city?: string
-  state?: string
-  postalCode?: string
-  country?: string
-  phone?: string
-}
-
 type VerifyPaymentBody = {
   transactionId?: number | string
   txRef?: string
@@ -46,94 +37,6 @@ type VerifyPaymentBody = {
   cartItems?: CheckoutCartItem[]
   shippingAddress?: CheckoutAddress
   billingAddress?: CheckoutAddress
-}
-
-const STATIC_PRODUCT_MAP = new Map(allProducts.map((product) => [product.id, product]))
-
-function normalizeCurrency(value: unknown) {
-  return String(value || '').trim().toUpperCase()
-}
-
-function isMongoObjectId(value: string) {
-  return /^[a-fA-F0-9]{24}$/.test(value)
-}
-
-function toAmount(value: unknown) {
-  const num = Number(value)
-  return Number.isFinite(num) ? num : NaN
-}
-
-function amountsMatch(expected: number, actual: number) {
-  return Math.abs(expected - actual) < 0.01
-}
-
-function generateOrderNumber() {
-  return `TDP-${Date.now()}-${Math.floor(Math.random() * 100000)
-    .toString()
-    .padStart(5, '0')}`
-}
-
-function buildAddress(address: CheckoutAddress | undefined, fallbackPhone?: string) {
-  const normalized = {
-    firstName: String(address?.firstName || '').trim(),
-    lastName: String(address?.lastName || '').trim(),
-    address1: String(address?.address1 || '').trim(),
-    address2: String(address?.address2 || '').trim(),
-    city: String(address?.city || '').trim(),
-    state: String(address?.state || '').trim(),
-    postalCode: String(address?.postalCode || '').trim(),
-    country: String(address?.country || 'Nigeria').trim() || 'Nigeria',
-    phone: String(address?.phone || fallbackPhone || '').trim(),
-  }
-
-  const requiredFields: (keyof typeof normalized)[] = [
-    'firstName',
-    'lastName',
-    'address1',
-    'city',
-    'state',
-    'postalCode',
-    'country',
-  ]
-
-  const missing = requiredFields.find((field) => !normalized[field])
-  if (missing) {
-    throw new Error(`Missing required address field: ${missing}`)
-  }
-
-  return normalized
-}
-
-function buildOrderItems(cartItems: CheckoutCartItem[]) {
-  if (!Array.isArray(cartItems) || cartItems.length === 0) {
-    throw new Error('Cart is empty')
-  }
-
-  let subtotal = 0
-
-  const items = cartItems.map((cartItem) => {
-    const quantity = Number(cartItem.quantity)
-    if (!Number.isInteger(quantity) || quantity <= 0) {
-      throw new Error(`Invalid quantity for item ${cartItem.id}`)
-    }
-
-    const product = STATIC_PRODUCT_MAP.get(String(cartItem.id))
-    if (!product) {
-      throw new Error(`Unknown cart item: ${cartItem.id}`)
-    }
-
-    subtotal += product.price * quantity
-
-    return {
-      ...(isMongoObjectId(String(cartItem.id)) ? { product: String(cartItem.id) } : {}),
-      name: product.name,
-      price: product.price,
-      quantity,
-      image: product.image,
-    }
-  })
-
-  return { items, subtotal }
 }
 
 async function verifyFlutterwaveTransaction(transactionId: string) {
@@ -220,21 +123,31 @@ async function finalizePendingOrderFromVerification(
         'email firstName lastName isActive'
       )
       if (user?.email && user?.isActive !== false) {
+        const customer = {
+          email: String(user.email),
+          firstName: user.firstName,
+          lastName: user.lastName,
+        }
+        const orderSummary = {
+          orderNumber: String(order.orderNumber),
+          status: String(order.status),
+          paymentStatus: String(order.paymentStatus),
+          paymentMethod: String(order.paymentMethod || 'flutterwave'),
+          total: Number(order.total || 0),
+          currency: String(order.currency || 'NGN'),
+          createdAt: (order as any).createdAt,
+          items: order.items.map((item: any) => ({
+            name: String(item.name),
+            quantity: Number(item.quantity || 0),
+            price: Number(item.price || 0),
+          })),
+          shippingAddress: order.shippingAddress,
+        }
         await sendOrderConfirmationEmail(
-          {
-            email: String(user.email),
-            firstName: user.firstName,
-            lastName: user.lastName,
-          },
-          {
-            orderNumber: String(order.orderNumber),
-            status: String(order.status),
-            paymentStatus: String(order.paymentStatus),
-            total: Number(order.total || 0),
-            currency: String(order.currency || 'NGN'),
-            createdAt: (order as any).createdAt,
-          }
+          customer,
+          orderSummary
         )
+        await sendOwnerOrderNotificationEmail(customer, orderSummary)
       }
     } catch (emailError) {
       console.error('Order confirmation email error:', emailError)
@@ -430,7 +343,7 @@ export async function POST(req: NextRequest) {
       })
     }
 
-    const { items, subtotal } = buildOrderItems(body.cartItems || [])
+    const { items, subtotal } = await buildOrderItems(body.cartItems || [])
     const paidAmount = toAmount(verified.amount)
 
     if (!Number.isFinite(paidAmount) || !amountsMatch(subtotal, paidAmount)) {
@@ -477,21 +390,31 @@ export async function POST(req: NextRequest) {
         'email firstName lastName isActive'
       )
       if (user?.email && user?.isActive !== false) {
+        const customer = {
+          email: String(user.email),
+          firstName: user.firstName,
+          lastName: user.lastName,
+        }
+        const orderSummary = {
+          orderNumber: String(order.orderNumber),
+          status: String(order.status),
+          paymentStatus: String(order.paymentStatus),
+          paymentMethod: String(order.paymentMethod || 'flutterwave'),
+          total: Number(order.total || 0),
+          currency: String(order.currency || 'NGN'),
+          createdAt: (order as any).createdAt,
+          items: order.items.map((item: any) => ({
+            name: String(item.name),
+            quantity: Number(item.quantity || 0),
+            price: Number(item.price || 0),
+          })),
+          shippingAddress: order.shippingAddress,
+        }
         await sendOrderConfirmationEmail(
-          {
-            email: String(user.email),
-            firstName: user.firstName,
-            lastName: user.lastName,
-          },
-          {
-            orderNumber: String(order.orderNumber),
-            status: String(order.status),
-            paymentStatus: String(order.paymentStatus),
-            total: Number(order.total || 0),
-            currency: String(order.currency || 'NGN'),
-            createdAt: (order as any).createdAt,
-          }
+          customer,
+          orderSummary
         )
+        await sendOwnerOrderNotificationEmail(customer, orderSummary)
       }
     } catch (emailError) {
       console.error('Order confirmation email error:', emailError)

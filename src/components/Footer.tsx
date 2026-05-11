@@ -69,7 +69,7 @@ export default function Footer() {
         {/* Bottom Bar */}
         <div className="flex flex-col md:flex-row justify-between items-center text-xs font-mono text-slate-500 pt-8 border-t border-slate-200">
           <div>
-            © 2026 SENATOR WATCHES. LAGOS, NIGERIA.
+            © 2026 SENATOR WATCHES. FREE DELIVERY IN AND OUTSIDE LAGOS.
           </div>
           <div className="flex gap-6 mt-4 md:mt-0">
             <Link href="/privacy" className="hover:text-slate-900">PRIVACY</Link>

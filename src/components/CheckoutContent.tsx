@@ -8,7 +8,7 @@ import { useCart } from '@/components/CartContext'
 
 export default function CheckoutContent() {
   const router = useRouter()
-  const { items, getTotalPrice } = useCart()
+  const { items, getTotalPrice, clearCart } = useCart()
   const [step, setStep] = useState(1)
   const [isPaying, setIsPaying] = useState(false)
 
@@ -134,7 +134,8 @@ export default function CheckoutContent() {
         },
       }
 
-      const res = await fetch('/api/payment/initialize', {
+      const isPayOnDelivery = formData.paymentMethod === 'cash_on_delivery'
+      const res = await fetch(isPayOnDelivery ? '/api/orders' : '/api/payment/initialize', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -146,7 +147,19 @@ export default function CheckoutContent() {
       const result = await res.json()
 
       if (!res.ok || !result.success) {
-        throw new Error(result.message || 'Unable to initialize payment.')
+        throw new Error(result.message || 'Unable to place order.')
+      }
+
+      if (isPayOnDelivery) {
+        clearCart()
+        const order = result?.data
+        const query = new URLSearchParams({
+          orderNumber: String(order?.orderNumber || ''),
+          paymentMethod: 'cash_on_delivery',
+        })
+        if (order?._id) query.set('orderId', String(order._id))
+        router.push(`/order-success?${query.toString()}`)
+        return
       }
 
       const checkoutLink = result?.data?.checkoutLink
@@ -264,9 +277,47 @@ export default function CheckoutContent() {
                     </h2>
 
                     <div className="rounded-xl border border-emerald-200 bg-emerald-50 dark:bg-emerald-950/20 dark:border-emerald-900 p-4 text-sm text-emerald-900 dark:text-emerald-200">
-                      Card, bank, or USSD details will be collected securely on the Flutterwave
-                      hosted checkout page after you click{' '}
-                      <span className="font-semibold">Place Order & Pay</span>.
+                      Delivery is free in Lagos and outside Lagos. Choose how you want to pay below.
+                    </div>
+
+                    <div className="grid gap-3">
+                      <label className={`block cursor-pointer rounded-xl border p-4 transition ${
+                        formData.paymentMethod === 'flutterwave'
+                          ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/20'
+                          : 'border-gray-200 dark:border-slate-700'
+                      }`}>
+                        <input
+                          type="radio"
+                          name="paymentMethod"
+                          value="flutterwave"
+                          checked={formData.paymentMethod === 'flutterwave'}
+                          onChange={handleInputChange}
+                          className="mr-3"
+                        />
+                        <span className="font-semibold text-slate-800 dark:text-white">Pay now with Flutterwave</span>
+                        <p className="mt-1 pl-7 text-sm text-slate-500 dark:text-slate-400">
+                          Card, bank transfer, or USSD details are collected securely on Flutterwave.
+                        </p>
+                      </label>
+
+                      <label className={`block cursor-pointer rounded-xl border p-4 transition ${
+                        formData.paymentMethod === 'cash_on_delivery'
+                          ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/20'
+                          : 'border-gray-200 dark:border-slate-700'
+                      }`}>
+                        <input
+                          type="radio"
+                          name="paymentMethod"
+                          value="cash_on_delivery"
+                          checked={formData.paymentMethod === 'cash_on_delivery'}
+                          onChange={handleInputChange}
+                          className="mr-3"
+                        />
+                        <span className="font-semibold text-slate-800 dark:text-white">Pay on delivery</span>
+                        <p className="mt-1 pl-7 text-sm text-slate-500 dark:text-slate-400">
+                          Place your order now and pay when your free delivery arrives.
+                        </p>
+                      </label>
                     </div>
                   </motion.div>
                 )}
@@ -297,6 +348,10 @@ export default function CheckoutContent() {
                       <span>Total:</span>
                       <span>NGN {getTotalPrice().toLocaleString()}</span>
                     </div>
+                    <div className="mt-3 flex justify-between text-sm text-emerald-600 dark:text-emerald-300">
+                      <span>Delivery:</span>
+                      <span>Free in and outside Lagos</span>
+                    </div>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -326,7 +381,13 @@ export default function CheckoutContent() {
                     disabled={isPaying}
                     className="px-6 py-3 rounded-full font-semibold text-white bg-emerald-500 hover:bg-emerald-600 disabled:opacity-60 disabled:cursor-not-allowed transition ml-auto"
                   >
-                    {isPaying ? 'Redirecting to Payment...' : 'Place Order & Pay'}
+                    {isPaying
+                      ? formData.paymentMethod === 'cash_on_delivery'
+                        ? 'Placing Order...'
+                        : 'Redirecting to Payment...'
+                      : formData.paymentMethod === 'cash_on_delivery'
+                        ? 'Place Order - Pay on Delivery'
+                        : 'Place Order & Pay'}
                   </button>
                 )}
               </div>
@@ -352,6 +413,10 @@ export default function CheckoutContent() {
               <div className="border-t border-gray-200 dark:border-slate-700 pt-4 flex justify-between font-semibold text-slate-800 dark:text-white">
                 <span>Total:</span>
                 <span>NGN {getTotalPrice().toLocaleString()}</span>
+              </div>
+              <div className="mt-3 flex justify-between text-sm text-emerald-600 dark:text-emerald-300">
+                <span>Delivery</span>
+                <span>Free in and outside Lagos</span>
               </div>
             </div>
           </div>

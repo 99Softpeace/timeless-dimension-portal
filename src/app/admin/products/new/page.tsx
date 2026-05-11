@@ -3,8 +3,6 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Upload, X, Loader2 } from 'lucide-react'
-import { motion } from 'framer-motion'
-import Image from 'next/image'
 
 const CATEGORIES = [
     'Watches',
@@ -24,41 +22,66 @@ export default function NewProductPage() {
         price: '',
         category: 'Watches',
         stock: '',
-        image: '',
+        images: [] as string[],
+        videos: [] as string[],
         isFeatured: false
     })
 
-    // Handle Image Upload
-    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0]
-        if (!file) return
+    const handleMediaUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = Array.from(e.target.files || [])
+        if (files.length === 0) return
 
         setUploading(true)
-        const data = new FormData()
-        data.append('image', file)
 
         try {
             const token = localStorage.getItem('token')
-            const res = await fetch('/api/upload', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                },
-                body: data
-            })
+            const uploadedImages: string[] = []
+            const uploadedVideos: string[] = []
 
-            const result = await res.json()
-            if (result.success) {
-                setFormData((prev) => ({ ...prev, image: result.url }))
-            } else {
-                alert('Upload failed: ' + (result.error || result.message))
+            for (const file of files) {
+                const data = new FormData()
+                data.append('media', file)
+
+                const res = await fetch('/api/upload', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: data
+                })
+
+                const result = await res.json()
+                if (!result.success) {
+                    throw new Error(result.error || result.message || `Upload failed for ${file.name}`)
+                }
+
+                if (result.type === 'video') {
+                    uploadedVideos.push(result.url)
+                } else {
+                    uploadedImages.push(result.url)
+                }
             }
-        } catch (error) {
+
+            setFormData((prev) => ({
+                ...prev,
+                images: [...prev.images, ...uploadedImages],
+                videos: [...prev.videos, ...uploadedVideos],
+            }))
+        } catch (error: any) {
             console.error('Error uploading image:', error)
-            alert('Error uploading image')
+            alert(error?.message || 'Error uploading media')
         } finally {
             setUploading(false)
+            e.target.value = ''
         }
+    }
+
+    const removeImage = (url: string) => {
+        setFormData((prev) => ({ ...prev, images: prev.images.filter((image) => image !== url) }))
+    }
+
+    const removeVideo = (url: string) => {
+        setFormData((prev) => ({ ...prev, videos: prev.videos.filter((video) => video !== url) }))
     }
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -80,7 +103,8 @@ export default function NewProductPage() {
                     name: formData.name,
                     description: formData.description,
                     category: formData.category,
-                    images: formData.image ? [formData.image] : [],
+                    images: formData.images,
+                    videos: formData.videos,
                     stockQuantity,
                     inStock: stockQuantity > 0,
                     isFeatured: formData.isFeatured
@@ -110,44 +134,68 @@ export default function NewProductPage() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6 bg-glass p-8 rounded-2xl border border-glass-border">
-                {/* Image Upload */}
+                {/* Media Upload */}
                 <div className="space-y-2">
-                    <label className="block text-sm font-medium text-silver">Product Image</label>
-                    <div className="flex items-center space-x-4">
-                        {formData.image ? (
-                            <div className="relative h-32 w-32 rounded-lg overflow-hidden border border-glass-border group">
-                                <img src={formData.image} alt="Preview" className="h-full w-full object-cover" />
-                                <button
-                                    type="button"
-                                    onClick={() => setFormData({ ...formData, image: '' })}
-                                    className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                                >
-                                    <X className="text-white" />
-                                </button>
-                            </div>
-                        ) : (
-                            <div className="w-full">
-                                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-glass-border border-dashed rounded-lg cursor-pointer hover:bg-white/5 transition-colors">
-                                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                        {uploading ? (
-                                            <Loader2 className="h-8 w-8 text-silver animate-spin" />
-                                        ) : (
-                                            <>
-                                                <Upload className="h-8 w-8 text-silver mb-2" />
-                                                <p className="text-sm text-silver">Click to upload image</p>
-                                            </>
-                                        )}
+                    <label className="block text-sm font-medium text-silver">Product Images & Videos</label>
+                    <div className="space-y-4">
+                        {(formData.images.length > 0 || formData.videos.length > 0) && (
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                {formData.images.map((image) => (
+                                    <div key={image} className="relative h-32 rounded-lg overflow-hidden border border-glass-border group">
+                                        <img src={image} alt="Product preview" className="h-full w-full object-cover" />
+                                        <button
+                                            type="button"
+                                            onClick={() => removeImage(image)}
+                                            className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                            aria-label="Remove image"
+                                        >
+                                            <X className="text-white" />
+                                        </button>
                                     </div>
-                                    <input
-                                        type="file"
-                                        className="hidden"
-                                        accept="image/*"
-                                        onChange={handleImageUpload}
-                                        disabled={uploading}
-                                    />
-                                </label>
+                                ))}
+
+                                {formData.videos.map((video) => (
+                                    <div key={video} className="relative h-32 rounded-lg overflow-hidden border border-glass-border group bg-black">
+                                        <video src={video} className="h-full w-full object-cover" muted playsInline />
+                                        <span className="absolute left-2 top-2 rounded-full bg-black/70 px-2 py-1 text-[10px] uppercase tracking-wide text-white">
+                                            Video
+                                        </span>
+                                        <button
+                                            type="button"
+                                            onClick={() => removeVideo(video)}
+                                            className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                            aria-label="Remove video"
+                                        >
+                                            <X className="text-white" />
+                                        </button>
+                                    </div>
+                                ))}
                             </div>
                         )}
+
+                        <div className="w-full">
+                            <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-glass-border border-dashed rounded-lg cursor-pointer hover:bg-white/5 transition-colors">
+                                <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center">
+                                    {uploading ? (
+                                        <Loader2 className="h-8 w-8 text-silver animate-spin" />
+                                    ) : (
+                                        <>
+                                            <Upload className="h-8 w-8 text-silver mb-2" />
+                                            <p className="text-sm text-silver">Click to upload multiple images or videos</p>
+                                            <p className="text-xs text-silver/70 mt-1">Images up to 5MB, videos up to 50MB</p>
+                                        </>
+                                    )}
+                                </div>
+                                <input
+                                    type="file"
+                                    className="hidden"
+                                    accept="image/*,video/mp4,video/webm,video/quicktime"
+                                    multiple
+                                    onChange={handleMediaUpload}
+                                    disabled={uploading}
+                                />
+                            </label>
+                        </div>
                     </div>
                 </div>
 

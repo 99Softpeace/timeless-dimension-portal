@@ -31,23 +31,23 @@ export default function ContactPage() {
                         <div>
                             <h3 className="font-serif text-xl text-slate-900 mb-2">Lagos HQ</h3>
                             <p className="text-slate-500 font-light">
-                                14 Senator Avenue,<br />
-                                Victoria Island, Lagos.<br />
-                                Nigeria.
+                                14 IDUMAGBO Avenue, Jankara Market,<br />
+                                opposite UBA Bank, Lagos Island.<br />
+                                Ask for Godwin or Senatorswristwatches.
                             </p>
                         </div>
 
                         <div>
                             <h3 className="font-serif text-xl text-slate-900 mb-2">Direct Line</h3>
                             <p className="text-slate-500 font-light font-mono">
-                                +234 (0) 800 SENATOR
+                                08050846550 / 08022171684 / 08142742338
                             </p>
                         </div>
 
                         <div>
                             <h3 className="font-serif text-xl text-slate-900 mb-2">Electronic Mail</h3>
                             <p className="text-slate-500 font-light font-mono">
-                                concierge@senator.ng
+                                Godwinonyema20@yahoo.com
                             </p>
                         </div>
                     </div>

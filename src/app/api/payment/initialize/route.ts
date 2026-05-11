@@ -1,26 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { v4 as uuidv4 } from 'uuid'
 import dbConnect from '@/lib/db'
 import { getUserIdFromRequest } from '@/lib/auth'
 import Order from '@/models/Order'
-import { allProducts } from '@/lib/products'
-
-type CheckoutCartItem = {
-  id: string
-  quantity: number
-}
-
-type CheckoutAddress = {
-  firstName?: string
-  lastName?: string
-  address1?: string
-  address2?: string
-  city?: string
-  state?: string
-  postalCode?: string
-  country?: string
-  phone?: string
-}
+import {
+  amountsMatch,
+  buildAddress,
+  buildOrderItems,
+  generateOrderNumber,
+  generatePaymentReference,
+  normalizeCurrency,
+  toAmount,
+  type CheckoutAddress,
+  type CheckoutCartItem,
+} from '@/lib/order-utils'
 
 type InitializePaymentBody = {
   amount?: number | string
@@ -34,96 +26,6 @@ type InitializePaymentBody = {
   cartItems?: CheckoutCartItem[]
   shippingAddress?: CheckoutAddress
   billingAddress?: CheckoutAddress
-}
-
-const STATIC_PRODUCT_MAP = new Map(allProducts.map((product) => [product.id, product]))
-
-function normalizeCurrency(value: unknown) {
-  return String(value || 'NGN').trim().toUpperCase() || 'NGN'
-}
-
-function toAmount(value: unknown) {
-  const num = Number(value)
-  return Number.isFinite(num) ? num : NaN
-}
-
-function amountsMatch(expected: number, actual: number) {
-  return Math.abs(expected - actual) < 0.01
-}
-
-function isMongoObjectId(value: string) {
-  return /^[a-fA-F0-9]{24}$/.test(value)
-}
-
-function generateOrderNumber() {
-  return `TDP-${Date.now()}-${Math.floor(Math.random() * 100000)
-    .toString()
-    .padStart(5, '0')}`
-}
-
-function buildAddress(address: CheckoutAddress | undefined, fallbackPhone?: string) {
-  const normalized = {
-    firstName: String(address?.firstName || '').trim(),
-    lastName: String(address?.lastName || '').trim(),
-    address1: String(address?.address1 || '').trim(),
-    address2: String(address?.address2 || '').trim(),
-    city: String(address?.city || '').trim(),
-    state: String(address?.state || '').trim(),
-    postalCode: String(address?.postalCode || '').trim(),
-    country: String(address?.country || 'Nigeria').trim() || 'Nigeria',
-    phone: String(address?.phone || fallbackPhone || '').trim(),
-  }
-
-  const requiredFields: (keyof typeof normalized)[] = [
-    'firstName',
-    'lastName',
-    'address1',
-    'city',
-    'state',
-    'postalCode',
-    'country',
-  ]
-
-  const missing = requiredFields.find((field) => !normalized[field])
-  if (missing) {
-    throw new Error(`Missing required address field: ${missing}`)
-  }
-
-  return normalized
-}
-
-function buildOrderItems(cartItems: CheckoutCartItem[] | undefined) {
-  if (!Array.isArray(cartItems) || cartItems.length === 0) {
-    throw new Error('Cart is empty')
-  }
-
-  let subtotal = 0
-
-  const items = cartItems.map((cartItem) => {
-    const quantity = Number(cartItem.quantity)
-    const id = String(cartItem.id)
-
-    if (!Number.isInteger(quantity) || quantity <= 0) {
-      throw new Error(`Invalid quantity for item ${id}`)
-    }
-
-    const product = STATIC_PRODUCT_MAP.get(id)
-    if (!product) {
-      throw new Error(`Unknown cart item: ${id}`)
-    }
-
-    subtotal += product.price * quantity
-
-    return {
-      ...(isMongoObjectId(id) ? { product: id } : {}),
-      name: product.name,
-      price: product.price,
-      quantity,
-      image: product.image,
-    }
-  })
-
-  return { items, subtotal }
 }
 
 // POST /api/payment/initialize
@@ -160,7 +62,9 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const { items, subtotal } = buildOrderItems(body.cartItems)
+    await dbConnect()
+
+    const { items, subtotal } = await buildOrderItems(body.cartItems)
     const clientAmount = toAmount(body.amount)
 
     if (Number.isFinite(clientAmount) && !amountsMatch(subtotal, clientAmount)) {
@@ -176,9 +80,7 @@ export async function POST(req: NextRequest) {
     )
     const billingAddress = buildAddress(body.billingAddress || body.shippingAddress, shippingAddress.phone)
 
-    const tx_ref = uuidv4()
-
-    await dbConnect()
+    const tx_ref = generatePaymentReference('FLW')
 
     const order = await Order.create({
       orderNumber: generateOrderNumber(),

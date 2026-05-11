@@ -40,6 +40,7 @@ export async function POST(req: NextRequest) {
         const price = Number(body?.price)
         const stockQuantity = Number(body?.stockQuantity ?? 0)
         const images = Array.isArray(body?.images) ? body.images.filter(Boolean) : []
+        const videos = Array.isArray(body?.videos) ? body.videos.filter(Boolean) : []
 
         if (!name || !description || !category || Number.isNaN(price)) {
             return NextResponse.json({
@@ -65,6 +66,7 @@ export async function POST(req: NextRequest) {
             price,
             slug,
             images,
+            videos,
             stockQuantity: Number.isNaN(stockQuantity) ? 0 : stockQuantity,
             inStock: (Number.isNaN(stockQuantity) ? 0 : stockQuantity) > 0,
             isFeatured: Boolean(body?.isFeatured),

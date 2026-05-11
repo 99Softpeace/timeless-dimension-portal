@@ -9,7 +9,7 @@ export default function ShippingPage() {
                         Shipping Information
                     </h1>
                     <p className="text-silver-dark text-lg">
-                        Details on how we get your timepiece to you safely and securely.
+                        Free delivery in Lagos and outside Lagos, with safe handling nationwide.
                     </p>
                 </div>
 
@@ -20,7 +20,7 @@ export default function ShippingPage() {
                             <h2 className="text-xl font-bold text-silver">Nationwide Delivery</h2>
                         </div>
                         <p className="text-silver-dark leading-relaxed">
-                            We offer delivery to all 36 states in Nigeria and the FCT. Our logistics partners ensure that your package is handled with care and delivered to your doorstep.
+                            Delivery is free in Lagos and outside Lagos. We deliver to all 36 states in Nigeria and the FCT, and our logistics partners handle each package with care.
                         </p>
                     </div>
 
@@ -48,10 +48,10 @@ export default function ShippingPage() {
                     <div className="glass p-8 rounded-2xl space-y-4">
                         <div className="flex items-center space-x-3">
                             <Globe className="text-teal" size={24} />
-                            <h2 className="text-xl font-bold text-silver">International Shipping</h2>
+                            <h2 className="text-xl font-bold text-silver">Payment Options</h2>
                         </div>
                         <p className="text-silver-dark leading-relaxed">
-                            Currently, we only ship within Nigeria. We are working on expanding our reach to serve our international customers soon.
+                            Customers can pay online through Flutterwave or choose pay on delivery at checkout.
                         </p>
                     </div>
 

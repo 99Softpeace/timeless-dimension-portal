@@ -16,6 +16,7 @@ type PageProduct = {
   price: number
   image: string
   images: string[]
+  videos: string[]
   description: string
   category: string
   isNew?: boolean
@@ -41,6 +42,7 @@ function normalizeProduct(raw: any): PageProduct {
   const slug = raw.slug || toSlug(raw.name || '')
   const image = raw.image || raw.images?.[0] || '/assets/images/heritage-classic-v2.png'
   const images = Array.isArray(raw.images) && raw.images.length > 0 ? raw.images : [image]
+  const videos = Array.isArray(raw.videos) ? raw.videos.filter(Boolean) : []
 
   return {
     id: String(raw.id || raw._id || slug),
@@ -49,6 +51,7 @@ function normalizeProduct(raw: any): PageProduct {
     price: Number(raw.price || 0),
     image,
     images,
+    videos,
     description: raw.description || '',
     category: String(raw.category || 'Collection'),
     isNew: Boolean(raw.isNew),
@@ -174,6 +177,30 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
                 </div>
               )}
             </motion.div>
+
+            {(product.images.length > 1 || product.videos.length > 0) && (
+              <div className="mt-4 grid grid-cols-3 gap-3">
+                {product.images.slice(0, 6).map((image, index) => (
+                  <div key={`${image}-${index}`} className="relative aspect-square overflow-hidden rounded-2xl bg-slate-50">
+                    <Image
+                      src={image}
+                      alt={`${product.name} view ${index + 1}`}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                ))}
+                {product.videos.slice(0, 3).map((video, index) => (
+                  <video
+                    key={`${video}-${index}`}
+                    src={video}
+                    controls
+                    className="aspect-square w-full rounded-2xl bg-black object-cover"
+                    aria-label={`${product.name} video ${index + 1}`}
+                  />
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Right: Product Details */}
@@ -267,7 +294,7 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
               <div className="grid grid-cols-2 gap-4 pt-4">
                 <div className="flex items-center gap-3 text-slate-500">
                   <Truck size={18} />
-                  <span className="text-xs uppercase tracking-wider">Free Shipping</span>
+                  <span className="text-xs uppercase tracking-wider">Free Delivery In & Outside Lagos</span>
                 </div>
                 <div className="flex items-center gap-3 text-slate-500">
                   <ShieldCheck size={18} />
