@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import dbConnect from '@/lib/db'
 import Product from '@/models/Product'
-// import { auth, admin } from '@/middleware/auth' // TODO: Implement auth middleware for serverless
+import { requireAdmin } from '@/lib/auth'
 
 function toSlug(value: string) {
     return value
@@ -27,20 +27,86 @@ async function buildUniqueSlug(name: string) {
     return slug
 }
 
+function normalizeMediaList(value: unknown) {
+    return Array.isArray(value)
+        ? value.map((item) => String(item || '').trim()).filter(Boolean)
+        : []
+}
+
+function normalizeProductPayload(body: any) {
+    const name = String(body?.name || '').trim()
+    const description = String(body?.description || '').trim()
+    const category = String(body?.category || '').trim()
+    const price = Number(body?.price)
+    const stockQuantity = Number(body?.stockQuantity ?? body?.stock ?? 0)
+
+    return {
+        name,
+        description,
+        category,
+        price,
+        stockQuantity: Number.isNaN(stockQuantity) ? 0 : stockQuantity,
+        images: normalizeMediaList(body?.images),
+        videos: normalizeMediaList(body?.videos),
+        isFeatured: Boolean(body?.isFeatured),
+        isNew: Boolean(body?.isNew),
+        isBestSeller: Boolean(body?.isBestSeller),
+        discount: body?.discount === undefined || body?.discount === '' ? undefined : Number(body.discount),
+    }
+}
+
+// GET /api/products/admin?id=... - Get product details (Admin only)
+export async function GET(req: NextRequest) {
+    try {
+        await dbConnect()
+        const adminCheck = await requireAdmin(req)
+        if (!adminCheck.ok) return adminCheck.response
+
+        const { searchParams } = new URL(req.url)
+        const id = searchParams.get('id')
+
+        if (id) {
+            const product = await Product.findById(id)
+            if (!product) {
+                return NextResponse.json({ success: false, message: 'Product not found' }, { status: 404 })
+            }
+            return NextResponse.json({ success: true, data: product })
+        }
+
+        const products = await Product.find({}).sort({ createdAt: -1 }).limit(200)
+        return NextResponse.json({ success: true, data: products })
+    } catch (error: any) {
+        console.error('Error fetching admin product:', error)
+        return NextResponse.json({
+            success: false,
+            message: 'Error fetching product',
+            error: error.message
+        }, { status: 500 })
+    }
+}
+
 // POST /api/products/admin - Create new product (Admin only)
 export async function POST(req: NextRequest) {
     try {
         await dbConnect()
-        // TODO: Add authentication/authorization check for admin
+        const adminCheck = await requireAdmin(req)
+        if (!adminCheck.ok) return adminCheck.response
+
         const body = await req.json()
 
-        const name = String(body?.name || '').trim()
-        const description = String(body?.description || '').trim()
-        const category = String(body?.category || '').trim()
-        const price = Number(body?.price)
-        const stockQuantity = Number(body?.stockQuantity ?? 0)
-        const images = Array.isArray(body?.images) ? body.images.filter(Boolean) : []
-        const videos = Array.isArray(body?.videos) ? body.videos.filter(Boolean) : []
+        const {
+            name,
+            description,
+            category,
+            price,
+            stockQuantity,
+            images,
+            videos,
+            isFeatured,
+            isNew,
+            isBestSeller,
+            discount,
+        } = normalizeProductPayload(body)
 
         if (!name || !description || !category || Number.isNaN(price)) {
             return NextResponse.json({
@@ -67,9 +133,12 @@ export async function POST(req: NextRequest) {
             slug,
             images,
             videos,
-            stockQuantity: Number.isNaN(stockQuantity) ? 0 : stockQuantity,
-            inStock: (Number.isNaN(stockQuantity) ? 0 : stockQuantity) > 0,
-            isFeatured: Boolean(body?.isFeatured),
+            stockQuantity,
+            inStock: stockQuantity > 0,
+            isFeatured,
+            isNew,
+            isBestSeller,
+            ...(discount !== undefined && !Number.isNaN(discount) ? { discount } : {}),
             isActive: true
         })
 
@@ -103,9 +172,64 @@ export async function POST(req: NextRequest) {
 export async function PUT(req: NextRequest) {
     try {
         await dbConnect()
-        // TODO: Add authentication/authorization check for admin
-        const { id, ...update } = await req.json()
-        const product = await Product.findByIdAndUpdate(id, update, { new: true, runValidators: true })
+        const adminCheck = await requireAdmin(req)
+        if (!adminCheck.ok) return adminCheck.response
+
+        const body = await req.json()
+        const id = String(body?.id || '').trim()
+        const {
+            name,
+            description,
+            category,
+            price,
+            stockQuantity,
+            images,
+            videos,
+            isFeatured,
+            isNew,
+            isBestSeller,
+            discount,
+        } = normalizeProductPayload(body)
+
+        if (!id) {
+            return NextResponse.json({
+                success: false,
+                message: 'Product id is required'
+            }, { status: 400 })
+        }
+
+        if (!name || !description || !category || Number.isNaN(price)) {
+            return NextResponse.json({
+                success: false,
+                message: 'Missing required product fields',
+                error: 'name, description, category, and valid price are required'
+            }, { status: 400 })
+        }
+
+        const existing = await Product.findById(id)
+        if (!existing) {
+            return NextResponse.json({
+                success: false,
+                message: 'Product not found'
+            }, { status: 404 })
+        }
+
+        const nextSlug = existing.name !== name ? await buildUniqueSlug(name) : existing.slug
+        const product = await Product.findByIdAndUpdate(id, {
+            name,
+            description,
+            category,
+            price,
+            slug: nextSlug,
+            images,
+            videos,
+            stockQuantity,
+            inStock: stockQuantity > 0,
+            isFeatured,
+            isNew,
+            isBestSeller,
+            discount: discount !== undefined && !Number.isNaN(discount) ? discount : undefined,
+        }, { new: true, runValidators: true })
         if (!product) {
             return NextResponse.json({
                 success: false,
@@ -131,7 +255,9 @@ export async function PUT(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
     try {
         await dbConnect()
-        // TODO: Add authentication/authorization check for admin
+        const adminCheck = await requireAdmin(req)
+        if (!adminCheck.ok) return adminCheck.response
+
         const { id } = await req.json()
         const product = await Product.findByIdAndUpdate(id, { isActive: false }, { new: true })
         if (!product) {

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { v2 as cloudinary } from 'cloudinary'
+import dbConnect from '@/lib/db'
+import { requireAdmin } from '@/lib/auth'
 
 const MAX_IMAGE_UPLOAD_SIZE = 5 * 1024 * 1024
 const MAX_VIDEO_UPLOAD_SIZE = 50 * 1024 * 1024
@@ -17,6 +19,12 @@ cloudinary.config({
 // POST /api/upload
 export async function POST(req: NextRequest) {
     try {
+        await dbConnect()
+        const adminCheck = await requireAdmin(req)
+        if (!adminCheck.ok) {
+            return adminCheck.response
+        }
+
         if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
             return NextResponse.json({
                 success: false,

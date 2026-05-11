@@ -122,6 +122,61 @@ productSchema.virtual('image').get(function () {
   return this.images?.[0] || ''
 })
 
+productSchema.statics.findFeatured = function () {
+  return this.find({
+    isFeatured: true,
+    $or: [{ isActive: true }, { isActive: { $exists: false } }],
+  })
+    .sort({ createdAt: -1 })
+    .limit(8)
+}
+
+productSchema.statics.search = function (
+  query: string,
+  options: {
+    category?: string | null
+    minPrice?: number
+    maxPrice?: number
+    sortBy?: string
+    limit?: number
+  } = {}
+) {
+  const filter: any = {
+    $or: [{ isActive: true }, { isActive: { $exists: false } }],
+  }
+
+  if (query) {
+    filter.$and = [
+      {
+        $or: [
+          { name: { $regex: query, $options: 'i' } },
+          { description: { $regex: query, $options: 'i' } },
+          { category: { $regex: query, $options: 'i' } },
+        ],
+      },
+    ]
+  }
+
+  if (options.category && options.category !== 'all') {
+    filter.category = options.category
+  }
+
+  if (options.minPrice !== undefined || options.maxPrice !== undefined) {
+    filter.price = {}
+    if (options.minPrice !== undefined) filter.price.$gte = options.minPrice
+    if (options.maxPrice !== undefined) filter.price.$lte = options.maxPrice
+  }
+
+  const sort: Record<string, 1 | -1> =
+    options.sortBy === 'price'
+      ? { price: 1 }
+      : options.sortBy === 'createdAt'
+        ? { createdAt: -1 }
+        : { createdAt: -1 }
+
+  return this.find(filter).sort(sort).limit(options.limit || 20)
+}
+
 function getProductModel() {
   const existingModel = mongoose.models.Product as Model<IProduct> | undefined
   if (!existingModel) {
@@ -130,7 +185,9 @@ function getProductModel() {
 
   const hasSlugPath = Boolean((existingModel as any).schema?.path('slug'))
   const hasIsActivePath = Boolean((existingModel as any).schema?.path('isActive'))
-  if (!hasSlugPath || !hasIsActivePath) {
+  const hasMediaPath = Boolean((existingModel as any).schema?.path('videos'))
+  const hasFeaturedStatic = typeof (existingModel as any).findFeatured === 'function'
+  if (!hasSlugPath || !hasIsActivePath || !hasMediaPath || !hasFeaturedStatic) {
     delete (mongoose.models as any).Product
     return mongoose.model<IProduct>('Product', productSchema)
   }

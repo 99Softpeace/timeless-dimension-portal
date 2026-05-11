@@ -154,9 +154,13 @@ export default function AdminProductsPage() {
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="flex items-center space-x-3">
-                                                <button className="text-silver hover:text-teal transition-colors">
+                                                <Link
+                                                    href={`/admin/products/${product._id}/edit`}
+                                                    className="text-silver hover:text-teal transition-colors"
+                                                    aria-label={`Edit ${product.name}`}
+                                                >
                                                     <Pencil size={18} />
-                                                </button>
+                                                </Link>
                                                 <button
                                                     onClick={() => handleDelete(product._id)}
                                                     className="text-silver hover:text-red-400 transition-colors"

@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import dbConnect from '@/lib/db'
 import User from '@/models/User'
-// import { getUserIdFromRequest, isAdmin } from '@/lib/auth' // TODO: Implement JWT auth extraction and admin check
+import { requireAdmin } from '@/lib/auth'
 
 // GET /api/users/admin - Get all users (Admin only)
 export async function GET(req: NextRequest) {
     try {
         await dbConnect()
-        // TODO: Add admin authentication/authorization
-        // if (!isAdmin(req)) return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 })
+        const adminCheck = await requireAdmin(req)
+        if (!adminCheck.ok) return adminCheck.response
+
         const users = await User.find({ isActive: true }).select('-password')
         return NextResponse.json({ success: true, data: users })
     } catch (error: any) {
@@ -21,8 +22,9 @@ export async function GET(req: NextRequest) {
 export async function PUT(req: NextRequest) {
     try {
         await dbConnect()
-        // TODO: Add admin authentication/authorization
-        // if (!isAdmin(req)) return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 })
+        const adminCheck = await requireAdmin(req)
+        if (!adminCheck.ok) return adminCheck.response
+
         const { id, ...update } = await req.json()
         const user = await User.findByIdAndUpdate(id, update, { new: true, runValidators: true }).select('-password')
         if (!user) {
@@ -39,8 +41,9 @@ export async function PUT(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
     try {
         await dbConnect()
-        // TODO: Add admin authentication/authorization
-        // if (!isAdmin(req)) return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 })
+        const adminCheck = await requireAdmin(req)
+        if (!adminCheck.ok) return adminCheck.response
+
         const { id } = await req.json()
         const user = await User.findByIdAndUpdate(id, { isActive: false }, { new: true })
         if (!user) {

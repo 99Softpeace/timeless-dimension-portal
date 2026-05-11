@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import dbConnect from '@/lib/db'
 import Product from '@/models/Product'
 
+export const dynamic = 'force-dynamic'
+
 // GET /api/products - Get all products with filtering and pagination
 export async function GET(req: NextRequest) {
     try {

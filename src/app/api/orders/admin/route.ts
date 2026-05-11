@@ -4,6 +4,8 @@ import { getUserIdFromRequest } from '@/lib/auth'
 import Order from '@/models/Order'
 import User from '@/models/User'
 
+export const dynamic = 'force-dynamic'
+
 async function requireAdmin(req: NextRequest) {
     const userId = getUserIdFromRequest(req)
     if (!userId) {

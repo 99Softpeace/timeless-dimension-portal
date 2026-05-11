@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from 'react'
 import { Menu, X } from 'lucide-react'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import AdminSidebar from '@/components/AdminSidebar'
 import { cn } from '@/lib/utils'
+import { useAuth } from '@/context/AuthContext'
 
 export default function AdminLayout({
     children,
@@ -13,10 +14,26 @@ export default function AdminLayout({
 }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false)
     const pathname = usePathname()
+    const router = useRouter()
+    const { loading, isAdmin } = useAuth()
 
     useEffect(() => {
         setIsSidebarOpen(false)
     }, [pathname])
+
+    useEffect(() => {
+        if (!loading && !isAdmin) {
+            router.replace('/login?redirect=/admin')
+        }
+    }, [isAdmin, loading, router])
+
+    if (loading || !isAdmin) {
+        return (
+            <div className="min-h-screen bg-midnight text-white flex items-center justify-center">
+                <p className="text-silver">Checking admin access...</p>
+            </div>
+        )
+    }
 
     return (
         <div className="min-h-screen bg-midnight text-white">
