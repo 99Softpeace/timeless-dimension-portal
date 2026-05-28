@@ -13,6 +13,7 @@ type OrderEmailOrder = {
     name: string
     quantity: number
     price: number
+    image?: string
   }[]
   shippingAddress?: {
     firstName?: string
@@ -42,12 +43,32 @@ function money(order: OrderEmailOrder) {
   return `${order.currency} ${Number(order.total || 0).toLocaleString()}`
 }
 
+function escapeHtml(value: unknown) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
+function absoluteImageUrl(image: unknown) {
+  const value = String(image || '').trim()
+  if (!value) return ''
+  if (/^https?:\/\//i.test(value)) return value
+
+  const base = (process.env.FRONTEND_URL || process.env.NEXT_PUBLIC_API_URL || '').replace(/\/+$/, '')
+  if (!base || !value.startsWith('/')) return value
+
+  return `${base}${value}`
+}
+
 function ownerEmailAddress() {
   return (
     process.env.OWNER_ORDER_EMAIL ||
     process.env.ORDER_NOTIFICATION_EMAIL ||
-    process.env.EMAIL_USER ||
     process.env.ADMIN_EMAIL ||
+    process.env.EMAIL_USER ||
     'senatorsaccessories@gmail.com'
   )
 }
@@ -117,32 +138,61 @@ export async function sendOwnerOrderNotificationEmail(
       ].filter(Boolean).join(', ')
     : 'Not provided'
   const itemRows = (order.items || [])
-    .map((item) => `<li>${item.name} x ${item.quantity} - ${order.currency} ${Number(item.price || 0).toLocaleString()}</li>`)
+    .map((item) => {
+      const image = absoluteImageUrl(item.image)
+      return `
+        <tr>
+          <td style="padding:12px 12px 12px 0; width:96px; vertical-align:top;">
+            ${
+              image
+                ? `<img src="${escapeHtml(image)}" alt="${escapeHtml(item.name)}" style="display:block; width:84px; height:84px; object-fit:cover; border-radius:8px; border:1px solid #e2e8f0;" />`
+                : `<div style="width:84px; height:84px; border-radius:8px; border:1px solid #e2e8f0; background:#f8fafc; color:#64748b; font-size:12px; display:flex; align-items:center; justify-content:center;">No image</div>`
+            }
+          </td>
+          <td style="padding:12px 0; vertical-align:top;">
+            <p style="margin:0 0 4px;"><strong>${escapeHtml(item.name)}</strong></p>
+            <p style="margin:0;">Quantity: ${Number(item.quantity || 0).toLocaleString()}</p>
+            <p style="margin:0;">Unit Price: ${order.currency} ${Number(item.price || 0).toLocaleString()}</p>
+            <p style="margin:0;">Line Total: ${order.currency} ${Number((item.price || 0) * (item.quantity || 0)).toLocaleString()}</p>
+          </td>
+        </tr>
+      `
+    })
     .join('')
 
   const html = `
     <div style="font-family: Arial, sans-serif; line-height:1.6; color:#0f172a;">
       <h2 style="margin:0 0 12px;">New Order Received</h2>
       <p><strong>Order Number:</strong> ${order.orderNumber}</p>
-      <p><strong>Customer:</strong> ${greeting} (${customer.email})</p>
+      <h3 style="margin:20px 0 8px;">Customer Details</h3>
+      <p><strong>Name:</strong> ${escapeHtml(greeting)}</p>
+      <p><strong>Email:</strong> ${escapeHtml(customer.email)}</p>
       <p><strong>Phone:</strong> ${address?.phone || 'Not provided'}</p>
+      <p><strong>Location:</strong> ${[address?.city, address?.state, address?.country].filter(Boolean).map(escapeHtml).join(', ') || 'Not provided'}</p>
       <p><strong>Delivery Address:</strong> ${addressText}</p>
+      <h3 style="margin:20px 0 8px;">Order Details</h3>
       <p><strong>Total:</strong> ${money(order)}</p>
       <p><strong>Payment Method:</strong> ${order.paymentMethod || 'N/A'}</p>
       <p><strong>Payment Status:</strong> ${order.paymentStatus}</p>
-      ${itemRows ? `<p><strong>Items:</strong></p><ul>${itemRows}</ul>` : ''}
+      ${itemRows ? `<h3 style="margin:20px 0 8px;">Products Ordered</h3><table style="border-collapse:collapse; width:100%;">${itemRows}</table>` : ''}
     </div>
   `
 
   const text = [
     `New Order Received`,
     `Order Number: ${order.orderNumber}`,
-    `Customer: ${greeting} (${customer.email})`,
+    `Customer Name: ${greeting}`,
+    `Customer Email: ${customer.email}`,
     `Phone: ${address?.phone || 'Not provided'}`,
+    `Location: ${[address?.city, address?.state, address?.country].filter(Boolean).join(', ') || 'Not provided'}`,
     `Delivery Address: ${addressText}`,
     `Total: ${money(order)}`,
     `Payment Method: ${order.paymentMethod || 'N/A'}`,
     `Payment Status: ${order.paymentStatus}`,
+    ...(order.items || []).map(
+      (item) =>
+        `Product: ${item.name} | Quantity: ${item.quantity} | Unit Price: ${order.currency} ${Number(item.price || 0).toLocaleString()} | Image: ${item.image || 'Not provided'}`
+    ),
   ].join('\n')
 
   return sendEmail({

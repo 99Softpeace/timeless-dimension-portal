@@ -119,6 +119,7 @@ export async function POST(req: NextRequest) {
                     name: String(item.name),
                     quantity: Number(item.quantity || 0),
                     price: Number(item.price || 0),
+                    image: String(item.image || ''),
                 })),
                 shippingAddress: order.shippingAddress,
             }

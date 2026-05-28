@@ -10,12 +10,12 @@ type MailInput = {
 let transporter: any = null
 
 function getEmailConfig() {
-  const host = process.env.EMAIL_HOST
-  const port = Number(process.env.EMAIL_PORT || 0)
+  const host = process.env.EMAIL_HOST || 'smtp.gmail.com'
+  const port = Number(process.env.EMAIL_PORT || 465)
   const user = process.env.EMAIL_USER
   const pass = process.env.EMAIL_PASS
 
-  if (!host || !port || !user || !pass) {
+  if (!user || !pass) {
     return null
   }
 
@@ -24,7 +24,7 @@ function getEmailConfig() {
     port,
     secure: port === 465,
     auth: { user, pass },
-    from: process.env.EMAIL_FROM || `Timeless Dimension Portal <${user}>`,
+    from: process.env.EMAIL_FROM || `Senators Accessories <${user}>`,
   }
 }
 
@@ -39,6 +39,9 @@ function getTransporter() {
     port: config.port,
     secure: config.secure,
     auth: config.auth,
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 15000,
   })
 
   return transporter
@@ -60,7 +63,7 @@ export async function sendEmail(input: MailInput) {
     return { sent: false as const, reason: 'missing_config' }
   }
 
-  await tx.sendMail({
+  const info = await tx.sendMail({
     from: config.from,
     to: input.to,
     subject: input.subject,
@@ -68,5 +71,11 @@ export async function sendEmail(input: MailInput) {
     text: input.text,
   })
 
-  return { sent: true as const }
+  console.info('Email sent', {
+    to: input.to,
+    subject: input.subject,
+    messageId: info?.messageId,
+  })
+
+  return { sent: true as const, messageId: info?.messageId }
 }

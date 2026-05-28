@@ -97,30 +97,31 @@ export async function POST(req: NextRequest) {
     if (!wasPaid && order.paymentStatus === 'paid') {
       try {
         const user = await (User as any).findById(order.user).select('email firstName lastName isActive')
-        if (user?.email && user?.isActive !== false) {
-          const customer = {
-            email: String(user.email),
-            firstName: user.firstName,
-            lastName: user.lastName,
-          }
-          const orderSummary = {
-            orderNumber: String(order.orderNumber),
-            status: String(order.status),
-            paymentStatus: String(order.paymentStatus),
-            paymentMethod: String(order.paymentMethod || 'flutterwave'),
-            total: Number(order.total || 0),
-            currency: String(order.currency || 'NGN'),
-            createdAt: (order as any).createdAt,
-            items: order.items.map((item: any) => ({
-              name: String(item.name),
-              quantity: Number(item.quantity || 0),
-              price: Number(item.price || 0),
-            })),
-            shippingAddress: order.shippingAddress,
-          }
-          await sendOrderConfirmationEmail(customer, orderSummary)
-          await sendOwnerOrderNotificationEmail(customer, orderSummary)
+        const customer = {
+          email: String(user?.email || tx.customer?.email || ''),
+          firstName: user?.firstName,
+          lastName: user?.lastName,
         }
+        const orderSummary = {
+          orderNumber: String(order.orderNumber),
+          status: String(order.status),
+          paymentStatus: String(order.paymentStatus),
+          paymentMethod: String(order.paymentMethod || 'flutterwave'),
+          total: Number(order.total || 0),
+          currency: String(order.currency || 'NGN'),
+          createdAt: (order as any).createdAt,
+          items: order.items.map((item: any) => ({
+            name: String(item.name),
+            quantity: Number(item.quantity || 0),
+            price: Number(item.price || 0),
+            image: String(item.image || ''),
+          })),
+          shippingAddress: order.shippingAddress,
+        }
+        if (user?.email && user?.isActive !== false) {
+          await sendOrderConfirmationEmail(customer, orderSummary)
+        }
+        await sendOwnerOrderNotificationEmail(customer, orderSummary)
       } catch (emailError) {
         console.error('Webhook order email error:', emailError)
       }

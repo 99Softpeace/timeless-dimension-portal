@@ -3,9 +3,42 @@ import jwt from 'jsonwebtoken'
 import dbConnect from '@/lib/db'
 import User from '@/models/User'
 
+function wait(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+async function connectWithRetry(attempts = 2) {
+    let lastError: any
+
+    for (let attempt = 1; attempt <= attempts; attempt += 1) {
+        try {
+            return await dbConnect()
+        } catch (error) {
+            lastError = error
+            if (attempt < attempts) {
+                await wait(1000)
+            }
+        }
+    }
+
+    throw lastError
+}
+
 export async function POST(req: Request) {
     try {
-        await dbConnect()
+        try {
+            await connectWithRetry()
+        } catch (dbError: any) {
+            console.error('Login database connection error:', dbError)
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: 'Login is temporarily unavailable because the database could not be reached. Please try again shortly.',
+                },
+                { status: 503 }
+            )
+        }
+
         const { email, password } = await req.json()
 
         if (!email || typeof email !== 'string' || !password || typeof password !== 'string') {
@@ -27,7 +60,13 @@ export async function POST(req: Request) {
         }
 
         // Check password
-        const isPasswordValid = await user.comparePassword(password)
+        let isPasswordValid = false
+        try {
+            isPasswordValid = await user.comparePassword(password)
+        } catch (passwordError) {
+            console.error('Login password comparison error:', passwordError)
+            isPasswordValid = false
+        }
         if (!isPasswordValid) {
             return NextResponse.json(
                 { success: false, message: 'Invalid email or password' },
