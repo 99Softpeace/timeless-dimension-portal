@@ -49,6 +49,8 @@ export interface IOrder extends Document {
   paymentMethod: 'card' | 'bank_transfer' | 'paypal' | 'stripe' | 'flutterwave' | 'cash_on_delivery'
   paymentReference?: string
   paymentIntentId?: string
+  flwRef?: string
+  txRef?: string
   trackingNumber?: string
   notes?: string
   estimatedDelivery?: Date
@@ -139,6 +141,13 @@ const orderSchema = new Schema<IOrder>(
 
     paymentReference: String,
     paymentIntentId: String,
+    flwRef: {
+      type: String,
+      unique: true,
+      sparse: true,
+      index: true
+    },
+    txRef: String,
     trackingNumber: String,
     notes: { type: String, maxlength: 500 },
     estimatedDelivery: Date,
