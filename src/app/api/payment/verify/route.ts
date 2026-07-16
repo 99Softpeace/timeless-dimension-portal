@@ -126,6 +126,7 @@ async function finalizePendingOrderFromVerification(
         email: String(user?.email || verified.customer?.email || ''),
         firstName: user?.firstName,
         lastName: user?.lastName,
+        phone: order.shippingAddress?.phone,
       }
       const orderSummary = {
         orderNumber: String(order.orderNumber),
@@ -394,6 +395,7 @@ export async function POST(req: NextRequest) {
         email: String(user?.email || verified.customer?.email || ''),
         firstName: user?.firstName,
         lastName: user?.lastName,
+        phone: order.shippingAddress?.phone,
       }
       const orderSummary = {
         orderNumber: String(order.orderNumber),

@@ -102,6 +102,8 @@ export default function CheckoutContent() {
         amount: getTotalPrice(),
         currency: 'NGN',
         email: formData.email,
+        phone: formData.phone,
+        phone_number: formData.phone,
         phonenumber: formData.phone,
         name: `${formData.firstName} ${formData.lastName}`.trim(),
         firstName: formData.firstName,
@@ -147,7 +149,14 @@ export default function CheckoutContent() {
       const result = await res.json()
 
       if (!res.ok || !result.success) {
-        throw new Error(result.message || 'Unable to place order.')
+        if (res.status === 401) {
+          localStorage.removeItem('token')
+          localStorage.removeItem('user')
+          router.push('/login?redirect=/checkout')
+          throw new Error('Your login session expired. Please login again to place your order.')
+        }
+
+        throw new Error(result.error || result.message || 'Unable to place order.')
       }
 
       if (isPayOnDelivery) {

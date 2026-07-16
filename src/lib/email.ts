@@ -5,6 +5,7 @@ type MailInput = {
   subject: string
   html: string
   text?: string
+  replyTo?: string
 }
 
 let transporter: any = null
@@ -15,7 +16,7 @@ function getEmailConfig() {
   const user = process.env.EMAIL_USER
   const pass = process.env.EMAIL_PASS
 
-  if (!user || !pass) {
+  if (!user || !pass || pass === 'your-app-password') {
     return null
   }
 
@@ -69,6 +70,7 @@ export async function sendEmail(input: MailInput) {
     subject: input.subject,
     html: input.html,
     text: input.text,
+    replyTo: input.replyTo,
   })
 
   console.info('Email sent', {

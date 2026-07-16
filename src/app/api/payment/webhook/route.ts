@@ -10,7 +10,7 @@ function isValidHmacSignature(rawBody: string, signature: string, secret: string
   const digest = crypto
     .createHmac('sha256', secret)
     .update(rawBody, 'utf8')
-    .digest('hex')
+    .digest('base64')
 
   if (digest.length !== signature.length) {
     return false
@@ -20,7 +20,7 @@ function isValidHmacSignature(rawBody: string, signature: string, secret: string
 }
 
 function isValidWebhookRequest(req: NextRequest, rawBody: string) {
-  const webhookSecret = process.env.FLW_WEBHOOK_HASH
+  const webhookSecret = process.env.FLW_WEBHOOK_HASH || process.env.FLW_SECRET_HASH
 
   if (!webhookSecret) {
     return false
@@ -83,6 +83,30 @@ export async function POST(req: NextRequest) {
     const wasPaid = order.paymentStatus === 'paid'
 
     if (tx.status === 'successful') {
+      const verifiedAmount = Number(tx.amount)
+      const orderAmount = Number(order.total)
+      const verifiedCurrency = String(tx.currency || '').trim().toUpperCase()
+      const orderCurrency = String(order.currency || '').trim().toUpperCase()
+      const verifiedTxRef = String(tx.tx_ref || '').trim()
+
+      if (
+        !Number.isFinite(verifiedAmount) ||
+        Math.abs(verifiedAmount - orderAmount) >= 0.01 ||
+        !verifiedCurrency ||
+        verifiedCurrency !== orderCurrency ||
+        !verifiedTxRef ||
+        verifiedTxRef !== String(order.paymentReference || '').trim()
+      ) {
+        console.error('Flutterwave webhook transaction mismatch', {
+          transactionId: String(tx.id),
+          orderId: String(order._id),
+        })
+        return NextResponse.json(
+          { success: false, message: 'Verified transaction does not match order' },
+          { status: 400 }
+        )
+      }
+
       order.paymentStatus = 'paid'
       if (order.status === 'pending') {
         order.status = 'processing'
@@ -101,6 +125,7 @@ export async function POST(req: NextRequest) {
           email: String(user?.email || tx.customer?.email || ''),
           firstName: user?.firstName,
           lastName: user?.lastName,
+          phone: order.shippingAddress?.phone,
         }
         const orderSummary = {
           orderNumber: String(order.orderNumber),

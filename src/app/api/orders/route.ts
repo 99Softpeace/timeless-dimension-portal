@@ -67,7 +67,14 @@ export async function POST(req: NextRequest) {
         const body = await req.json()
         const currency = normalizeCurrency(body?.currency)
         const clientAmount = toAmount(body?.amount)
-        const phone = String(body?.phonenumber || body?.phone_number || '').trim()
+        const phone = String(
+            body?.phone ||
+            body?.phonenumber ||
+            body?.phone_number ||
+            body?.shippingAddress?.phone ||
+            body?.billingAddress?.phone ||
+            ''
+        ).trim()
 
         const { items, subtotal } = await buildOrderItems(body?.cartItems)
 
@@ -106,6 +113,7 @@ export async function POST(req: NextRequest) {
                 email: String(body?.email || user?.email || ''),
                 firstName: String(body?.firstName || user?.firstName || shippingAddress.firstName || ''),
                 lastName: String(body?.lastName || user?.lastName || shippingAddress.lastName || ''),
+                phone: shippingAddress.phone,
             }
             const orderSummary = {
                 orderNumber: String(order.orderNumber),
@@ -124,10 +132,19 @@ export async function POST(req: NextRequest) {
                 shippingAddress: order.shippingAddress,
             }
 
-            if (customer.email && user?.isActive !== false) {
-                await sendOrderConfirmationEmail(customer, orderSummary)
+            try {
+                await sendOwnerOrderNotificationEmail(customer, orderSummary)
+            } catch (ownerEmailError) {
+                console.error('Owner order notification email error:', ownerEmailError)
             }
-            await sendOwnerOrderNotificationEmail(customer, orderSummary)
+
+            if (customer.email && user?.isActive !== false) {
+                try {
+                    await sendOrderConfirmationEmail(customer, orderSummary)
+                } catch (customerEmailError) {
+                    console.error('Customer order confirmation email error:', customerEmailError)
+                }
+            }
         } catch (emailError) {
             console.error('Order email notification error:', emailError)
         }

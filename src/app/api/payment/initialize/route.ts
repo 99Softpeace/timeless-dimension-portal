@@ -18,6 +18,7 @@ type InitializePaymentBody = {
   amount?: number | string
   currency?: string
   email?: string
+  phone?: string
   phonenumber?: string
   phone_number?: string
   name?: string
@@ -43,7 +44,14 @@ export async function POST(req: NextRequest) {
     const body = (await req.json()) as InitializePaymentBody
     const email = String(body.email || '').trim()
     const currency = normalizeCurrency(body.currency)
-    const phone = String(body.phonenumber || body.phone_number || '').trim()
+    const phone = String(
+      body.phone ||
+      body.phonenumber ||
+      body.phone_number ||
+      body.shippingAddress?.phone ||
+      body.billingAddress?.phone ||
+      ''
+    ).trim()
     const name = String(
       body.name || `${body.firstName || ''} ${body.lastName || ''}`
     ).trim()
@@ -59,6 +67,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { success: false, message: 'Customer name is required' },
         { status: 400 }
+      )
+    }
+
+    const secretKey = process.env.FLW_SECRET_KEY
+    if (!secretKey) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'Flutterwave is not configured. Add FLW_SECRET_KEY to the server environment.',
+        },
+        { status: 500 }
       )
     }
 
@@ -127,11 +146,6 @@ export async function POST(req: NextRequest) {
       },
     }
 
-    const secretKey = process.env.FLW_SECRET_KEY
-    if (!secretKey) {
-      throw new Error('FLW_SECRET_KEY is missing')
-    }
-
     const flutterwaveRes = await fetch('https://api.flutterwave.com/v3/payments', {
       method: 'POST',
       headers: {
@@ -145,8 +159,23 @@ export async function POST(req: NextRequest) {
     const response = await flutterwaveRes.json()
 
     if (!flutterwaveRes.ok || response?.status !== 'success') {
-      throw new Error(
-        response?.message || `Flutterwave initialize failed (${flutterwaveRes.status})`
+      if (flutterwaveRes.status === 401) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: 'Flutterwave rejected the secret key. Check that FLW_SECRET_KEY is correct and matches your Flutterwave account mode.',
+            error: response?.message || 'Unauthorized',
+          },
+          { status: 502 }
+        )
+      }
+
+      return NextResponse.json(
+        {
+          success: false,
+          message: response?.message || `Flutterwave initialize failed (${flutterwaveRes.status})`,
+        },
+        { status: 502 }
       )
     }
 
