@@ -70,3 +70,11 @@ export async function retrieveFlutterwaveCharge(id: string) {
   const response = await flutterwaveRequest<{ data?: any }>(`/charges/${encodeURIComponent(id)}`)
   return response.data || {}
 }
+
+export async function findFlutterwaveChargeByReference(reference: string) {
+  const query = new URLSearchParams({ reference, page: '1', size: '10' })
+  const response = await flutterwaveRequest<{ data?: any }>(`/charges?${query.toString()}`)
+  const data = response.data
+  const charges = Array.isArray(data) ? data : Array.isArray(data?.items) ? data.items : []
+  return charges.find((charge: any) => charge?.reference === reference) || null
+}
