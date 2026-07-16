@@ -44,7 +44,12 @@ export async function flutterwaveRequest<T = any>(path: string, init: RequestIni
     cache: 'no-store',
   })
   const result = await response.json()
-  if (!response.ok) throw new Error(result?.error?.message || result?.message || `Flutterwave request failed (${response.status})`)
+  if (!response.ok) {
+    const validation = Array.isArray(result?.error?.validation_errors)
+      ? result.error.validation_errors.map((item: any) => `${item.field_name}: ${item.message}`).join('; ')
+      : ''
+    throw new Error(validation || result?.error?.message || result?.message || `Flutterwave request failed (${response.status})`)
+  }
   return result as T
 }
 

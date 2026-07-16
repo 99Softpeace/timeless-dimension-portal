@@ -35,12 +35,11 @@ export async function POST(req: NextRequest) {
     const reference = generatePaymentReference('FLW4')
     const order = await Order.create({ orderNumber: generateOrderNumber(), user: userId, items, shippingAddress, billingAddress, subtotal, shippingCost: 0, tax: 0, discount: 0, total: subtotal, currency, status: 'pending', paymentStatus: 'pending', paymentMethod, paymentReference: reference, notes: `Flutterwave V4 ${paymentMethod} initialized` })
 
-    const localNumber = phone.replace(/^\+?234/, '').replace(/^0/, '')
-    const customer = await flutterwaveRequest<{ data: { id: string } }>('/customers', { method: 'POST', body: JSON.stringify({ email, name: { first: firstName || name.split(' ')[0], middle: '', last: lastName || name.split(' ').slice(1).join(' ') || firstName }, phone: localNumber ? { country_code: '234', number: localNumber } : undefined, address: { city: shippingAddress.city, country: 'NG', line1: shippingAddress.address1, line2: shippingAddress.address2 || '', postal_code: shippingAddress.postalCode, state: shippingAddress.state }, meta: { order_id: String(order._id), user_id: userId } }) })
+    const customer = await flutterwaveRequest<{ data: { id: string } }>('/customers', { method: 'POST', body: JSON.stringify({ email, name: { first: firstName || name.split(' ')[0], last: lastName || name.split(' ').slice(1).join(' ') || firstName } }) })
 
     if (paymentMethod === 'bank_transfer') {
       if (currency !== 'NGN') throw new Error('Bank transfer checkout supports NGN only')
-      const account = await flutterwaveRequest<{ data: any }>('/virtual-accounts', { method: 'POST', body: JSON.stringify({ reference, customer_id: customer.data.id, expiry: 60, amount: subtotal, currency, account_type: 'dynamic', narration: name, bank_code: '090567', meta: { order_id: String(order._id), order_number: order.orderNumber } }) })
+      const account = await flutterwaveRequest<{ data: any }>('/virtual-accounts', { method: 'POST', body: JSON.stringify({ reference, customer_id: customer.data.id, expiry: 60, amount: subtotal, currency, account_type: 'dynamic', narration: name, meta: { order_id: String(order._id), order_number: order.orderNumber } }) })
       order.paymentIntentId = String(account.data.id || '')
       await order.save()
       return NextResponse.json({ success: true, data: { paymentMethod, orderId: String(order._id), orderNumber: order.orderNumber, reference, accountNumber: account.data.account_number, bankName: account.data.account_bank_name, accountName: account.data.narration || name, note: account.data.note, expiresAt: account.data.account_expiration_datetime, amount: subtotal, currency } })
