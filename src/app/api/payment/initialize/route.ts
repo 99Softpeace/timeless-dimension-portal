@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
 
     if (paymentMethod === 'bank_transfer') {
       if (currency !== 'NGN') throw new Error('Bank transfer checkout supports NGN only')
-      const account = await flutterwaveRequest<{ data: any }>('/virtual-accounts', { method: 'POST', body: JSON.stringify({ reference, customer_id: customer.data.id, expiry: 60, amount: subtotal, currency, account_type: 'dynamic', narration: name, meta: { order_id: String(order._id), order_number: order.orderNumber } }) })
+      const account = await flutterwaveRequest<{ data: any }>('/virtual-accounts', { method: 'POST', body: JSON.stringify({ reference, customer_id: customer.data.id, expiry: 1800, amount: subtotal, currency, account_type: 'dynamic', narration: name, meta: { order_id: String(order._id), order_number: order.orderNumber } }) })
       order.paymentIntentId = String(account.data.id || '')
       await order.save()
       return NextResponse.json({ success: true, data: { paymentMethod, orderId: String(order._id), orderNumber: order.orderNumber, reference, accountNumber: account.data.account_number, bankName: account.data.account_bank_name, accountName: account.data.narration || name, note: account.data.note, expiresAt: account.data.account_expiration_datetime, amount: subtotal, currency } })

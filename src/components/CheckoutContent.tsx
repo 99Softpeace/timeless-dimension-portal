@@ -176,8 +176,13 @@ export default function CheckoutContent() {
       }
 
       if (formData.paymentMethod === 'bank_transfer') {
-        alert(`Transfer NGN ${Number(result.data.amount).toLocaleString()} to ${result.data.bankName}, account ${result.data.accountNumber} (${result.data.accountName}). Your order will update after confirmation.`)
-        setIsPaying(false)
+        const query = new URLSearchParams({
+          orderId: String(result.data.orderId), orderNumber: String(result.data.orderNumber),
+          bankName: String(result.data.bankName), accountNumber: String(result.data.accountNumber),
+          accountName: String(result.data.accountName), amount: String(result.data.amount),
+          expiresAt: String(result.data.expiresAt || ''),
+        })
+        router.push(`/payment/bank-transfer?${query.toString()}`)
         return
       }
       if (result?.data?.redirectUrl) {
