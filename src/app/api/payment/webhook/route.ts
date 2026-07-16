@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import dbConnect from '@/lib/db'
 import Order from '@/models/Order'
 import User from '@/models/User'
-import { getFlutterwaveClient } from '@/lib/flutterwave'
+import { retrieveFlutterwaveCharge } from '@/lib/flutterwave-v4'
 import { sendOwnerOrderNotificationEmail, sendOrderConfirmationEmail } from '@/lib/order-email'
 
 function isValidHmacSignature(rawBody: string, signature: string, secret: string) {
@@ -57,9 +57,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true, message: 'Webhook received' })
     }
 
-    const flw = getFlutterwaveClient()
-    const verification = await flw.Transaction.verify({ id: String(transactionId) })
-    const tx = verification?.data
+    const tx = await retrieveFlutterwaveCharge(String(transactionId))
 
     if (!tx?.id) {
       return NextResponse.json({ success: true, message: 'Webhook received' })
@@ -70,7 +68,7 @@ export async function POST(req: NextRequest) {
     const order = await Order.findOne({
       $or: [
         { paymentIntentId: String(tx.id) },
-        { paymentReference: String(tx.tx_ref || '') },
+        { paymentReference: String(tx.reference || '') },
       ],
     })
     if (!order) {
@@ -82,12 +80,12 @@ export async function POST(req: NextRequest) {
 
     const wasPaid = order.paymentStatus === 'paid'
 
-    if (tx.status === 'successful') {
+    if (tx.status === 'succeeded') {
       const verifiedAmount = Number(tx.amount)
       const orderAmount = Number(order.total)
       const verifiedCurrency = String(tx.currency || '').trim().toUpperCase()
       const orderCurrency = String(order.currency || '').trim().toUpperCase()
-      const verifiedTxRef = String(tx.tx_ref || '').trim()
+      const verifiedTxRef = String(tx.reference || '').trim()
 
       if (
         !Number.isFinite(verifiedAmount) ||
@@ -112,7 +110,7 @@ export async function POST(req: NextRequest) {
         order.status = 'processing'
       }
       order.paymentIntentId = String(tx.id)
-    } else if (tx.status === 'failed' || tx.status === 'cancelled') {
+    } else if (tx.status === 'failed' || tx.status === 'voided') {
       order.paymentStatus = 'failed'
     }
 

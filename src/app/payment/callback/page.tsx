@@ -40,7 +40,7 @@ function PaymentCallbackContent() {
   })
 
   useEffect(() => {
-    const transactionId = searchParams.get('transaction_id')
+    const transactionId = searchParams.get('transaction_id') || searchParams.get('charge_id') || searchParams.get('id')
     const txRef = searchParams.get('tx_ref')
     const status = searchParams.get('status')
 
@@ -97,7 +97,7 @@ function PaymentCallbackContent() {
       }
     }
 
-    if (status && status !== 'successful') {
+    if (status && status !== 'successful' && status !== 'succeeded') {
       setState({
         loading: false,
         success: false,

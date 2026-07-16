@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import dbConnect from '@/lib/db'
 import { getUserIdFromRequest } from '@/lib/auth'
-import { getFlutterwaveClient } from '@/lib/flutterwave'
+import { retrieveFlutterwaveCharge } from '@/lib/flutterwave-v4'
 import Order from '@/models/Order'
 import User from '@/models/User'
 import {
@@ -24,7 +24,7 @@ type PaymentVerification = {
   status?: string
   amount?: number | string
   currency?: string
-  tx_ref?: string
+  reference?: string
   customer?: {
     email?: string
   }
@@ -40,15 +40,13 @@ type VerifyPaymentBody = {
 }
 
 async function verifyFlutterwaveTransaction(transactionId: string) {
-  const flw = getFlutterwaveClient()
-  const response = await flw.Transaction.verify({ id: transactionId })
-  return (response?.data || {}) as PaymentVerification
+  return (await retrieveFlutterwaveCharge(transactionId)) as PaymentVerification
 }
 
 function buildPaymentSummary(data: PaymentVerification) {
   return {
     transactionId: data.id ? String(data.id) : null,
-    txRef: data.tx_ref || null,
+    txRef: data.reference || null,
     status: data.status || null,
     amount: toAmount(data.amount),
     currency: normalizeCurrency(data.currency) || null,
@@ -60,7 +58,7 @@ async function finalizePendingOrderFromVerification(
   verified: PaymentVerification,
   txRefFromRequest?: string | null
 ) {
-  const txRef = String(txRefFromRequest || verified.tx_ref || '').trim()
+  const txRef = String(txRefFromRequest || verified.reference || '').trim()
   const paymentIntentId = verified.id ? String(verified.id) : ''
 
   if (!txRef) {
@@ -108,7 +106,7 @@ async function finalizePendingOrderFromVerification(
 
   order.paymentReference = txRef
 
-  const txRefNote = verified.tx_ref ? `Flutterwave tx_ref: ${verified.tx_ref}` : ''
+  const txRefNote = verified.reference ? `Flutterwave V4 reference: ${verified.reference}` : ''
   if (txRefNote && !String(order.notes || '').includes(txRefNote)) {
     order.notes = String(order.notes || '').trim()
       ? `${String(order.notes).trim()} | ${txRefNote}`
@@ -182,7 +180,7 @@ export async function GET(req: NextRequest) {
     const data = await verifyFlutterwaveTransaction(transaction_id)
     const summary = buildPaymentSummary(data)
 
-    if (tx_ref && data.tx_ref && tx_ref !== data.tx_ref) {
+    if (tx_ref && data.reference && tx_ref !== data.reference) {
       return NextResponse.json(
         {
           success: false,
@@ -201,7 +199,7 @@ export async function GET(req: NextRequest) {
       })
     }
 
-    if (data.status !== 'successful') {
+    if (data.status !== 'succeeded') {
       return NextResponse.json(
         {
           success: false,
@@ -272,7 +270,7 @@ export async function POST(req: NextRequest) {
     const verified = await verifyFlutterwaveTransaction(transactionId)
     const paymentSummary = buildPaymentSummary(verified)
 
-    if (verified.status !== 'successful') {
+    if (verified.status !== 'succeeded') {
       return NextResponse.json(
         {
           success: false,
@@ -283,7 +281,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    if (body.txRef && verified.tx_ref && body.txRef !== verified.tx_ref) {
+    if (body.txRef && verified.reference && body.txRef !== verified.reference) {
       return NextResponse.json(
         {
           success: false,
@@ -324,7 +322,7 @@ export async function POST(req: NextRequest) {
 
     const pendingOrder = await finalizePendingOrderFromVerification(
       verified,
-      body.txRef || verified.tx_ref || null
+      body.txRef || verified.reference || null
     )
 
     if (pendingOrder) {
@@ -382,9 +380,9 @@ export async function POST(req: NextRequest) {
       currency: expectedCurrency || 'NGN',
       status: 'processing',
       paymentStatus: 'paid',
-      paymentMethod: 'flutterwave',
+      paymentMethod: 'card',
       paymentIntentId: String(verified.id || transactionId),
-      notes: verified.tx_ref ? `Flutterwave tx_ref: ${verified.tx_ref}` : undefined,
+      notes: verified.reference ? `Flutterwave V4 reference: ${verified.reference}` : undefined,
     })
 
     try {

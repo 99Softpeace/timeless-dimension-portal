@@ -5,12 +5,14 @@ import { AnimatePresence, motion } from 'framer-motion'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCart } from '@/components/CartContext'
+import V4PaymentFields from '@/components/V4PaymentFields'
 
 export default function CheckoutContent() {
   const router = useRouter()
   const { items, getTotalPrice, clearCart } = useCart()
   const [step, setStep] = useState(1)
   const [isPaying, setIsPaying] = useState(false)
+  const [card, setCard] = useState({ number: '', expiryMonth: '', expiryYear: '', cvv: '', pin: '' })
 
   const [formData, setFormData] = useState({
     email: '',
@@ -23,7 +25,7 @@ export default function CheckoutContent() {
     state: '',
     postalCode: '',
     country: 'Nigeria',
-    paymentMethod: 'flutterwave',
+    paymentMethod: 'card',
   })
 
   useEffect(() => {
@@ -108,6 +110,8 @@ export default function CheckoutContent() {
         name: `${formData.firstName} ${formData.lastName}`.trim(),
         firstName: formData.firstName,
         lastName: formData.lastName,
+        paymentMethod: formData.paymentMethod,
+        ...(formData.paymentMethod === 'card' ? { card } : {}),
         cartItems: items.map((item) => ({
           id: item.id,
           quantity: item.quantity,
@@ -171,12 +175,21 @@ export default function CheckoutContent() {
         return
       }
 
-      const checkoutLink = result?.data?.checkoutLink
-      if (!checkoutLink) {
-        throw new Error('Flutterwave checkout link not returned.')
+      if (formData.paymentMethod === 'bank_transfer') {
+        alert(`Transfer NGN ${Number(result.data.amount).toLocaleString()} to ${result.data.bankName}, account ${result.data.accountNumber} (${result.data.accountName}). Your order will update after confirmation.`)
+        setIsPaying(false)
+        return
       }
-
-      window.location.assign(checkoutLink)
+      if (result?.data?.redirectUrl) {
+        window.location.assign(result.data.redirectUrl)
+        return
+      }
+      if (result?.data?.chargeId && result?.data?.status === 'succeeded') {
+        const query = new URLSearchParams({ transaction_id: String(result.data.chargeId), tx_ref: String(result.data.reference), status: 'succeeded' })
+        window.location.assign(`/payment/callback?${query.toString()}`)
+        return
+      }
+      throw new Error('Card payment is pending. Complete the authorization requested by your bank.')
     } catch (error: any) {
       setIsPaying(false)
       alert(error?.message || 'Unable to start payment.')
@@ -291,7 +304,7 @@ export default function CheckoutContent() {
 
                     <div className="grid gap-3">
                       <label className={`block cursor-pointer rounded-xl border p-4 transition ${
-                        formData.paymentMethod === 'flutterwave'
+                        formData.paymentMethod === 'card'
                           ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/20'
                           : 'border-gray-200 dark:border-slate-700'
                       }`}>
@@ -299,8 +312,8 @@ export default function CheckoutContent() {
                           type="radio"
                           name="paymentMethod"
                           value="flutterwave"
-                          checked={formData.paymentMethod === 'flutterwave'}
-                          onChange={handleInputChange}
+                          checked={formData.paymentMethod === 'card'}
+                          onChange={() => setFormData((prev) => ({ ...prev, paymentMethod: 'card' }))}
                           className="mr-3"
                         />
                         <span className="font-semibold text-slate-800 dark:text-white">Pay now with Flutterwave</span>
@@ -308,6 +321,7 @@ export default function CheckoutContent() {
                           Card, bank transfer, or USSD details are collected securely on Flutterwave.
                         </p>
                       </label>
+                      <V4PaymentFields paymentMethod={formData.paymentMethod} card={card} setCard={setCard} onMethodChange={(paymentMethod) => setFormData((prev) => ({ ...prev, paymentMethod }))} />
 
                       <label className={`block cursor-pointer rounded-xl border p-4 transition ${
                         formData.paymentMethod === 'cash_on_delivery'
