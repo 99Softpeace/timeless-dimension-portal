@@ -35,7 +35,12 @@ export async function POST(req: NextRequest) {
     const reference = generatePaymentReference('FLW4')
     const order = await Order.create({ orderNumber: generateOrderNumber(), user: userId, items, shippingAddress, billingAddress, subtotal, shippingCost: 0, tax: 0, discount: 0, total: subtotal, currency, status: 'pending', paymentStatus: 'pending', paymentMethod, paymentReference: reference, notes: `Flutterwave V4 ${paymentMethod} initialized` })
 
-    const customer = await flutterwaveRequest<{ data: { id: string } }>('/customers', { method: 'POST', body: JSON.stringify({ email, name: { first: firstName || name.split(' ')[0], last: lastName || name.split(' ').slice(1).join(' ') || firstName } }) })
+    const customerSearch = await flutterwaveRequest<{ data: any }>('/customers/search?page=1&size=10', { method: 'POST', body: JSON.stringify({ email }) })
+    const matches = Array.isArray(customerSearch.data) ? customerSearch.data : customerSearch.data?.customers || customerSearch.data?.items || (customerSearch.data?.id ? [customerSearch.data] : [])
+    const existingCustomer = matches.find((item: any) => String(item.email || '').toLowerCase() === email.toLowerCase())
+    const customer = existingCustomer?.id
+      ? { data: existingCustomer }
+      : await flutterwaveRequest<{ data: { id: string } }>('/customers', { method: 'POST', body: JSON.stringify({ email, name: { first: firstName || name.split(' ')[0], last: lastName || name.split(' ').slice(1).join(' ') || firstName } }) })
 
     if (paymentMethod === 'bank_transfer') {
       if (currency !== 'NGN') throw new Error('Bank transfer checkout supports NGN only')
