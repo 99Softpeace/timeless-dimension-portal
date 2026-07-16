@@ -182,7 +182,7 @@ export default function CheckoutContent() {
           accountName: String(result.data.accountName), amount: String(result.data.amount),
           expiresAt: String(result.data.expiresAt || ''),
         })
-        router.push(`/payment/bank-transfer?${query.toString()}`)
+        router.push(`/payment/secure-transfer?${query.toString()}`)
         return
       }
       if (result?.data?.redirectUrl) {
