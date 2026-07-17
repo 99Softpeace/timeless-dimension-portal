@@ -142,13 +142,19 @@ async function finalizePendingOrderFromVerification(
         })),
         shippingAddress: order.shippingAddress,
       }
-      if (user?.email && user?.isActive !== false) {
-        await sendOrderConfirmationEmail(
-          customer,
-          orderSummary
-        )
+      try {
+        await sendOwnerOrderNotificationEmail(customer, orderSummary)
+      } catch (ownerEmailError) {
+        console.error('Owner order notification email error:', ownerEmailError)
       }
-      await sendOwnerOrderNotificationEmail(customer, orderSummary)
+
+      if (user?.email && user?.isActive !== false) {
+        try {
+          await sendOrderConfirmationEmail(customer, orderSummary)
+        } catch (customerEmailError) {
+          console.error('Customer order confirmation email error:', customerEmailError)
+        }
+      }
     } catch (emailError) {
       console.error('Order confirmation email error:', emailError)
     }
@@ -411,13 +417,19 @@ export async function POST(req: NextRequest) {
         })),
         shippingAddress: order.shippingAddress,
       }
-      if (user?.email && user?.isActive !== false) {
-        await sendOrderConfirmationEmail(
-          customer,
-          orderSummary
-        )
+      try {
+        await sendOwnerOrderNotificationEmail(customer, orderSummary)
+      } catch (ownerEmailError) {
+        console.error('Owner order notification email error:', ownerEmailError)
       }
-      await sendOwnerOrderNotificationEmail(customer, orderSummary)
+
+      if (user?.email && user?.isActive !== false) {
+        try {
+          await sendOrderConfirmationEmail(customer, orderSummary)
+        } catch (customerEmailError) {
+          console.error('Customer order confirmation email error:', customerEmailError)
+        }
+      }
     } catch (emailError) {
       console.error('Order confirmation email error:', emailError)
     }
