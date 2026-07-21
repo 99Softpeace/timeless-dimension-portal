@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import dbConnect from '@/lib/db'
 import Product from '@/models/Product'
+import { getStoreProducts } from '@/lib/product-data'
 
 export const dynamic = 'force-dynamic'
 
 // GET /api/products - Get all products with filtering and pagination
 export async function GET(req: NextRequest) {
     try {
-        await dbConnect()
         const { searchParams } = new URL(req.url)
         const page = parseInt(searchParams.get('page') || '1')
         const limit = parseInt(searchParams.get('limit') || '20')
@@ -19,6 +19,26 @@ export async function GET(req: NextRequest) {
         const sortOrder = searchParams.get('sortOrder') === 'asc' ? 1 : -1
         const featured = searchParams.get('featured')
         const inStock = searchParams.get('inStock')
+
+        const canUseStoreCache = !search && !minPrice && !maxPrice && !featured && !inStock && sortBy === 'createdAt' && !category
+
+        if (canUseStoreCache) {
+            const cachedProducts = await getStoreProducts(Math.max(limit * page, limit))
+            const pagedProducts = cachedProducts.slice((page - 1) * limit, page * limit)
+
+            return NextResponse.json({
+                success: true,
+                data: pagedProducts,
+                pagination: {
+                    page,
+                    limit,
+                    total: cachedProducts.length,
+                    pages: Math.ceil(cachedProducts.length / limit)
+                }
+            })
+        }
+
+        await dbConnect()
 
         let query: any = { $or: [{ isActive: true }, { isActive: { $exists: false } }] }
         if (search) query.$text = { $search: search }
@@ -56,3 +76,6 @@ export async function GET(req: NextRequest) {
         }, { status: 500 })
     }
 }
+
+
+

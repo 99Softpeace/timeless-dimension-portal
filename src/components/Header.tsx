@@ -9,6 +9,14 @@ import CartDrawer from './CartDrawer'
 import { useCart } from './CartContext'
 import { useAuth } from '@/context/AuthContext'
 
+const navLinks = [
+  { href: '/watches', label: 'Watches' },
+  { href: '/bags', label: 'Bags' },
+  { href: '/clothes', label: 'Clothes' },
+  { href: '/belts', label: 'Belts' },
+  { href: '/eyeglasses', label: 'Eyeglasses' },
+]
+
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isCartOpen, setIsCartOpen] = useState(false)
@@ -20,116 +28,92 @@ export default function Header() {
 
   if (pathname.startsWith('/admin')) return null
 
-  // Always White Header - Oura Style
-  // Fixes visibility issues ensuring dark text on light background is always grounded
-  const headerClass = 'bg-white/95 backdrop-blur-md py-4 border-b border-black/5'
-  const textColor = 'text-slate-900'
-  const hoverColor = 'hover:text-teal-600'
-
   return (
     <>
-      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${headerClass}`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between">
+      <header className="fixed top-0 left-0 right-0 z-50 px-6 pt-6 md:px-12 lg:px-16">
+        <div className="liquid-glass rounded-xl px-4 py-2 flex items-center justify-between text-white">
+          <Link href="/" className="relative z-10 text-2xl font-semibold tracking-tight">
+            SENATOR
+          </Link>
 
-            {/* 1. Logo (Far Left) */}
-            <Link href="/" className="flex items-center gap-2 group">
-              <span className={`text-2xl font-serif font-bold tracking-tighter ${textColor}`}>
-                SENATOR
-              </span>
-            </Link>
+          <nav className="relative z-10 hidden md:flex items-center gap-8 text-sm">
+            {navLinks.map((link) => (
+              <Link key={link.href} href={link.href} className="text-white/90 transition-colors hover:text-gray-300">
+                {link.label}
+              </Link>
+            ))}
 
-            {/* 2. Desktop Navigation (Centered) */}
-            <nav className="hidden md:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
-              <Link href="/" className={`text-sm font-medium ${textColor} ${hoverColor} transition-colors uppercase tracking-wide`}>
-                Home
-              </Link>
-              <Link href="/shop" className={`text-sm font-medium ${textColor} ${hoverColor} transition-colors uppercase tracking-wide`}>
-                Shop
-              </Link>
-              <Link href="/collections" className={`text-sm font-medium ${textColor} ${hoverColor} transition-colors uppercase tracking-wide`}>
-                Collections
-              </Link>
-              <Link href="/about" className={`text-sm font-medium ${textColor} ${hoverColor} transition-colors uppercase tracking-wide`}>
-                Our Story
-              </Link>
-            </nav>
+          </nav>
 
-            {/* 3. Icons / Actions (Far Right) */}
-            <div className="flex items-center gap-6">
-
-              {/* User/Admin */}
-              {user ? (
-                <div className="hidden sm:flex items-center gap-4">
-                  <Link href="/orders" className={`${textColor}/80 ${hoverColor} text-sm font-medium`}>
-                    My Orders
-                  </Link>
-                  {isAdmin && (
-                    <Link href="/admin" className={`${textColor}/60 ${hoverColor}`}>
-                      <LayoutDashboard size={20} />
-                    </Link>
-                  )}
-                  <button onClick={logout} className={`${textColor}/60 hover:text-red-500`} aria-label="Log out">
-                    <LogOut size={20} />
-                  </button>
-                </div>
-              ) : (
-                <Link href="/login" className={`hidden sm:block ${textColor} ${hoverColor} font-medium text-sm`}>
-                  Sign In
+          <div className="relative z-10 flex items-center gap-4">
+            {user ? (
+              <div className="hidden sm:flex items-center gap-4">
+                <Link href="/orders" className="text-sm font-medium text-white/85 transition-colors hover:text-white">
+                  My Orders
                 </Link>
-              )}
-
-              {/* Cart - Oura Style circular border */}
-              <button
-                onClick={() => setIsCartOpen(true)}
-                className={`relative group flex items-center justify-center w-10 h-10 rounded-full border border-slate-900/20 hover:border-slate-900/50 transition-all`}
-              >
-                <ShoppingCart size={18} className={`${textColor} group-hover:scale-110 transition-transform`} />
-                {cartItemsCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-teal-500 text-white text-[10px] font-bold h-4 w-4 rounded-full flex items-center justify-center">
-                    {cartItemsCount}
-                  </span>
+                {isAdmin && (
+                  <Link href="/admin" className="text-white/80 transition-colors hover:text-white" aria-label="Admin dashboard">
+                    <LayoutDashboard size={20} />
+                  </Link>
                 )}
-              </button>
+                <button onClick={logout} className="text-white/80 transition-colors hover:text-red-200" aria-label="Log out">
+                  <LogOut size={20} />
+                </button>
+              </div>
+            ) : null}
 
-              {/* Mobile Menu Trigger */}
-              <button
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className={`md:hidden ${textColor} ${hoverColor} transition-colors`}
-              >
-                {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-              </button>
-            </div>
+            <button
+              onClick={() => setIsCartOpen(true)}
+              className="relative flex items-center justify-center h-10 w-10 rounded-lg border border-white/20 text-white transition-colors hover:bg-white/10"
+              aria-label="Open cart"
+            >
+              <ShoppingCart size={18} />
+              {cartItemsCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-teal-500 text-white text-[10px] font-bold h-4 w-4 rounded-full flex items-center justify-center">
+                  {cartItemsCount}
+                </span>
+              )}
+            </button>
+
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="md:hidden text-white transition-colors hover:text-gray-300"
+              aria-label="Open menu"
+            >
+              {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
           </div>
         </div>
       </header>
 
-      {/* Mobile Menu Overlay */}
       <motion.div
         initial={false}
         animate={{
           opacity: isMenuOpen ? 1 : 0,
           pointerEvents: isMenuOpen ? 'auto' : 'none'
         }}
-        className="fixed inset-0 z-40 bg-white/95 backdrop-blur-xl md:hidden pt-24 px-6"
+        className="fixed inset-0 z-40 bg-black/95 backdrop-blur-xl md:hidden pt-28 px-6 text-white"
       >
         <nav className="flex flex-col space-y-6 text-center">
-          <Link href="/" onClick={() => setIsMenuOpen(false)} className="text-2xl font-serif text-midnight">Home</Link>
-          <Link href="/shop" onClick={() => setIsMenuOpen(false)} className="text-2xl font-serif text-midnight">Shop</Link>
-          <Link href="/collections" onClick={() => setIsMenuOpen(false)} className="text-2xl font-serif text-midnight">Collections</Link>
-          <Link href="/about" onClick={() => setIsMenuOpen(false)} className="text-2xl font-serif text-midnight">Our Story</Link>
-          {/* Mobile Auth */}
+          {navLinks.map((link) => (
+            <Link key={link.href} href={link.href} onClick={() => setIsMenuOpen(false)} className="text-3xl font-serif">
+              {link.label}
+            </Link>
+          ))}
+
+          <Link href="/collections" onClick={() => setIsMenuOpen(false)} className="text-xl text-white/75">Collections</Link>
+          <Link href="/about" onClick={() => setIsMenuOpen(false)} className="text-xl text-white/75">Our Story</Link>
           {!user && (
-            <Link href="/login" onClick={() => setIsMenuOpen(false)} className="text-lg text-midnight/60 mt-4">Sign In</Link>
+            <Link href="/login" onClick={() => setIsMenuOpen(false)} className="text-lg text-white/70 mt-4">Sign In</Link>
           )}
           {user && (
             <>
-              <Link href="/orders" onClick={() => setIsMenuOpen(false)} className="text-lg text-midnight/70 mt-2 flex items-center justify-center gap-2">
+              <Link href="/orders" onClick={() => setIsMenuOpen(false)} className="text-lg text-white/80 mt-2 flex items-center justify-center gap-2">
                 <ShoppingBag size={18} />
                 My Orders
               </Link>
               {isAdmin && (
-                <Link href="/admin" onClick={() => setIsMenuOpen(false)} className="text-lg text-midnight/70 flex items-center justify-center gap-2">
+                <Link href="/admin" onClick={() => setIsMenuOpen(false)} className="text-lg text-white/80 flex items-center justify-center gap-2">
                   <LayoutDashboard size={18} />
                   Admin Dashboard
                 </Link>
@@ -139,7 +123,7 @@ export default function Header() {
                   setIsMenuOpen(false)
                   logout()
                 }}
-                className="mx-auto mt-4 flex w-full max-w-xs items-center justify-center gap-2 rounded-full border border-red-200 bg-red-50 px-6 py-3 text-base font-semibold text-red-600 shadow-sm transition-colors hover:bg-red-100"
+                className="mx-auto mt-4 flex w-full max-w-xs items-center justify-center gap-2 rounded-full border border-red-300/30 bg-red-500/15 px-6 py-3 text-base font-semibold text-red-100 shadow-sm transition-colors hover:bg-red-500/25"
               >
                 <LogOut size={18} />
                 Log Out

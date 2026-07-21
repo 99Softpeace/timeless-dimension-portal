@@ -30,16 +30,16 @@ export default function AboutPage() {
                     transition={{ delay: 0.2 }}
                     className="text-xl md:text-2xl text-slate-600 font-light leading-relaxed"
                 >
-                    We exist at the intersection of Swiss precision and Nigerian ambition. A tribute to those who build the future.
+                    We exist at the intersection of refined style and Nigerian ambition. A store for people who understand that every detail speaks.
                 </motion.p>
             </section>
 
-            {/* 2. Split Section: Swiss Precision */}
+            {/* 2. Split Section: Curated Quality */}
             <section className="grid grid-cols-1 lg:grid-cols-2">
                 <div className="relative h-[600px] lg:h-auto bg-slate-100">
                     <Image
                         src="/assets/images/bento-mechanical.png"
-                        alt="Swiss Movement Detail"
+                        alt="Senator product detail"
                         fill
                         className="object-cover"
                     />
@@ -47,13 +47,13 @@ export default function AboutPage() {
                 <div className="flex items-center justify-center p-12 lg:p-24 bg-slate-50">
                     <div className="max-w-md">
                         <span className="font-mono text-xs uppercase tracking-widest text-slate-500 mb-4 block">
-                            [01] THE ENGINE
+                            [01] THE CURATION
                         </span>
                         <h2 className="text-4xl font-serif font-bold text-slate-900 mb-6">
-                            Swiss Heart.
+                            Curated Eye.
                         </h2>
                         <p className="text-lg text-slate-600 font-light leading-relaxed">
-                            Every Senator timepiece pulses with a Swiss mechanical movement. We refuse to compromise on the engine that drives your day. 42-hour power reserve, self-winding capability, and flawless accuracy.
+                            Every Senator item is chosen for quality, presence, and everyday usefulness. From bags and clothes to belts, frames, watches, and jewelry, we select pieces that sharpen the full look.
                         </p>
                     </div>
                 </div>
@@ -70,7 +70,7 @@ export default function AboutPage() {
                             Nigerian Soul.
                         </h2>
                         <p className="text-lg text-slate-600 font-light leading-relaxed">
-                            We don't just import; we interpret. Our designs are inspired by the architecture of Lagos, the history of Kano, and the resilience of Port Harcourt. A watch that feels like home.
+                            We do not just stock products; we interpret style for real movement. Our catalog is built for Lagos pace, business days, weekend events, and moments that deserve presence.
                         </p>
                     </div>
                 </div>
@@ -88,13 +88,13 @@ export default function AboutPage() {
             <section className="py-32 px-6 text-center bg-slate-900 text-white">
                 <div className="max-w-3xl mx-auto">
                     <h2 className="text-3xl md:text-5xl font-serif font-bold mb-8">
-                        "Time is the only luxury <br /> that cannot be bought."
+                        "Style is the quiet detail <br /> that announces arrival."
                     </h2>
                     <p className="text-slate-400 text-lg mb-12">
-                        But it can be measured beautifully.
+                        And every detail can be chosen beautifully.
                     </p>
                     <div className="border border-white/20 inline-block px-12 py-4 rounded-full text-sm font-mono tracking-widest uppercase">
-                        SENATOR WATCHES — EST. 2026
+                        SENATOR ACCESSORIES ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â EST. 2026
                     </div>
                 </div>
             </section>

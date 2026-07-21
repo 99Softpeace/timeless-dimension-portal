@@ -6,12 +6,14 @@ import { Loader2, Upload, X } from 'lucide-react'
 
 const CATEGORIES = [
     'Watches',
+    'Bags',
+    'Clothes',
+    'Belts',
+    'Eyeglasses',
     'Jewelry',
     'Accessories',
-    'Collections',
     'Limited Edition'
 ]
-
 type ProductFormData = {
     name: string
     description: string
@@ -35,7 +37,7 @@ export default function EditProductPage() {
         name: '',
         description: '',
         price: '',
-        category: 'Watches',
+        category: 'Accessories',
         stock: '',
         images: [],
         videos: [],
@@ -68,7 +70,7 @@ export default function EditProductPage() {
                         name: product.name || '',
                         description: product.description || '',
                         price: String(product.price ?? ''),
-                        category: product.category || 'Watches',
+                        category: product.category || 'Accessories',
                         stock: String(product.stockQuantity ?? 0),
                         images: Array.isArray(product.images) ? product.images : [],
                         videos: Array.isArray(product.videos) ? product.videos : [],

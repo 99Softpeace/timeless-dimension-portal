@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import dbConnect from '@/lib/db'
 import Product from '@/models/Product'
 import { requireAdmin } from '@/lib/auth'
+import { clearStoreProductsCache } from '@/lib/product-data'
 
 function toSlug(value: string) {
     return value
@@ -143,6 +144,7 @@ export async function POST(req: NextRequest) {
         })
 
         await product.save()
+        clearStoreProductsCache()
         return NextResponse.json({
             success: true,
             data: product,
@@ -236,6 +238,7 @@ export async function PUT(req: NextRequest) {
                 message: 'Product not found'
             }, { status: 404 })
         }
+        clearStoreProductsCache()
         return NextResponse.json({
             success: true,
             data: product,
@@ -266,6 +269,7 @@ export async function DELETE(req: NextRequest) {
                 message: 'Product not found'
             }, { status: 404 })
         }
+        clearStoreProductsCache()
         return NextResponse.json({
             success: true,
             message: 'Product deleted successfully'

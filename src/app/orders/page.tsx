@@ -123,7 +123,7 @@ export default function OrdersPage() {
               <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">No orders yet</h2>
               <p className="text-slate-500 dark:text-slate-400 mb-5">Your paid orders will appear here.</p>
               <Link
-                href="/shop"
+                href="/watches"
                 className="px-5 py-2.5 rounded-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold"
               >
                 Continue Shopping
@@ -178,3 +178,4 @@ export default function OrdersPage() {
     </div>
   )
 }
+

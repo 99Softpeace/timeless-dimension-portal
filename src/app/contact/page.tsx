@@ -62,7 +62,7 @@ export default function ContactPage() {
                             <p className="text-slate-500 font-light">
                                 14 IDUMAGBO Avenue, Jankara Market,<br />
                                 opposite UBA Bank, Lagos Island.<br />
-                                Ask for Godwin or Senatorswristwatches.
+                                Ask for Godwin or Senator Accessories.
                             </p>
                         </div>
 

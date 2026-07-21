@@ -63,7 +63,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (userData.role === 'admin') {
             router.push('/admin')
         } else {
-            router.push('/shop')
+            router.push('/watches')
         }
     }
 
@@ -88,3 +88,4 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 }
 
 export const useAuth = () => useContext(AuthContext)
+

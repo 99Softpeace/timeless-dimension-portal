@@ -116,10 +116,10 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
   if (!product) {
     return (
       <div className="min-h-screen pt-32 pb-16 px-4 flex flex-col items-center justify-center text-center bg-white">
-        <h1 className="text-4xl font-serif font-bold text-slate-900 mb-4">Timepiece Not Found</h1>
-        <p className="text-slate-500 mb-8 font-light">The model you are looking for does not exist in our archives.</p>
-        <Link href="/shop" className="border-b border-slate-900 pb-1 uppercase tracking-widest text-sm hover:text-slate-600 transition-colors">
-          Return to Collection
+        <h1 className="text-4xl font-serif font-bold text-slate-900 mb-4">Product Not Found</h1>
+        <p className="text-slate-500 mb-8 font-light">The product you are looking for is not available in our catalog.</p>
+        <Link href="/watches" className="border-b border-slate-900 pb-1 uppercase tracking-widest text-sm hover:text-slate-600 transition-colors">
+          Return to Shop
         </Link>
       </div>
     )
@@ -144,8 +144,8 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
 
         {/* Breadcrumb */}
         <div className="mb-12">
-          <Link href="/shop" className="text-slate-400 hover:text-slate-900 flex items-center gap-2 transition-colors uppercase tracking-widest text-xs font-mono">
-            <ArrowLeft size={14} /> Back to Collection
+          <Link href="/watches" className="text-slate-400 hover:text-slate-900 flex items-center gap-2 transition-colors uppercase tracking-widest text-xs font-mono">
+            <ArrowLeft size={14} /> Back to Shop
           </Link>
         </div>
 
@@ -213,14 +213,14 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
             {/* Header */}
             <div>
               <span className="font-mono text-xs uppercase tracking-widest text-slate-500 mb-2 block">
-                {product.category} Series
+                {product.category}
               </span>
               <h1 className="text-5xl md:text-6xl font-serif font-bold text-slate-900 mb-6 leading-tight">
                 {product.name}
               </h1>
               <div className="flex items-baseline gap-4 border-b border-slate-100 pb-8">
                 <span className="text-3xl font-mono text-slate-900">
-                  ₦{product.price.toLocaleString()}
+                  â‚¦{product.price.toLocaleString()}
                 </span>
                 {product.discount && (
                   <span className="text-lg text-red-500 font-medium">
@@ -238,7 +238,7 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
             {/* Technical Specs Grid */}
             {product.specs && (
               <div className="border-t border-slate-100 pt-8">
-                <h3 className="font-serif text-xl text-slate-900 mb-6">Technical Specifications</h3>
+                <h3 className="font-serif text-xl text-slate-900 mb-6">Product Details</h3>
                 <div className="grid grid-cols-2 gap-x-8 gap-y-8">
                   <div>
                     <span className="font-mono text-xs uppercase tracking-widest text-slate-400 block mb-1">Movement</span>
@@ -298,7 +298,7 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
                 </div>
                 <div className="flex items-center gap-3 text-slate-500">
                   <ShieldCheck size={18} />
-                  <span className="text-xs uppercase tracking-wider">10 Year Warranty</span>
+                  <span className="text-xs uppercase tracking-wider">Quality Support</span>
                 </div>
               </div>
             </div>

@@ -212,7 +212,7 @@ export default function CheckoutContent() {
             Add some products to get started
           </p>
           <Link
-            href="/shop"
+            href="/watches"
             className="px-6 py-3 rounded-full font-semibold text-white bg-emerald-500 hover:bg-emerald-600 transition"
           >
             Start Shopping
@@ -453,3 +453,4 @@ export default function CheckoutContent() {
     </div>
   )
 }
+

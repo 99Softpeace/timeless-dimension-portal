@@ -6,12 +6,14 @@ import { Upload, X, Loader2 } from 'lucide-react'
 
 const CATEGORIES = [
     'Watches',
+    'Bags',
+    'Clothes',
+    'Belts',
+    'Eyeglasses',
     'Jewelry',
     'Accessories',
-    'Collections',
     'Limited Edition'
 ]
-
 export default function NewProductPage() {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
@@ -20,7 +22,7 @@ export default function NewProductPage() {
         name: '',
         description: '',
         price: '',
-        category: 'Watches',
+        category: 'Accessories',
         stock: '',
         images: [] as string[],
         videos: [] as string[],
@@ -209,7 +211,7 @@ export default function NewProductPage() {
                             value={formData.name}
                             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                             className="w-full bg-midnight/50 border border-glass-border rounded-lg px-4 py-2 text-white placeholder-silver/50 focus:outline-none focus:border-teal transition-colors"
-                            placeholder="e.g. Chronos Elite"
+                            placeholder="e.g. Leather Tote Bag"
                         />
                     </div>
 
@@ -229,7 +231,7 @@ export default function NewProductPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-silver">Price (₦)</label>
+                        <label className="text-sm font-medium text-silver">Price (â‚¦)</label>
                         <input
                             type="number"
                             required

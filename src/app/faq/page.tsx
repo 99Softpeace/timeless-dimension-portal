@@ -7,27 +7,27 @@ import { motion, AnimatePresence } from 'framer-motion'
 const faqs = [
     {
         question: "Do you offer nationwide delivery?",
-        answer: "Yes, we deliver to all states within Nigeria. Delivery times vary by location but typically take 2-5 business days."
+        answer: "Yes, we deliver bags, clothes, belts, eyeglasses, watches, and accessories to all states within Nigeria. Delivery times vary by location but typically take 2-5 business days."
     },
     {
-        question: "Are your watches authentic?",
-        answer: "Absolutely. We guarantee 100% authenticity on all our timepieces. Each watch comes with its original warranty and documentation."
+        question: "Are your products authentic?",
+        answer: "Absolutely. We only list products selected by Senator Accessories, and each item is checked before it is offered for sale."
     },
     {
         question: "What is your return policy?",
-        answer: "We offer a 7-day return policy for items in their original, unworn condition. Please visit our Returns & Exchanges page for full details."
+        answer: "We offer a 7-day return policy for eligible items in their original, unused condition. Please visit our Returns page for full details."
     },
     {
         question: "How do I track my order?",
-        answer: "Once your order is shipped, you will receive a tracking number via email and SMS. You can use this to track your package on our website."
+        answer: "Once your order is shipped, you will receive a tracking number via email and SMS. You can also view your order status from your account."
     },
     {
-        question: "Do you offer warranty on watches?",
-        answer: "Yes, all our watches come with a manufacturer's warranty. The duration and coverage depend on the specific brand and model."
+        question: "Do you offer warranty or after-sales support?",
+        answer: "Yes. Warranty and support depend on the product type and brand. Product-specific warranty details can be confirmed before purchase."
     },
     {
-        question: "Can I pick up my order in person?",
-        answer: "Currently, we operate primarily online. However, we may offer pickup options for specific high-value items upon request."
+        question: "Can I request help choosing an item?",
+        answer: "Yes. Contact our concierge team for help choosing bags, outfits, belts, frames, watches, and accessories for your occasion."
     }
 ]
 
@@ -42,7 +42,7 @@ export default function FAQPage() {
                         Frequently Asked Questions
                     </h1>
                     <p className="text-silver-dark text-lg">
-                        Find answers to common questions about our services and products.
+                        Find answers to common questions about our products, delivery, and support.
                     </p>
                 </div>
 

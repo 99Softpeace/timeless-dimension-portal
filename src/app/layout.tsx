@@ -21,25 +21,25 @@ const poppins = Poppins({
 })
 
 export const metadata: Metadata = {
-  title: "Senator Watches | Luxury Timepieces Nigeria",
+  title: "Senator Accessories | Fashion & Lifestyle Store Nigeria",
   description:
-    "Fragments of forever — luxury wristwatches crafted for the Nigerian market. Experience time in a new dimension with the Senator Collection.",
+    "Bags, clothes, belts, eyeglasses, watches, jewelry, and accessories curated for the Nigerian market.",
   keywords:
-    "luxury watches, Nigeria, Senator watches, wristwatches, mechanical watches, hybrid watches, 3D models, ecommerce",
-  authors: [{ name: "Senator Watches" }],
+    "bags, clothes, belts, eyeglasses, accessories, watches, jewelry, Nigeria, Senator Accessories, fashion ecommerce",
+  authors: [{ name: "Senator Accessories" }],
   openGraph: {
-    title: "Senator Watches | Luxury Timepieces Nigeria",
+    title: "Senator Accessories | Fashion & Lifestyle Store Nigeria",
     description:
-      "Fragments of forever — luxury wristwatches crafted for the Nigerian market.",
+      "Bags, clothes, belts, eyeglasses, watches, jewelry, and accessories curated for the Nigerian market.",
     type: "website",
     locale: "en_NG",
-    siteName: "Senator Watches",
+    siteName: "Senator Accessories",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Senator Watches | Luxury Timepieces Nigeria",
+    title: "Senator Accessories | Fashion & Lifestyle Store Nigeria",
     description:
-      "Fragments of forever — luxury wristwatches crafted for the Nigerian market.",
+      "Bags, clothes, belts, eyeglasses, watches, jewelry, and accessories curated for the Nigerian market.",
   },
   robots: {
     index: true,
@@ -67,7 +67,6 @@ export default function RootLayout({
           </AuthProvider>
         </CartProvider>
 
-        {/* Toaster lives outside so it can overlay everything */}
         <Toaster />
       </body>
     </html>

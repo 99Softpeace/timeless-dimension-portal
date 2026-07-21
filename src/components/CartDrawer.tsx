@@ -57,7 +57,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
             <div className="flex-1 overflow-y-auto p-8">
               {items.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-center">
-                  <span className="text-4xl mb-4 text-slate-300">∅</span>
+                  <span className="text-4xl mb-4 text-slate-300">âˆ…</span>
                   <h3 className="text-lg font-serif font-medium text-slate-900 mb-2">
                     Your cart is empty.
                   </h3>
@@ -65,7 +65,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                     Time waits for no one.
                   </p>
                   <Link
-                    href="/shop"
+                    href="/watches"
                     onClick={onClose}
                     className="border-b border-slate-900 pb-1 text-sm uppercase tracking-widest hover:text-slate-600 transition-colors"
                   >
@@ -99,7 +99,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                               {item.name}
                             </h4>
                             <p className="font-mono text-sm text-slate-600">
-                              ₦{item.price.toLocaleString()}
+                              â‚¦{item.price.toLocaleString()}
                             </p>
                           </div>
                         </div>
@@ -144,7 +144,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                 <div className="flex justify-between items-end">
                   <span className="font-mono text-xs uppercase tracking-widest text-slate-500">Subtotal</span>
                   <span className="text-3xl font-serif font-bold text-slate-900">
-                    ₦{getTotalPrice().toLocaleString()}
+                    â‚¦{getTotalPrice().toLocaleString()}
                   </span>
                 </div>
 
@@ -173,3 +173,4 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
     </AnimatePresence>
   )
 }
+

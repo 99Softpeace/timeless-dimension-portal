@@ -32,7 +32,7 @@ export default function WarrantyPage() {
                     transition={{ delay: 0.2 }}
                     className="text-xl text-slate-600 font-light leading-relaxed"
                 >
-                    We build for perpetuity. Every Senator timepiece is backed by a decade-long comprehensive warranty on the movement and mechanics.
+                    We stand behind the products we sell. Warranty and after-sales support depend on the product type, brand, and condition at purchase.
                 </motion.p>
             </section>
 
@@ -49,20 +49,20 @@ export default function WarrantyPage() {
                         </div>
                         <div className="md:col-span-2 space-y-6">
                             <p className="text-slate-600 leading-relaxed">
-                                Our warranty covers all manufacturing defects in the watch movement, case integrity, and dial assembly. If the watch fails to keep time within specification, we will repair or replace it free of charge.
+                                Our support covers eligible manufacturing defects and product issues confirmed after inspection. Coverage varies for bags, clothes, belts, eyeglasses, watches, and jewelry.
                             </p>
                             <ul className="space-y-3 font-mono text-sm text-slate-500">
                                 <li className="flex items-center gap-3">
                                     <span className="w-1.5 h-1.5 bg-slate-900 rounded-full" />
-                                    Internal Movement Failure
+                                    Manufacturing Defects
                                 </li>
                                 <li className="flex items-center gap-3">
                                     <span className="w-1.5 h-1.5 bg-slate-900 rounded-full" />
-                                    Water Resistance Failure (under rated depth)
+                                    Eligible Hardware or Material Issues
                                 </li>
                                 <li className="flex items-center gap-3">
                                     <span className="w-1.5 h-1.5 bg-slate-900 rounded-full" />
-                                    Crystal Detachment
+                                    Confirmed Product Faults
                                 </li>
                             </ul>
                         </div>
@@ -93,7 +93,7 @@ export default function WarrantyPage() {
                         </div>
                         <div className="md:col-span-2 space-y-6">
                             <p className="text-slate-500 leading-relaxed font-light">
-                                While we stand by our engineering, this warranty does not cover routine wear and tear on leather straps, accidental damage to the sapphire crystal, or damage resulting from unauthorized modifications.
+                                This does not cover normal wear and tear, sizing preference, accidental damage, misuse, stains, scratches, or alterations made after purchase.
                             </p>
                         </div>
                     </div>
@@ -103,14 +103,15 @@ export default function WarrantyPage() {
 
             {/* 4. Footer Statement */}
             <section className="bg-slate-50 py-24 text-center px-6">
-                <h2 className="text-3xl font-serif font-bold text-slate-900 mb-6">Built to Outlast.</h2>
+                <h2 className="text-3xl font-serif font-bold text-slate-900 mb-6">Chosen to Last.</h2>
                 <p className="text-slate-500 mb-8 max-w-xl mx-auto">
-                    A Senator watch is not just a purchase; it is an inheritance. We are here to ensure it lasts for the next generation.
+                    A Senator product should feel worth choosing. We are here to help you enjoy it with confidence.
                 </p>
-                <Link href="/shop" className="btn-primary inline-flex">
+                <Link href="/watches" className="btn-primary inline-flex">
                     Shop the Collection
                 </Link>
             </section>
         </div>
     )
 }
+

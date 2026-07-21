@@ -74,12 +74,12 @@ export default function CustomerPage() {
             <p className="text-silver-dark text-sm">Track payment, shipping, and delivery updates.</p>
           </Link>
 
-          <Link href="/shop" className="glass-card p-6 hover:bg-white/5 transition-colors">
+          <Link href="/watches" className="glass-card p-6 hover:bg-white/5 transition-colors">
             <div className="flex items-center gap-3 text-teal mb-3">
               <Package size={20} />
               <span className="font-semibold">Continue Shopping</span>
             </div>
-            <p className="text-silver-dark text-sm">Browse the latest Senator watch collections.</p>
+            <p className="text-silver-dark text-sm">Browse the latest bags, clothes, belts, eyeglasses, watches, and accessories.</p>
           </Link>
 
           <Link href="/contact" className="glass-card p-6 hover:bg-white/5 transition-colors">
@@ -94,3 +94,4 @@ export default function CustomerPage() {
     </section>
   )
 }
+

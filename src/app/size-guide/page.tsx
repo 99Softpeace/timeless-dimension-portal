@@ -6,10 +6,10 @@ export default function SizeGuidePage() {
             <div className="max-w-4xl mx-auto space-y-12">
                 <div className="text-center space-y-4">
                     <h1 className="text-4xl md:text-5xl font-display font-bold text-gradient">
-                        Watch Size Guide
+                        Size & Fit Guide
                     </h1>
                     <p className="text-silver-dark text-lg">
-                        Find the perfect fit for your wrist.
+                        Choose the right fit for clothes, belts, eyeglasses, watches, and accessories.
                     </p>
                 </div>
 
@@ -17,37 +17,25 @@ export default function SizeGuidePage() {
                     <div className="glass p-8 rounded-2xl space-y-6">
                         <div className="flex items-center space-x-3">
                             <Ruler className="text-teal" size={28} />
-                            <h2 className="text-2xl font-bold text-silver">Case Diameter</h2>
+                            <h2 className="text-2xl font-bold text-silver">Key Measurements</h2>
                         </div>
                         <p className="text-silver-dark leading-relaxed">
-                            The case diameter is the most significant factor in how a watch looks on your wrist. It is measured in millimeters (mm) from the outer edge of the case at 9 o'clock to the outer edge at 3 o'clock, excluding the crown.
+                            For clothes, check chest, waist, hip, and length. For belts, measure your waist or an existing belt from buckle to the hole you use most. For eyeglasses, compare lens width, bridge, and temple length with a frame you already like.
                         </p>
 
                         <div className="overflow-x-auto">
                             <table className="w-full text-left text-silver-dark">
                                 <thead>
                                     <tr className="border-b border-glass-border">
-                                        <th className="py-3 px-4 font-semibold text-silver">Wrist Size (cm)</th>
-                                        <th className="py-3 px-4 font-semibold text-silver">Recommended Case Size (mm)</th>
+                                        <th className="py-3 px-4 font-semibold text-silver">Category</th>
+                                        <th className="py-3 px-4 font-semibold text-silver">What to Check</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-glass-border">
-                                    <tr>
-                                        <td className="py-3 px-4">15cm - 16cm (Small)</td>
-                                        <td className="py-3 px-4">34mm - 38mm</td>
-                                    </tr>
-                                    <tr>
-                                        <td className="py-3 px-4">16cm - 17cm (Average)</td>
-                                        <td className="py-3 px-4">38mm - 42mm</td>
-                                    </tr>
-                                    <tr>
-                                        <td className="py-3 px-4">17cm - 18cm (Average)</td>
-                                        <td className="py-3 px-4">40mm - 44mm</td>
-                                    </tr>
-                                    <tr>
-                                        <td className="py-3 px-4">19cm+ (Large)</td>
-                                        <td className="py-3 px-4">44mm - 46mm+</td>
-                                    </tr>
+                                    <tr><td className="py-3 px-4">Clothes</td><td className="py-3 px-4">Chest, waist, hip, length</td></tr>
+                                    <tr><td className="py-3 px-4">Belts</td><td className="py-3 px-4">Waist size and buckle-to-hole length</td></tr>
+                                    <tr><td className="py-3 px-4">Eyeglasses</td><td className="py-3 px-4">Lens width, bridge, temple length</td></tr>
+                                    <tr><td className="py-3 px-4">Watches</td><td className="py-3 px-4">Case size and wrist circumference</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -56,18 +44,11 @@ export default function SizeGuidePage() {
                     <div className="glass p-8 rounded-2xl space-y-6">
                         <div className="flex items-center space-x-3">
                             <Info className="text-teal" size={28} />
-                            <h2 className="text-2xl font-bold text-silver">How to Measure</h2>
+                            <h2 className="text-2xl font-bold text-silver">Need Help?</h2>
                         </div>
-                        <div className="space-y-4 text-silver-dark leading-relaxed">
-                            <p>
-                                To measure your wrist size, use a flexible tape measure or a strip of paper.
-                            </p>
-                            <ol className="list-decimal list-inside space-y-2 pl-4">
-                                <li>Wrap the tape or paper around your wrist where you typically wear a watch.</li>
-                                <li>If using paper, mark the point where it overlaps and measure the length with a ruler.</li>
-                                <li>Round up to the nearest centimeter for a comfortable fit.</li>
-                            </ol>
-                        </div>
+                        <p className="text-silver-dark leading-relaxed">
+                            If a product has a unique sizing note, check its description or contact the Senator team before ordering. We can help confirm fit before dispatch.
+                        </p>
                     </div>
                 </div>
             </div>
