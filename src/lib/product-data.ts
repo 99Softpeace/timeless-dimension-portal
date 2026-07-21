@@ -14,13 +14,6 @@ export type StoreProduct = {
   discount?: number
 }
 
-type ProductCache = {
-  products: StoreProduct[]
-  expiresAt: number
-}
-
-const PRODUCT_CACHE_TTL_MS = 5 * 60 * 1000
-let productCache: ProductCache | null = null
 
 function toSlug(value: string) {
   return value
@@ -49,16 +42,11 @@ export function normalizeProduct(product: any): StoreProduct {
   }
 }
 
-export function clearStoreProductsCache() {
-  productCache = null
-}
+// Kept for compatibility with admin mutations. Store reads are intentionally
+// uncached so newly uploaded products are immediately visible on every instance.
+export function clearStoreProductsCache() {}
 
 export async function getStoreProducts(): Promise<StoreProduct[]> {
-  const now = Date.now()
-  if (productCache && productCache.expiresAt > now) {
-    return productCache.products
-  }
-
   try {
     await dbConnect()
     const products = await (Product as any)
@@ -66,15 +54,10 @@ export async function getStoreProducts(): Promise<StoreProduct[]> {
       .sort({ createdAt: -1 })
       .lean({ virtuals: true })
 
-    const normalized = products.map(normalizeProduct).filter((product: StoreProduct) => product.slug)
-    productCache = {
-      products: normalized,
-      expiresAt: now + PRODUCT_CACHE_TTL_MS,
-    }
-    return normalized
+    return products.map(normalizeProduct).filter((product: StoreProduct) => product.slug)
   } catch (error) {
     console.error('Error loading store products:', error)
-    return productCache?.products || []
+    return []
   }
 }
 

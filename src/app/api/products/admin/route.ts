@@ -86,7 +86,9 @@ export async function GET(req: NextRequest) {
             return NextResponse.json({ success: true, data: product })
         }
 
-        const products = await Product.find({}).sort({ createdAt: -1 }).limit(200)
+        const products = await Product.find({
+            $or: [{ isActive: true }, { isActive: { $exists: false } }]
+        }).sort({ createdAt: -1 }).limit(200)
         return NextResponse.json({ success: true, data: products })
     } catch (error: any) {
         console.error('Error fetching admin product:', error)
