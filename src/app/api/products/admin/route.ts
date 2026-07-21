@@ -34,6 +34,16 @@ function normalizeMediaList(value: unknown) {
         : []
 }
 
+function normalizeTextList(value: unknown) {
+    const list = Array.isArray(value)
+        ? value
+        : typeof value === 'string'
+            ? value.split(',')
+            : []
+
+    return Array.from(new Set(list.map((item) => String(item || '').trim()).filter(Boolean)))
+}
+
 function normalizeProductPayload(body: any) {
     const name = String(body?.name || '').trim()
     const description = String(body?.description || '').trim()
@@ -49,6 +59,7 @@ function normalizeProductPayload(body: any) {
         stockQuantity: Number.isNaN(stockQuantity) ? 0 : stockQuantity,
         images: normalizeMediaList(body?.images),
         videos: normalizeMediaList(body?.videos),
+        colors: normalizeTextList(body?.colors),
         isFeatured: Boolean(body?.isFeatured),
         isNew: Boolean(body?.isNew),
         isBestSeller: Boolean(body?.isBestSeller),
@@ -103,6 +114,7 @@ export async function POST(req: NextRequest) {
             stockQuantity,
             images,
             videos,
+            colors,
             isFeatured,
             isNew,
             isBestSeller,
@@ -134,6 +146,7 @@ export async function POST(req: NextRequest) {
             slug,
             images,
             videos,
+            colors,
             stockQuantity,
             inStock: stockQuantity > 0,
             isFeatured,
@@ -187,6 +200,7 @@ export async function PUT(req: NextRequest) {
             stockQuantity,
             images,
             videos,
+            colors,
             isFeatured,
             isNew,
             isBestSeller,
@@ -225,6 +239,7 @@ export async function PUT(req: NextRequest) {
             slug: nextSlug,
             images,
             videos,
+            colors,
             stockQuantity,
             inStock: stockQuantity > 0,
             isFeatured,
@@ -283,3 +298,4 @@ export async function DELETE(req: NextRequest) {
         }, { status: 500 })
     }
 }
+

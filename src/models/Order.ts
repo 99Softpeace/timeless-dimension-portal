@@ -13,6 +13,7 @@ export interface IOrder extends Document {
     price: number
     quantity: number
     image: string
+    selectedColor?: string
   }[]
   shippingAddress: {
     firstName: string
@@ -84,7 +85,8 @@ const orderSchema = new Schema<IOrder>(
         name: { type: String, required: true },
         price: { type: Number, required: true, min: 0 },
         quantity: { type: Number, required: true, min: 1 },
-        image: { type: String, required: true }
+        image: { type: String, required: true },
+        selectedColor: { type: String, trim: true }
       }
     ],
 
@@ -296,3 +298,4 @@ const Order =
   mongoose.model<IOrder>('Order', orderSchema)
 
 export default Order
+

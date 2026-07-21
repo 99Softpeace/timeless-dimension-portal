@@ -26,6 +26,7 @@ export default function NewProductPage() {
         stock: '',
         images: [] as string[],
         videos: [] as string[],
+        colors: '',
         isFeatured: false
     })
 
@@ -107,6 +108,7 @@ export default function NewProductPage() {
                     category: formData.category,
                     images: formData.images,
                     videos: formData.videos,
+                    colors: formData.colors.split(',').map((color) => color.trim()).filter(Boolean),
                     stockQuantity,
                     inStock: stockQuantity > 0,
                     isFeatured: formData.isFeatured
@@ -268,6 +270,17 @@ export default function NewProductPage() {
                         placeholder="Product description..."
                     />
                 </div>
+                <div className="space-y-2">
+                    <label className="text-sm font-medium text-silver">Available Colors</label>
+                    <input
+                        type="text"
+                        value={formData.colors}
+                        onChange={(e) => setFormData({ ...formData, colors: e.target.value })}
+                        className="w-full bg-midnight/50 border border-glass-border rounded-lg px-4 py-2 text-white placeholder-silver/50 focus:outline-none focus:border-teal transition-colors"
+                        placeholder="e.g. Black, Brown, Gold, Silver"
+                    />
+                    <p className="text-xs text-silver/60">Separate colors with commas. Customers will select one before adding to cart.</p>
+                </div>
 
                 <div className="flex items-center space-x-2">
                     <input
@@ -303,3 +316,6 @@ export default function NewProductPage() {
         </div>
     )
 }
+
+
+

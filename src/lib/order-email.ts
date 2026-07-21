@@ -14,6 +14,7 @@ type OrderEmailOrder = {
     quantity: number
     price: number
     image?: string
+  selectedColor?: string
   }[]
   shippingAddress?: {
     firstName?: string
@@ -95,6 +96,7 @@ function buildItemRows(order: OrderEmailOrder) {
           </td>
           <td style="padding:12px 0; vertical-align:top;">
             <p style="margin:0 0 4px;"><strong>${escapeHtml(item.name)}</strong></p>
+            ${item.selectedColor ? `<p style="margin:0;"><strong>Selected Color:</strong> ${escapeHtml(item.selectedColor)}</p>` : ''}
             <p style="margin:0;">Quantity: ${Number(item.quantity || 0).toLocaleString()}</p>
             <p style="margin:0;">Unit Price: ${escapeHtml(order.currency)} ${Number(item.price || 0).toLocaleString()}</p>
             <p style="margin:0;">Line Total: ${escapeHtml(order.currency)} ${Number((item.price || 0) * (item.quantity || 0)).toLocaleString()}</p>
@@ -154,7 +156,7 @@ export async function sendOrderConfirmationEmail(
     `Delivery: Free in Lagos and outside Lagos.`,
     ...(order.items || []).map(
       (item) =>
-        `Product: ${item.name} | Quantity: ${item.quantity} | Unit Price: ${order.currency} ${Number(item.price || 0).toLocaleString()} | Image: ${item.image || 'Not provided'}`
+        `Product: ${item.name} | Color: ${item.selectedColor || 'Not selected'} | Quantity: ${item.quantity} | Unit Price: ${order.currency} ${Number(item.price || 0).toLocaleString()} | Image: ${item.image || 'Not provided'}`
     ),
     `Senators Accessories`,
   ].join('\n')
@@ -217,7 +219,7 @@ export async function sendOwnerOrderNotificationEmail(
     `Payment Status: ${order.paymentStatus}`,
     ...(order.items || []).map(
       (item) =>
-        `Product: ${item.name} | Quantity: ${item.quantity} | Unit Price: ${order.currency} ${Number(item.price || 0).toLocaleString()} | Image: ${item.image || 'Not provided'}`
+        `Product: ${item.name} | Color: ${item.selectedColor || 'Not selected'} | Quantity: ${item.quantity} | Unit Price: ${order.currency} ${Number(item.price || 0).toLocaleString()} | Image: ${item.image || 'Not provided'}`
     ),
   ].join('\n')
 
@@ -274,3 +276,5 @@ export async function sendOrderStatusUpdateEmail(
     text: [`Hello ${greeting},`, `Order update for ${order.orderNumber}:`, ...updateLines].join('\n'),
   })
 }
+
+

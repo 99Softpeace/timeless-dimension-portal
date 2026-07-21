@@ -8,6 +8,7 @@ export interface IProduct {
   category: string
   images: string[]
   videos?: string[]
+  colors?: string[]
   image?: string
   inStock: boolean
   stockQuantity: number
@@ -53,6 +54,10 @@ const productSchema = new Schema<IProduct>(
       default: [],
     },
     videos: {
+      type: [String],
+      default: [],
+    },
+    colors: {
       type: [String],
       default: [],
     },
@@ -186,8 +191,9 @@ function getProductModel() {
   const hasSlugPath = Boolean((existingModel as any).schema?.path('slug'))
   const hasIsActivePath = Boolean((existingModel as any).schema?.path('isActive'))
   const hasMediaPath = Boolean((existingModel as any).schema?.path('videos'))
+  const hasColorsPath = Boolean((existingModel as any).schema?.path('colors'))
   const hasFeaturedStatic = typeof (existingModel as any).findFeatured === 'function'
-  if (!hasSlugPath || !hasIsActivePath || !hasMediaPath || !hasFeaturedStatic) {
+  if (!hasSlugPath || !hasIsActivePath || !hasMediaPath || !hasColorsPath || !hasFeaturedStatic) {
     delete (mongoose.models as any).Product
     return mongoose.model<IProduct>('Product', productSchema)
   }
@@ -198,3 +204,5 @@ function getProductModel() {
 const Product: Model<IProduct> = getProductModel()
 
 export default Product
+
+

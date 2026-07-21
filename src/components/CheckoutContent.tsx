@@ -115,6 +115,7 @@ export default function CheckoutContent() {
         cartItems: items.map((item) => ({
           id: item.id,
           quantity: item.quantity,
+          selectedColor: item.selectedColor,
         })),
         shippingAddress: {
           firstName: formData.firstName,
@@ -364,10 +365,10 @@ export default function CheckoutContent() {
 
                     {items.map((item) => (
                       <div
-                        key={item.id}
+                        key={item.cartKey || item.id}
                         className="flex justify-between mb-3 text-slate-600 dark:text-slate-300"
                       >
-                        <span>{item.name}</span>
+                        <span>{item.name}{item.selectedColor ? ` (${item.selectedColor})` : ''}</span>
                         <span>NGN {item.price.toLocaleString()}</span>
                       </div>
                     ))}
@@ -430,10 +431,10 @@ export default function CheckoutContent() {
 
               {items.map((item) => (
                 <div
-                  key={item.id}
+                  key={item.cartKey || item.id}
                   className="flex justify-between mb-3 text-slate-500 dark:text-slate-400"
                 >
-                  <span>{item.name}</span>
+                  <span>{item.name}{item.selectedColor ? ` (${item.selectedColor})` : ''}</span>
                   <span>NGN {item.price.toLocaleString()}</span>
                 </div>
               ))}
@@ -453,4 +454,7 @@ export default function CheckoutContent() {
     </div>
   )
 }
+
+
+
 

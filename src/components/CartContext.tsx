@@ -9,6 +9,8 @@ export interface CartItem {
   image: string
   quantity: number
   slug: string
+  selectedColor?: string
+  cartKey?: string
 }
 
 interface CartState {
@@ -32,13 +34,14 @@ const initialState: CartState = {
 function cartReducer(state: CartState, action: CartAction): CartState {
   switch (action.type) {
     case 'ADD_ITEM': {
-      const existingItem = state.items.find(item => item.id === action.payload.id)
+      const incomingCartKey = `${action.payload.id}::${action.payload.selectedColor || ''}`
+      const existingItem = state.items.find(item => (item.cartKey || item.id) === incomingCartKey)
       
       if (existingItem) {
         return {
           ...state,
           items: state.items.map(item =>
-            item.id === action.payload.id
+            (item.cartKey || item.id) === incomingCartKey
               ? { ...item, quantity: item.quantity + 1 }
               : item
           ),
@@ -47,21 +50,21 @@ function cartReducer(state: CartState, action: CartAction): CartState {
       
       return {
         ...state,
-        items: [...state.items, { ...action.payload, quantity: 1 }],
+        items: [...state.items, { ...action.payload, cartKey: incomingCartKey, quantity: 1 }],
       }
     }
     
     case 'REMOVE_ITEM':
       return {
         ...state,
-        items: state.items.filter(item => item.id !== action.payload),
+        items: state.items.filter(item => (item.cartKey || item.id) !== action.payload),
       }
     
     case 'UPDATE_QUANTITY':
       return {
         ...state,
         items: state.items.map(item =>
-          item.id === action.payload.id
+          (item.cartKey || item.id) === action.payload.id
             ? { ...item, quantity: Math.max(0, action.payload.quantity) }
             : item
         ).filter(item => item.quantity > 0),
@@ -166,3 +169,5 @@ export function useCart() {
   }
   return context
 }
+
+

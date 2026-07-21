@@ -5,6 +5,7 @@ import { allProducts } from '@/lib/products'
 export type CheckoutCartItem = {
   id: string
   quantity: number
+  selectedColor?: string
 }
 
 export type CheckoutAddress = {
@@ -90,6 +91,7 @@ export async function buildOrderItems(cartItems: CheckoutCartItem[] | undefined)
   for (const cartItem of cartItems) {
     const quantity = Number(cartItem.quantity)
     const id = String(cartItem.id)
+    const selectedColor = String(cartItem.selectedColor || '').trim()
 
     if (!Number.isInteger(quantity) || quantity <= 0) {
       throw new Error(`Invalid quantity for item ${id}`)
@@ -111,6 +113,13 @@ export async function buildOrderItems(cartItems: CheckoutCartItem[] | undefined)
     const price = Number((product as any).price || 0)
     const name = String((product as any).name || 'Product')
     const image = String((product as any).image || (product as any).images?.[0] || '')
+    const availableColors = Array.isArray((product as any).colors)
+      ? (product as any).colors.map((color: unknown) => String(color || '').trim()).filter(Boolean)
+      : []
+
+    if (selectedColor && availableColors.length > 0 && !availableColors.some((color: string) => color.toLowerCase() === selectedColor.toLowerCase())) {
+      throw new Error(`Selected color is not available for ${name}`)
+    }
 
     subtotal += price * quantity
     items.push({
@@ -119,8 +128,12 @@ export async function buildOrderItems(cartItems: CheckoutCartItem[] | undefined)
       price,
       quantity,
       image,
+      ...(selectedColor ? { selectedColor } : {}),
     })
   }
 
   return { items, subtotal }
 }
+
+
+

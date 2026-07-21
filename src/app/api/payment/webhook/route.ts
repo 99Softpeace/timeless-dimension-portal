@@ -138,6 +138,7 @@ export async function POST(req: NextRequest) {
             quantity: Number(item.quantity || 0),
             price: Number(item.price || 0),
             image: String(item.image || ''),
+          selectedColor: String(item.selectedColor || ''),
           })),
           shippingAddress: order.shippingAddress,
         }
@@ -168,3 +169,5 @@ export async function POST(req: NextRequest) {
     )
   }
 }
+
+

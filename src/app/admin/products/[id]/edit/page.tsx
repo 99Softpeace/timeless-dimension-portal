@@ -22,6 +22,7 @@ type ProductFormData = {
     stock: string
     images: string[]
     videos: string[]
+    colors: string
     isFeatured: boolean
     isNew: boolean
     isBestSeller: boolean
@@ -41,6 +42,7 @@ export default function EditProductPage() {
         stock: '',
         images: [],
         videos: [],
+        colors: '',
         isFeatured: false,
         isNew: false,
         isBestSeller: false,
@@ -74,6 +76,7 @@ export default function EditProductPage() {
                         stock: String(product.stockQuantity ?? 0),
                         images: Array.isArray(product.images) ? product.images : [],
                         videos: Array.isArray(product.videos) ? product.videos : [],
+                        colors: Array.isArray(product.colors) ? product.colors.join(', ') : '',
                         isFeatured: Boolean(product.isFeatured),
                         isNew: Boolean(product.isNew),
                         isBestSeller: Boolean(product.isBestSeller),
@@ -171,6 +174,7 @@ export default function EditProductPage() {
                     category: formData.category,
                     images: formData.images,
                     videos: formData.videos,
+                    colors: formData.colors.split(',').map((color) => color.trim()).filter(Boolean),
                     stockQuantity,
                     inStock: stockQuantity > 0,
                     isFeatured: formData.isFeatured,
@@ -333,6 +337,19 @@ export default function EditProductPage() {
                     />
                 </div>
 
+                <div className="space-y-2">
+                    <label className="text-sm font-medium text-silver">Available Colors</label>
+                    <input
+                        type="text"
+                        value={formData.colors}
+                        onChange={(e) => setFormData({ ...formData, colors: e.target.value })}
+                        className="w-full bg-midnight/50 border border-glass-border rounded-lg px-4 py-2 text-white placeholder-silver/50 focus:outline-none focus:border-teal transition-colors"
+                        placeholder="e.g. Black, Brown, Gold, Silver"
+                    />
+                    <p className="text-xs text-silver/60">Separate colors with commas. Customers will select one before adding to cart.</p>
+                </div>
+
+
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     {[
                         ['isFeatured', 'Featured Product'],
@@ -372,3 +389,6 @@ export default function EditProductPage() {
         </div>
     )
 }
+
+
+

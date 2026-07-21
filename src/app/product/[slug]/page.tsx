@@ -17,6 +17,7 @@ type PageProduct = {
   image: string
   images: string[]
   videos: string[]
+  colors: string[]
   description: string
   category: string
   isNew?: boolean
@@ -43,6 +44,7 @@ function normalizeProduct(raw: any): PageProduct {
   const image = raw.image || raw.images?.[0] || '/assets/images/heritage-classic-v2.png'
   const images = Array.isArray(raw.images) && raw.images.length > 0 ? raw.images : [image]
   const videos = Array.isArray(raw.videos) ? raw.videos.filter(Boolean) : []
+  const colors = Array.isArray(raw.colors) ? raw.colors.map((color: unknown) => String(color || '').trim()).filter(Boolean) : []
 
   return {
     id: String(raw.id || raw._id || slug),
@@ -52,6 +54,7 @@ function normalizeProduct(raw: any): PageProduct {
     image,
     images,
     videos,
+    colors,
     description: raw.description || '',
     category: String(raw.category || 'Collection'),
     isNew: Boolean(raw.isNew),
@@ -63,6 +66,7 @@ function normalizeProduct(raw: any): PageProduct {
 export default function ProductPage({ params }: { params: { slug: string } }) {
   const { addItem } = useCart()
   const [quantity, setQuantity] = useState(1)
+  const [selectedColor, setSelectedColor] = useState('')
   const staticProduct = useMemo(() => allProducts.find((p) => p.slug === params.slug), [params.slug])
   const [product, setProduct] = useState<PageProduct | null>(() =>
     staticProduct ? normalizeProduct(staticProduct) : null
@@ -71,7 +75,9 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
 
   useEffect(() => {
     if (staticProduct) {
-      setProduct(normalizeProduct(staticProduct))
+      const nextProduct = normalizeProduct(staticProduct)
+      setProduct(nextProduct)
+      setSelectedColor(nextProduct.colors[0] || '')
       setLoading(false)
       return
     }
@@ -89,7 +95,9 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
         }
 
         if (!isCancelled) {
-          setProduct(normalizeProduct(data.data))
+          const nextProduct = normalizeProduct(data.data)
+          setProduct(nextProduct)
+          setSelectedColor(nextProduct.colors[0] || '')
         }
       } catch (error) {
         console.error('Error fetching product details:', error)
@@ -126,6 +134,11 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
   }
 
   const handleAddToCart = () => {
+    if (product.colors.length > 0 && !selectedColor) {
+      toast.error('Please select a color before adding to cart')
+      return
+    }
+
     for (let i = 0; i < quantity; i++) {
       addItem({
         id: product.id,
@@ -133,9 +146,10 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
         price: product.price,
         image: product.image,
         slug: product.slug,
+        selectedColor: selectedColor || undefined,
       })
     }
-    toast.success(`Added ${quantity} ${product.name} to cart`)
+    toast.success(`Added ${quantity} ${product.name}${selectedColor ? ` in ${selectedColor}` : ''} to cart`)
   }
 
   return (
@@ -260,6 +274,25 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
               </div>
             )}
 
+            {/* Color Selector */}
+            {product.colors.length > 0 && (
+              <div className="border-t border-slate-100 pt-8">
+                <h3 className="font-serif text-xl text-slate-900 mb-4">Select Color</h3>
+                <div className="flex flex-wrap gap-3">
+                  {product.colors.map((color) => (
+                    <button
+                      key={color}
+                      type="button"
+                      onClick={() => setSelectedColor(color)}
+                      className={`rounded-full border px-5 py-3 text-sm font-semibold transition-colors ${selectedColor === color ? 'border-slate-950 bg-slate-950 text-white' : 'border-slate-200 text-slate-700 hover:border-slate-950'}`}
+                    >
+                      {color}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Actions */}
             <div className="space-y-6 pt-6 border-t border-slate-100">
               <div className="flex items-center gap-6">
@@ -309,3 +342,9 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
     </div>
   )
 }
+
+
+
+
+
+

@@ -76,7 +76,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                 <div className="space-y-8">
                   {items.map((item) => (
                     <motion.div
-                      key={item.id}
+                      key={item.cartKey || item.id}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
@@ -101,6 +101,9 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                             <p className="font-mono text-sm text-slate-600">
                               â‚¦{item.price.toLocaleString()}
                             </p>
+                          {item.selectedColor && (
+                            <p className="mt-2 text-xs uppercase tracking-widest text-slate-500">Color: {item.selectedColor}</p>
+                          )}
                           </div>
                         </div>
 
@@ -108,7 +111,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                           {/* Quantity Controls */}
                           <div className="flex items-center border border-slate-200">
                             <button
-                              onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                              onClick={() => updateQuantity(item.cartKey || item.id, item.quantity - 1)}
                               className="p-2 text-slate-400 hover:text-slate-900 hover:bg-slate-50 transition-colors"
                             >
                               <Minus size={14} />
@@ -117,7 +120,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                               {item.quantity}
                             </span>
                             <button
-                              onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                              onClick={() => updateQuantity(item.cartKey || item.id, item.quantity + 1)}
                               className="p-2 text-slate-400 hover:text-slate-900 hover:bg-slate-50 transition-colors"
                             >
                               <Plus size={14} />
@@ -125,7 +128,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                           </div>
 
                           <button
-                            onClick={() => removeItem(item.id)}
+                            onClick={() => removeItem(item.cartKey || item.id)}
                             className="text-xs text-slate-400 hover:text-red-600 uppercase tracking-wider underline decoration-slate-200 hover:decoration-red-200 underline-offset-4 transition-all"
                           >
                             Remove
@@ -173,4 +176,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
     </AnimatePresence>
   )
 }
+
+
+
 
