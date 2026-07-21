@@ -118,11 +118,12 @@ export default function ClientHome() {
 
   useEffect(() => {
     const prefersReducedData = 'connection' in navigator && Boolean((navigator as any).connection?.saveData)
+    if (prefersReducedData) return
+
     const isDesktop = window.matchMedia('(min-width: 768px)').matches
+    const delay = isDesktop ? 900 : 1800
+    const timer = window.setTimeout(() => setShouldLoadVideo(true), delay)
 
-    if (!isDesktop || prefersReducedData) return
-
-    const timer = window.setTimeout(() => setShouldLoadVideo(true), 1200)
     return () => window.clearTimeout(timer)
   }, [])
 
