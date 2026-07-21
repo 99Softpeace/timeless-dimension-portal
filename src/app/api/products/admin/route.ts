@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import mongoose from 'mongoose'
 import dbConnect from '@/lib/db'
 import Product from '@/models/Product'
 import { requireAdmin } from '@/lib/auth'
@@ -276,8 +277,18 @@ export async function DELETE(req: NextRequest) {
         const adminCheck = await requireAdmin(req)
         if (!adminCheck.ok) return adminCheck.response
 
-        const { id } = await req.json()
-        const product = await Product.findByIdAndUpdate(id, { isActive: false }, { new: true })
+        const { id: rawId } = await req.json()
+        const id = String(rawId || '').trim()
+
+        if (!id) {
+            return NextResponse.json({
+                success: false,
+                message: 'Product id is required'
+            }, { status: 400 })
+        }
+
+        const lookup = mongoose.Types.ObjectId.isValid(id) ? { _id: id } : { slug: id }
+        const product = await Product.findOneAndUpdate(lookup, { isActive: false }, { new: true })
         if (!product) {
             return NextResponse.json({
                 success: false,

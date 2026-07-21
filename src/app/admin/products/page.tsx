@@ -7,12 +7,15 @@ import { motion } from 'framer-motion'
 import Image from 'next/image'
 
 interface Product {
-    _id: string
+    _id?: string
+    id?: string
+    slug?: string
     name: string
     price: number
     category: string
     inStock: boolean
     image?: string
+    images?: string[]
 }
 
 export default function AdminProductsPage() {
@@ -24,12 +27,22 @@ export default function AdminProductsPage() {
         fetchProducts()
     }, [])
 
+    const getProductId = (product: Product) => product._id || product.id || ''
+
     const fetchProducts = async () => {
         try {
-            const res = await fetch('/api/products?limit=100')
+            const token = localStorage.getItem('token')
+            const res = await fetch('/api/products/admin', {
+                headers: {
+                    Authorization: `Bearer ${token || ''}`,
+                },
+                cache: 'no-store',
+            })
             const data = await res.json()
             if (data.success) {
-                setProducts(data.data)
+                setProducts(Array.isArray(data.data) ? data.data : [])
+            } else {
+                console.error('Error fetching admin products:', data.message || data.error)
             }
         } catch (error) {
             console.error('Error fetching products:', error)
@@ -39,6 +52,11 @@ export default function AdminProductsPage() {
     }
 
     const handleDelete = async (id: string) => {
+        if (!id) {
+            alert('Cannot delete this product because its ID is missing. Please refresh and try again.')
+            return
+        }
+
         if (!confirm('Are you sure you want to delete this product?')) return
 
         try {
@@ -47,13 +65,13 @@ export default function AdminProductsPage() {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    Authorization: `Bearer ${token || ''}`,
                 },
                 body: JSON.stringify({ id })
             })
 
             if (res.ok) {
-                setProducts(products.filter(p => p._id !== id))
+                setProducts((currentProducts) => currentProducts.filter((product) => getProductId(product) !== id))
                 return
             }
 
@@ -119,58 +137,63 @@ export default function AdminProductsPage() {
                                     <td colSpan={5} className="px-6 py-8 text-center text-silver">No products found.</td>
                                 </tr>
                             ) : (
-                                filteredProducts.map((product) => (
-                                    <motion.tr
-                                        key={product._id}
-                                        initial={{ opacity: 0 }}
-                                        animate={{ opacity: 1 }}
-                                        className="hover:bg-white/5 transition-colors"
-                                    >
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center space-x-4">
-                                                <div className="h-12 w-12 rounded-lg bg-midnight/50 overflow-hidden relative">
-                                                    {product.image ? (
-                                                        <Image
-                                                            src={product.image}
-                                                            alt={product.name}
-                                                            fill
-                                                            sizes="48px"
-                                                            className="object-cover"
-                                                        />
-                                                    ) : (
-                                                        <div className="w-full h-full bg-teal/20 flex items-center justify-center text-teal text-xs">IMG</div>
-                                                    )}
+                                filteredProducts.map((product) => {
+                                    const productId = getProductId(product)
+                                    const productImage = product.image || product.images?.[0]
+
+                                    return (
+                                        <motion.tr
+                                            key={productId || product.slug || product.name}
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                            className="hover:bg-white/5 transition-colors"
+                                        >
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center space-x-4">
+                                                    <div className="h-12 w-12 rounded-lg bg-midnight/50 overflow-hidden relative">
+                                                        {productImage ? (
+                                                            <Image
+                                                                src={productImage}
+                                                                alt={product.name}
+                                                                fill
+                                                                sizes="48px"
+                                                                className="object-cover"
+                                                            />
+                                                        ) : (
+                                                            <div className="w-full h-full bg-teal/20 flex items-center justify-center text-teal text-xs">IMG</div>
+                                                        )}
+                                                    </div>
+                                                    <span className="font-medium text-white">{product.name}</span>
                                                 </div>
-                                                <span className="font-medium text-white">{product.name}</span>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 text-silver">{product.category}</td>
-                                        <td className="px-6 py-4 text-white font-mono">₦{product.price.toLocaleString()}</td>
-                                        <td className="px-6 py-4">
-                                            <span className={`px-2 py-1 rounded-full text-xs font-semibold ${product.inStock ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
-                                                }`}>
-                                                {product.inStock ? 'In Stock' : 'Out of Stock'}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center space-x-3">
-                                                <Link
-                                                    href={`/admin/products/${product._id}/edit`}
-                                                    className="text-silver hover:text-teal transition-colors"
-                                                    aria-label={`Edit ${product.name}`}
-                                                >
-                                                    <Pencil size={18} />
-                                                </Link>
-                                                <button
-                                                    onClick={() => handleDelete(product._id)}
-                                                    className="text-silver hover:text-red-400 transition-colors"
-                                                >
-                                                    <Trash2 size={18} />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </motion.tr>
-                                ))
+                                            </td>
+                                            <td className="px-6 py-4 text-silver">{product.category}</td>
+                                            <td className="px-6 py-4 text-white font-mono">&#8358;{product.price.toLocaleString()}</td>
+                                            <td className="px-6 py-4">
+                                                <span className={`px-2 py-1 rounded-full text-xs font-semibold ${product.inStock ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
+                                                    }`}>
+                                                    {product.inStock ? 'In Stock' : 'Out of Stock'}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center space-x-3">
+                                                    <Link
+                                                        href={`/admin/products/${productId}/edit`}
+                                                        className="text-silver hover:text-teal transition-colors"
+                                                        aria-label={`Edit ${product.name}`}
+                                                    >
+                                                        <Pencil size={18} />
+                                                    </Link>
+                                                    <button
+                                                        onClick={() => handleDelete(productId)}
+                                                        className="text-silver hover:text-red-400 transition-colors"
+                                                    >
+                                                        <Trash2 size={18} />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </motion.tr>
+                                    )
+                                })
                             )}
                         </tbody>
                     </table>
