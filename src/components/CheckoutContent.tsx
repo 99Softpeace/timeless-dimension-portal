@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
@@ -369,13 +369,13 @@ export default function CheckoutContent() {
                         className="flex justify-between mb-3 text-slate-600 dark:text-slate-300"
                       >
                         <span>{item.name}{item.selectedColor ? ` (${item.selectedColor})` : ''}</span>
-                        <span>NGN {item.price.toLocaleString()}</span>
+                        <span>&#8358;{item.price.toLocaleString()}</span>
                       </div>
                     ))}
 
                     <div className="border-t border-gray-200 dark:border-slate-700 pt-4 flex justify-between font-semibold text-slate-800 dark:text-white">
                       <span>Total:</span>
-                      <span>NGN {getTotalPrice().toLocaleString()}</span>
+                      <span>&#8358;{getTotalPrice().toLocaleString()}</span>
                     </div>
                     <div className="mt-3 flex justify-between text-sm text-emerald-600 dark:text-emerald-300">
                       <span>Delivery:</span>
@@ -435,13 +435,13 @@ export default function CheckoutContent() {
                   className="flex justify-between mb-3 text-slate-500 dark:text-slate-400"
                 >
                   <span>{item.name}{item.selectedColor ? ` (${item.selectedColor})` : ''}</span>
-                  <span>NGN {item.price.toLocaleString()}</span>
+                  <span>&#8358;{item.price.toLocaleString()}</span>
                 </div>
               ))}
 
               <div className="border-t border-gray-200 dark:border-slate-700 pt-4 flex justify-between font-semibold text-slate-800 dark:text-white">
                 <span>Total:</span>
-                <span>NGN {getTotalPrice().toLocaleString()}</span>
+                <span>&#8358;{getTotalPrice().toLocaleString()}</span>
               </div>
               <div className="mt-3 flex justify-between text-sm text-emerald-600 dark:text-emerald-300">
                 <span>Delivery</span>
@@ -454,6 +454,9 @@ export default function CheckoutContent() {
     </div>
   )
 }
+
+
+
 
 
 

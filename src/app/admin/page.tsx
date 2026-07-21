@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
@@ -65,7 +65,7 @@ export default function AdminDashboard() {
   const cards = [
     {
       label: 'Total Revenue',
-      value: stats ? `NGN ${Number(stats.totalRevenue || 0).toLocaleString()}` : '...',
+      value: stats ? `\u20A6${Number(stats.totalRevenue || 0).toLocaleString()}` : '...',
       icon: DollarSign,
       color: 'text-gold',
     },
@@ -190,3 +190,7 @@ export default function AdminDashboard() {
     </div>
   )
 }
+
+
+
+

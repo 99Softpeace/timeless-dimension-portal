@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import Link from 'next/link'
 import { Suspense, useEffect, useMemo, useState } from 'react'
@@ -76,7 +76,7 @@ function TransferInstructions() {
           <div><p className="text-xs uppercase text-slate-400">Bank</p><p className="font-semibold text-slate-900 dark:text-white">{bankName}</p></div>
           <div><p className="text-xs uppercase text-slate-400">Account name</p><p className="font-semibold text-slate-900 dark:text-white">{accountName}</p></div>
           <div className="flex items-end justify-between gap-3"><div><p className="text-xs uppercase text-slate-400">Account number</p><p className="text-2xl font-bold tracking-wider text-slate-900 dark:text-white">{accountNumber}</p></div><button type="button" onClick={() => copy(accountNumber, 'account')} className="rounded-full bg-emerald-500 px-4 py-2 text-sm font-semibold text-white">{copied === 'account' ? 'Copied' : 'Copy'}</button></div>
-          <div className="flex items-end justify-between gap-3"><div><p className="text-xs uppercase text-slate-400">Exact amount</p><p className="text-2xl font-bold text-slate-900 dark:text-white">NGN {amount.toLocaleString()}</p></div><button type="button" onClick={() => copy(String(amount), 'amount')} className="rounded-full border border-emerald-500 px-4 py-2 text-sm font-semibold text-emerald-600">{copied === 'amount' ? 'Copied' : 'Copy'}</button></div>
+          <div className="flex items-end justify-between gap-3"><div><p className="text-xs uppercase text-slate-400">Exact amount</p><p className="text-2xl font-bold text-slate-900 dark:text-white">&#8358;{amount.toLocaleString()}</p></div><button type="button" onClick={() => copy(String(amount), 'amount')} className="rounded-full border border-emerald-500 px-4 py-2 text-sm font-semibold text-emerald-600">{copied === 'amount' ? 'Copied' : 'Copy'}</button></div>
         </div>
         <div className="my-5 flex items-center gap-3 rounded-xl border border-emerald-100 p-4 dark:border-emerald-900"><span className="h-3 w-3 animate-pulse rounded-full bg-emerald-500"/><p className="text-sm text-slate-600 dark:text-slate-300">{message}</p></div>
         <p className="text-center text-xs text-slate-400">Order {orderNumber}. Do not reuse this account for another order.</p>
@@ -89,3 +89,6 @@ function TransferInstructions() {
 export default function BankTransferPage() {
   return <Suspense fallback={<div className="min-h-screen bg-gray-50 pt-24 text-center dark:bg-slate-900 dark:text-white">Loading transfer details...</div>}><TransferInstructions /></Suspense>
 }
+
+
+

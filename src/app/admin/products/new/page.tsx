@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -233,7 +233,7 @@ export default function NewProductPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-silver">Price (â‚¦)</label>
+                        <label className="text-sm font-medium text-silver">Price (Naira)</label>
                         <input
                             type="number"
                             required
@@ -316,6 +316,9 @@ export default function NewProductPage() {
         </div>
     )
 }
+
+
+
 
 
 

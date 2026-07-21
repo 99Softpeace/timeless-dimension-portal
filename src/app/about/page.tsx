@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { motion } from 'framer-motion'
 import Image from 'next/image'
@@ -94,10 +94,12 @@ export default function AboutPage() {
                         And every detail can be chosen beautifully.
                     </p>
                     <div className="border border-white/20 inline-block px-12 py-4 rounded-full text-sm font-mono tracking-widest uppercase">
-                        SENATOR ACCESSORIES ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â EST. 2026
+                        SENATOR ACCESSORIES — EST. 2026
                     </div>
                 </div>
             </section>
         </div>
     )
 }
+
+
