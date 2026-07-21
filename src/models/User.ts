@@ -1,6 +1,19 @@
 import mongoose from 'mongoose'
 import bcrypt from 'bcryptjs'
 
+const addressSchema = new mongoose.Schema({
+    firstName: { type: String, trim: true },
+    lastName: { type: String, trim: true },
+    address1: { type: String, trim: true, required: true },
+    address2: { type: String, trim: true },
+    city: { type: String, trim: true, required: true },
+    state: { type: String, trim: true, required: true },
+    postalCode: { type: String, trim: true },
+    country: { type: String, trim: true, default: 'Nigeria' },
+    phone: { type: String, trim: true },
+    isDefault: { type: Boolean, default: false },
+}, { timestamps: true })
+
 const userSchema = new mongoose.Schema({
     firstName: {
         type: String,
@@ -31,6 +44,10 @@ const userSchema = new mongoose.Schema({
         type: String,
         trim: true
     },
+    addresses: {
+        type: [addressSchema],
+        default: []
+    },
     role: {
         type: String,
         enum: ['customer', 'admin', 'moderator'],
@@ -51,12 +68,10 @@ const userSchema = new mongoose.Schema({
     toObject: { virtuals: true }
 })
 
-// Virtual for full name
 userSchema.virtual('fullName').get(function () {
     return `${this.firstName} ${this.lastName}`
 })
 
-// Pre-save middleware to hash password
 userSchema.pre('save', async function (next) {
     if (!this.isModified('password')) return next()
 
@@ -69,12 +84,10 @@ userSchema.pre('save', async function (next) {
     }
 })
 
-// Method to compare password
 userSchema.methods.comparePassword = async function (candidatePassword: string) {
     return bcrypt.compare(candidatePassword, this.password)
 }
 
-// Method to get public profile
 userSchema.methods.getPublicProfile = function () {
     const userObject = this.toObject()
     delete userObject.password
@@ -83,11 +96,18 @@ userSchema.methods.getPublicProfile = function () {
     return userObject
 }
 
-// Static method to find by email
 userSchema.statics.findByEmail = function (email: string) {
     return this.findOne({ email: email.toLowerCase().trim(), isActive: true })
 }
 
-const User = mongoose.models.User || mongoose.model('User', userSchema)
+function getUserModel() {
+    const existingModel = mongoose.models.User
+    const hasAddresses = Boolean((existingModel as any)?.schema?.path('addresses'))
+    if (existingModel && hasAddresses) return existingModel
+    if (existingModel && !hasAddresses) delete (mongoose.models as any).User
+    return mongoose.model('User', userSchema)
+}
+
+const User: any = getUserModel()
 
 export default User

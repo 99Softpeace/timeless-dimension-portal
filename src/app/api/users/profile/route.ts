@@ -1,20 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import dbConnect from '@/lib/db'
 import User from '@/models/User'
-// import { getUserIdFromRequest } from '@/lib/auth' // TODO: Implement JWT auth extraction
+import { getUserIdFromRequest } from '@/lib/auth'
 
-// GET /api/users/profile - Get user profile
+export const dynamic = 'force-dynamic'
+
 export async function GET(req: NextRequest) {
     try {
         await dbConnect()
-        // TODO: Extract userId from JWT token in request headers
-        // const userId = getUserIdFromRequest(req)
-        const userId = '' // Placeholder
-        if (!userId) {
-            return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 })
-        }
-        const user = await User.findById(userId).select('-password')
-        if (!user) {
+        const userId = getUserIdFromRequest(req)
+        if (!userId) return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 })
+
+        const user = await (User as any).findById(userId).select('-password')
+        if (!user || user.isActive === false) {
             return NextResponse.json({ success: false, message: 'User not found' }, { status: 404 })
         }
         return NextResponse.json({ success: true, data: user.getPublicProfile() })
@@ -24,22 +22,26 @@ export async function GET(req: NextRequest) {
     }
 }
 
-// PUT /api/users/profile - Update user profile
 export async function PUT(req: NextRequest) {
     try {
         await dbConnect()
-        // TODO: Extract userId from JWT token in request headers
-        // const userId = getUserIdFromRequest(req)
-        const userId = '' // Placeholder
-        if (!userId) {
-            return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 })
+        const userId = getUserIdFromRequest(req)
+        if (!userId) return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 })
+
+        const body = await req.json()
+        const updates = {
+            firstName: String(body?.firstName || '').trim(),
+            lastName: String(body?.lastName || '').trim(),
+            email: String(body?.email || '').trim().toLowerCase(),
+            phone: String(body?.phone || '').trim(),
         }
-        const updates = await req.json()
-        delete updates.password
-        delete updates.role
-        delete updates.isActive
-        const user = await User.findByIdAndUpdate(userId, updates, { new: true, runValidators: true }).select('-password')
-        if (!user) {
+
+        if (!updates.firstName || !updates.lastName || !updates.email) {
+            return NextResponse.json({ success: false, message: 'First name, last name, and email are required' }, { status: 400 })
+        }
+
+        const user = await (User as any).findByIdAndUpdate(userId, updates, { new: true, runValidators: true }).select('-password')
+        if (!user || user.isActive === false) {
             return NextResponse.json({ success: false, message: 'User not found' }, { status: 404 })
         }
         return NextResponse.json({ success: true, data: user.getPublicProfile() })

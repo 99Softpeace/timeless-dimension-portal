@@ -69,7 +69,7 @@ export default function Header() {
                       <LayoutDashboard size={20} />
                     </Link>
                   )}
-                  <button onClick={logout} className={`${textColor}/60 hover:text-red-500`}>
+                  <button onClick={logout} className={`${textColor}/60 hover:text-red-500`} aria-label="Log out">
                     <LogOut size={20} />
                   </button>
                 </div>
@@ -134,6 +134,16 @@ export default function Header() {
                   Admin Dashboard
                 </Link>
               )}
+              <button
+                onClick={() => {
+                  setIsMenuOpen(false)
+                  logout()
+                }}
+                className="mx-auto mt-4 flex w-full max-w-xs items-center justify-center gap-2 rounded-full border border-red-200 bg-red-50 px-6 py-3 text-base font-semibold text-red-600 shadow-sm transition-colors hover:bg-red-100"
+              >
+                <LogOut size={18} />
+                Log Out
+              </button>
             </>
           )}
         </nav>
@@ -143,3 +153,4 @@ export default function Header() {
     </>
   )
 }
+

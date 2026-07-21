@@ -6,23 +6,39 @@ import { useState } from 'react'
 
 export default function Newsletter() {
     const [email, setEmail] = useState('')
-    const [status, setStatus] = useState<'idle' | 'loading' | 'success'>('idle')
+    const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
+    const [message, setMessage] = useState('')
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setStatus('loading')
-        setTimeout(() => {
+        setMessage('')
+
+        try {
+            const res = await fetch('/api/newsletter', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email }),
+            })
+            const result = await res.json()
+
+            if (!res.ok || !result.success) {
+                throw new Error(result.message || 'Could not subscribe right now.')
+            }
+
             setStatus('success')
+            setMessage(result.message || 'Welcome to the family.')
             setEmail('')
-        }, 1500)
+        } catch (error: any) {
+            setStatus('error')
+            setMessage(error?.message || 'Could not subscribe right now.')
+        }
     }
 
     return (
         <section className="bg-white text-slate-900 py-24 border-t border-slate-200">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-end">
-
-                    {/* Left: Typography */}
                     <div>
                         <span className="font-mono text-xs uppercase tracking-widest text-slate-500 mb-4 block">
                             [02] Newsletter
@@ -36,7 +52,6 @@ export default function Newsletter() {
                         </p>
                     </div>
 
-                    {/* Right: Form - VanMoof Style Underline Input */}
                     <div className="w-full">
                         {status === 'success' ? (
                             <motion.div
@@ -44,7 +59,7 @@ export default function Newsletter() {
                                 animate={{ opacity: 1, y: 0 }}
                                 className="text-2xl font-serif italic text-teal-600"
                             >
-                                Welcome to the family.
+                                {message || 'Welcome to the family.'}
                             </motion.div>
                         ) : (
                             <form onSubmit={handleSubmit} className="relative group">
@@ -61,6 +76,7 @@ export default function Newsletter() {
                                         type="submit"
                                         disabled={status === 'loading'}
                                         className="bg-slate-900 text-white w-12 h-12 flex items-center justify-center hover:bg-teal-600 transition-colors disabled:opacity-50"
+                                        aria-label="Subscribe to newsletter"
                                     >
                                         {status === 'loading' ? (
                                             <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -71,8 +87,13 @@ export default function Newsletter() {
                                 </div>
                             </form>
                         )}
+
+                        {status === 'error' && message && (
+                            <p className="mt-4 text-sm text-red-600">{message}</p>
+                        )}
+
                         <p className="mt-4 text-[10px] font-mono uppercase text-slate-400">
-                            No spam. Unsubscribe anytime.
+                            Product updates only. No spam.
                         </p>
                     </div>
                 </div>

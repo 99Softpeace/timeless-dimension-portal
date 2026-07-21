@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Package, ShoppingBag, Users, Settings, LogOut } from 'lucide-react'
+import { LayoutDashboard, Package, ShoppingBag, Users, Settings, LogOut, Mail } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/context/AuthContext'
 
@@ -24,8 +24,8 @@ export default function AdminSidebar({ className, onNavigate }: AdminSidebarProp
     const { logout } = useAuth()
 
     return (
-        <div className={cn('flex h-full min-h-screen flex-col w-64 bg-glass border-r border-glass-border', className)}>
-            <div className="flex items-center justify-center h-16 border-b border-glass-border">
+        <div className={cn('flex h-full min-h-screen flex-col w-64 bg-[#0B1020] border-r border-white/10 shadow-2xl', className)}>
+            <div className="flex items-center justify-center h-16 border-b border-white/10">
                 <Link href="/" className="flex items-center space-x-2">
                     <div className="w-8 h-8 bg-gradient-to-br from-teal to-gold rounded-lg flex items-center justify-center">
                         <span className="text-midnight font-bold text-sm">A</span>
@@ -49,13 +49,13 @@ export default function AdminSidebar({ className, onNavigate }: AdminSidebarProp
                                     'group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors',
                                     isActive
                                         ? 'bg-teal/10 text-teal'
-                                        : 'text-silver hover:bg-white/5 hover:text-white'
+                                        : 'text-slate-200 hover:bg-white/10 hover:text-white'
                                 )}
                             >
                                 <item.icon
                                     className={cn(
                                         'mr-3 flex-shrink-0 h-6 w-6',
-                                        isActive ? 'text-teal' : 'text-silver group-hover:text-white'
+                                        isActive ? 'text-teal' : 'text-slate-300 group-hover:text-white'
                                     )}
                                     aria-hidden="true"
                                 />
@@ -66,16 +66,16 @@ export default function AdminSidebar({ className, onNavigate }: AdminSidebarProp
                 </nav>
             </div>
 
-            <div className="border-t border-glass-border p-4">
+            <div className="border-t border-white/10 p-4">
                 <button
                     onClick={() => {
                         onNavigate?.()
                         logout()
                     }}
-                    className="flex w-full items-center px-2 py-2 text-sm font-medium text-silver hover:bg-white/5 hover:text-white rounded-md transition-colors"
+                    className="flex w-full items-center justify-center gap-2 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm font-semibold text-red-100 transition-colors hover:bg-red-500/20 hover:text-white"
                 >
-                    <LogOut className="mr-3 h-6 w-6 text-silver group-hover:text-white" />
-                    Logout
+                    <LogOut className="h-5 w-5" />
+                    Log Out
                 </button>
             </div>
         </div>

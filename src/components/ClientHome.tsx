@@ -2,37 +2,19 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import dynamic from 'next/dynamic'
-import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Loader2 } from 'lucide-react'
 
-import { allProducts } from '@/lib/products'
-import ProductCard from '@/components/ProductCard'
-import Testimonials from '@/components/Testimonials'
-import Newsletter from '@/components/Newsletter'
 import NeuralBackground from '@/components/ui/flow-field-background'
 
-// Dynamically import the heavy 3D showcase
-const ProductShowcase3D: any = dynamic(() => import('@/components/ProductShowcase3D') as any, {
+const Testimonials = dynamic(() => import('@/components/Testimonials'), {
   ssr: false,
-  loading: () => (
-    <div className="w-full h-96 lg:h-[500px] flex flex-col items-center justify-center text-silver-dark/50 gap-4">
-      <Loader2 className="animate-spin text-teal" size={48} />
-      <span className="text-sm tracking-widest uppercase">Loading Dimensions...</span>
-    </div>
-  ),
 })
 
-// Use the first 4 products as featured
-const featuredProducts = allProducts.slice(0, 4)
+const Newsletter = dynamic(() => import('@/components/Newsletter'), {
+  ssr: false,
+})
 
 export default function ClientHome() {
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
   return (
     <div>
       {/* Hero Section */}
@@ -40,19 +22,15 @@ export default function ClientHome() {
         {/* Animated Background - Subtle & Elegant */}
         <div className="absolute inset-0 z-0 opacity-30">
           <NeuralBackground
-            color="#A1A1AA" // Cool Gray 400
-            speed={0.2}
-            particleCount={200}
+            color="#A1A1AA"
+            speed={0.12}
+            particleCount={80}
             trailOpacity={0.05}
           />
         </div>
 
-        {/* No dark overlay needed for light theme */}
-
         <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 relative z-10 w-full h-full flex flex-col justify-center">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-center">
-
-            {/* Image (Top on Mobile, Right on Desktop) */}
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -76,7 +54,6 @@ export default function ClientHome() {
               </div>
             </motion.div>
 
-            {/* Hero Content (Bottom on Mobile, Left on Desktop) */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -118,7 +95,6 @@ export default function ClientHome() {
                 </Link>
               </motion.div>
 
-              {/* Stats Integrated into Text Column */}
               <motion.div
                 className="grid grid-cols-3 gap-8 pt-8 border-t border-midnight/10 mt-8"
                 initial={{ opacity: 0, y: 20 }}
@@ -134,17 +110,15 @@ export default function ClientHome() {
                   <div className="text-xs tracking-widest text-midnight/60 uppercase mt-1">Models</div>
                 </div>
                 <div className="text-center lg:text-left">
-                  <div className="text-2xl font-serif font-bold text-midnight">5★</div>
+                  <div className="text-2xl font-serif font-bold text-midnight">5-star</div>
                   <div className="text-xs tracking-widest text-midnight/60 uppercase mt-1">Rating</div>
                 </div>
               </motion.div>
             </motion.div>
-
           </div>
         </div>
       </section>
 
-      {/* Bento Grid Features Section - Apple Style */}
       <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
@@ -153,7 +127,6 @@ export default function ClientHome() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            {/* Rebranded to Senator */}
             <h2 className="text-4xl md:text-5xl font-serif font-bold text-slate-900 mb-6">
               Engineering Excellence
             </h2>
@@ -163,7 +136,6 @@ export default function ClientHome() {
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[400px]">
-            {/* Card 1: Mechanical Movement (Large) */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -183,7 +155,6 @@ export default function ClientHome() {
               </div>
             </motion.div>
 
-            {/* Card 2: Sapphire Crystal */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -204,7 +175,6 @@ export default function ClientHome() {
               </div>
             </motion.div>
 
-            {/* Card 3: Lifestyle (Tall) */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -225,7 +195,6 @@ export default function ClientHome() {
               </div>
             </motion.div>
 
-            {/* Card 4: Warranty/Service (Text Only) */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -244,7 +213,6 @@ export default function ClientHome() {
         </div>
       </section>
 
-      {/* Editorial Showcase - Oura Style */}
       <section className="bg-slate-50 py-24">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
@@ -285,10 +253,7 @@ export default function ClientHome() {
         </div>
       </section>
 
-      {/* Testimonials Section */}
       <Testimonials />
-
-      {/* Newsletter Section */}
       <Newsletter />
     </div>
   )

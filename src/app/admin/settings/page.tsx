@@ -58,16 +58,23 @@ export default function AdminSettingsPage() {
             phone: storedPhone,
         })
 
-        const prefsRaw = localStorage.getItem('adminPreferences')
-        if (prefsRaw) {
+        async function loadPreferences() {
+            if (!token) return
             try {
-                const parsed = JSON.parse(prefsRaw)
-                setPreferences({ ...DEFAULT_PREFERENCES, ...parsed })
+                const res = await fetch('/api/admin/preferences', {
+                    headers: { Authorization: `Bearer ${token}` },
+                })
+                const result = await res.json()
+                if (res.ok && result.success) {
+                    setPreferences({ ...DEFAULT_PREFERENCES, ...result.data })
+                }
             } catch (error) {
                 setPreferences(DEFAULT_PREFERENCES)
             }
         }
-    }, [user])
+
+        loadPreferences()
+    }, [token, user])
 
     const handleProfileSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault()
@@ -108,14 +115,31 @@ export default function AdminSettingsPage() {
         }
     }
 
-    const handlePreferencesSubmit = (e: FormEvent<HTMLFormElement>) => {
+    const handlePreferencesSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         setSavingPreferences(true)
         setPreferencesMessage('')
 
-        localStorage.setItem('adminPreferences', JSON.stringify(preferences))
-        setPreferencesMessage('Preferences saved successfully.')
-        setSavingPreferences(false)
+        try {
+            const res = await fetch('/api/admin/preferences', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                },
+                body: JSON.stringify(preferences),
+            })
+            const result = await res.json()
+            if (!res.ok || !result.success) {
+                throw new Error(result.message || 'Failed to save preferences')
+            }
+            setPreferences({ ...DEFAULT_PREFERENCES, ...result.data })
+            setPreferencesMessage(result.message || 'Preferences saved successfully.')
+        } catch (error: any) {
+            setPreferencesMessage(error?.message || 'Failed to save preferences.')
+        } finally {
+            setSavingPreferences(false)
+        }
     }
 
     if (loading) {
