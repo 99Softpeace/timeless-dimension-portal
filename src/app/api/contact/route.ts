@@ -73,9 +73,18 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true, message: 'Message sent successfully.' })
   } catch (error: any) {
     console.error('Contact form error:', error)
+    const rawMessage = String(error?.message || '')
+    const lowerMessage = rawMessage.toLowerCase()
+    const message = lowerMessage.includes('username and password not accepted') || lowerMessage.includes('badcredentials')
+      ? 'Email login failed. Please confirm the Gmail app password for this account and try again.'
+      : lowerMessage.includes('timeout') || lowerMessage.includes('enetunreach')
+        ? 'Email server connection failed. Please try again shortly.'
+        : 'Could not send message.'
+
     return NextResponse.json(
-      { success: false, message: 'Could not send message.', error: error.message },
+      { success: false, message, error: rawMessage },
       { status: 500 }
     )
   }
 }
+

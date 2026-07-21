@@ -9,12 +9,14 @@ type MailInput = {
 }
 
 let transporter: any = null
+let transporterKey = ''
 
 function getEmailConfig() {
   const host = process.env.EMAIL_HOST || 'smtp.gmail.com'
   const port = Number(process.env.EMAIL_PORT || 465)
   const user = process.env.EMAIL_USER
-  const pass = process.env.EMAIL_PASS
+  const rawPass = process.env.EMAIL_PASS
+  const pass = host.includes('gmail') ? rawPass?.replace(/\s+/g, '') : rawPass
 
   if (!user || !pass || pass === 'your-app-password') {
     return null
@@ -29,11 +31,11 @@ function getEmailConfig() {
   }
 }
 
-function getTransporter() {
-  if (transporter) return transporter
+type EmailConfig = NonNullable<ReturnType<typeof getEmailConfig>>
 
-  const config = getEmailConfig()
-  if (!config) return null
+function createTransporter(config: EmailConfig) {
+  const key = `${config.host}:${config.port}:${config.auth.user}`
+  if (transporter && transporterKey === key) return transporter
 
   transporter = nodemailer.createTransport({
     host: config.host,
@@ -44,12 +46,25 @@ function getTransporter() {
     greetingTimeout: 10000,
     socketTimeout: 15000,
   })
+  transporterKey = key
 
   return transporter
 }
 
+function getTransporter() {
+  const config = getEmailConfig()
+  if (!config) return null
+
+  return createTransporter(config)
+}
+
 export function canSendEmails() {
   return Boolean(getEmailConfig())
+}
+
+function shouldRetryWithStartTls(error: any, config: EmailConfig) {
+  const message = String(error?.message || '').toLowerCase()
+  return config.host.includes('gmail') && config.port === 465 && (message.includes('timeout') || message.includes('etimedout') || message.includes('enetunreach') || message.includes('econnrefused'))
 }
 
 export async function sendEmail(input: MailInput) {
@@ -64,14 +79,33 @@ export async function sendEmail(input: MailInput) {
     return { sent: false as const, reason: 'missing_config' }
   }
 
-  const info = await tx.sendMail({
+  const mail = {
     from: config.from,
     to: input.to,
     subject: input.subject,
     html: input.html,
     text: input.text,
     replyTo: input.replyTo,
-  })
+  }
+
+  let info
+
+  try {
+    info = await tx.sendMail(mail)
+  } catch (error: any) {
+    if (!shouldRetryWithStartTls(error, config)) {
+      throw error
+    }
+
+    console.warn('Email send timed out on Gmail port 465; retrying with STARTTLS on port 587.')
+    const fallbackConfig = {
+      ...config,
+      port: 587,
+      secure: false,
+    }
+    const fallbackTx = createTransporter(fallbackConfig)
+    info = await fallbackTx.sendMail(mail)
+  }
 
   console.info('Email sent', {
     to: input.to,
@@ -81,3 +115,5 @@ export async function sendEmail(input: MailInput) {
 
   return { sent: true as const, messageId: info?.messageId }
 }
+
+
