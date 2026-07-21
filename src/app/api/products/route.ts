@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
         const canUseStoreCache = !search && !minPrice && !maxPrice && !featured && !inStock && sortBy === 'createdAt' && !category
 
         if (canUseStoreCache) {
-            const cachedProducts = await getStoreProducts(Math.max(limit * page, limit))
+            const cachedProducts = await getStoreProducts()
             const pagedProducts = cachedProducts.slice((page - 1) * limit, page * limit)
 
             return NextResponse.json({

@@ -4,12 +4,13 @@ import { useEffect, useMemo, useState } from 'react'
 import Image from 'next/image'
 import ProductCard from '@/components/ProductCard'
 import { motion } from 'framer-motion'
-import { Grid, List } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Grid, List } from 'lucide-react'
 import type { StoreProduct } from '@/lib/product-data'
 
 type ProductFilter = 'all' | 'new' | 'best-seller' | 'sale' | 'accessories'
 
 const EMPTY_PRODUCTS: StoreProduct[] = []
+const PRODUCTS_PER_PAGE = 6
 
 type ProductListingPageProps = {
   title: string
@@ -130,6 +131,7 @@ export default function ProductListingPage({ title, description, emptyMessage, f
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [allProducts, setAllProducts] = useState<StoreProduct[]>(products)
   const [isLoading, setIsLoading] = useState(products.length === 0)
+  const [currentPage, setCurrentPage] = useState(1)
   const theme = getTheme(title, category)
 
   useEffect(() => {
@@ -168,6 +170,24 @@ export default function ProductListingPage({ title, description, emptyMessage, f
     () => allProducts.filter((product) => applyFilter(product, filter, category)),
     [allProducts, category, filter]
   )
+  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE))
+  const visibleProducts = useMemo(
+    () => filteredProducts.slice((currentPage - 1) * PRODUCTS_PER_PAGE, currentPage * PRODUCTS_PER_PAGE),
+    [currentPage, filteredProducts]
+  )
+
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [category, filter])
+
+  useEffect(() => {
+    if (currentPage > totalPages) setCurrentPage(totalPages)
+  }, [currentPage, totalPages])
+
+  function changePage(page: number) {
+    setCurrentPage(Math.min(Math.max(page, 1), totalPages))
+    document.getElementById('product-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
 
   return (
     <motion.main
@@ -235,7 +255,7 @@ export default function ProductListingPage({ title, description, emptyMessage, f
         </div>
       </section>
 
-      <section className="px-4 pt-10 sm:px-6 lg:px-8">
+      <section id="product-grid" className="scroll-mt-24 px-4 pt-10 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
           <div className="mb-10 flex flex-col gap-5 border-b border-black/10 pb-7 md:flex-row md:items-center md:justify-between">
             <div>
@@ -276,7 +296,7 @@ export default function ProductListingPage({ title, description, emptyMessage, f
           ) : (
             <div className={`grid gap-8 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
               {filteredProducts.length > 0 ? (
-                filteredProducts.map((product, index) => (
+                visibleProducts.map((product, index) => (
                   <div key={product.id} className="rounded-[2rem] bg-white p-4 shadow-sm shadow-black/5">
                     <ProductCard product={product} index={index} />
                   </div>
@@ -290,6 +310,27 @@ export default function ProductListingPage({ title, description, emptyMessage, f
                 </div>
               )}
             </div>
+          )}
+
+          {!isLoading && filteredProducts.length > PRODUCTS_PER_PAGE && (
+            <nav className="mt-10 flex flex-col items-center gap-4" aria-label="Product pages">
+              <p className="text-sm font-medium text-slate-500">
+                Page {currentPage} of {totalPages} · {filteredProducts.length} products
+              </p>
+              <div className="flex max-w-full items-center gap-2 overflow-x-auto rounded-full border border-black/10 bg-white p-2 shadow-sm">
+                <button type="button" onClick={() => changePage(currentPage - 1)} disabled={currentPage === 1} className="flex h-11 items-center gap-1 rounded-full px-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-35" aria-label="Previous product page">
+                  <ChevronLeft size={18} /> <span className="hidden sm:inline">Previous</span>
+                </button>
+                {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
+                  <button key={page} type="button" onClick={() => changePage(page)} aria-current={page === currentPage ? 'page' : undefined} aria-label={`Go to product page ${page}`} className={`h-11 min-w-11 rounded-full px-3 text-sm font-bold transition ${page === currentPage ? 'bg-slate-950 text-white' : 'text-slate-600 hover:bg-slate-100'}`}>
+                    {page}
+                  </button>
+                ))}
+                <button type="button" onClick={() => changePage(currentPage + 1)} disabled={currentPage === totalPages} className="flex h-11 items-center gap-1 rounded-full px-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-35" aria-label="Next product page">
+                  <span className="hidden sm:inline">Next</span> <ChevronRight size={18} />
+                </button>
+              </div>
+            </nav>
           )}
         </div>
       </section>

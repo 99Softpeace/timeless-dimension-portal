@@ -53,7 +53,7 @@ export function clearStoreProductsCache() {
   productCache = null
 }
 
-export async function getStoreProducts(limit = 200): Promise<StoreProduct[]> {
+export async function getStoreProducts(): Promise<StoreProduct[]> {
   const now = Date.now()
   if (productCache && productCache.expiresAt > now) {
     return productCache.products
@@ -64,7 +64,6 @@ export async function getStoreProducts(limit = 200): Promise<StoreProduct[]> {
     const products = await (Product as any)
       .find({ $or: [{ isActive: true }, { isActive: { $exists: false } }] })
       .sort({ createdAt: -1 })
-      .limit(limit)
       .lean({ virtuals: true })
 
     const normalized = products.map(normalizeProduct).filter((product: StoreProduct) => product.slug)
