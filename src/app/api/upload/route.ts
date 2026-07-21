@@ -4,9 +4,9 @@ import dbConnect from '@/lib/db'
 import { requireAdmin } from '@/lib/auth'
 
 const MAX_IMAGE_UPLOAD_SIZE = 5 * 1024 * 1024
-const MAX_VIDEO_UPLOAD_SIZE = 50 * 1024 * 1024
+const MAX_VIDEO_UPLOAD_SIZE = 100 * 1024 * 1024
 const ALLOWED_IMAGE_MIME_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
-const ALLOWED_VIDEO_MIME_TYPES = new Set(['video/mp4', 'video/webm', 'video/quicktime'])
+const ALLOWED_VIDEO_MIME_TYPES = new Set(['video/mp4', 'video/webm', 'video/quicktime', 'video/x-m4v'])
 
 export const runtime = 'nodejs'
 
@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
         if (mediaFile.size > maxSize) {
             return NextResponse.json({
                 success: false,
-                message: isVideo ? 'Video is too large. Maximum size is 50MB.' : 'Image is too large. Maximum size is 5MB.'
+                message: isVideo ? 'Video is too large. Maximum size is 100MB.' : 'Image is too large. Maximum size is 5MB.'
             }, { status: 400 })
         }
 

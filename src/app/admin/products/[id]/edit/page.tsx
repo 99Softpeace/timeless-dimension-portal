@@ -1,8 +1,9 @@
-﻿'use client'
+'use client'
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { Loader2, Upload, X } from 'lucide-react'
+import { uploadAdminMedia } from '@/lib/admin-media-upload'
 
 const CATEGORIES = [
     'Watches',
@@ -108,21 +109,8 @@ export default function EditProductPage() {
             const uploadedVideos: string[] = []
 
             for (const file of files) {
-                const data = new FormData()
-                data.append('media', file)
 
-                const res = await fetch('/api/upload', {
-                    method: 'POST',
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                    body: data,
-                })
-
-                const result = await res.json()
-                if (!result.success) {
-                    throw new Error(result.error || result.message || `Upload failed for ${file.name}`)
-                }
+                const result = await uploadAdminMedia(file, token)
 
                 if (result.type === 'video') {
                     uploadedVideos.push(result.url)
@@ -258,7 +246,7 @@ export default function EditProductPage() {
                                     <>
                                         <Upload className="h-8 w-8 text-silver mb-2" />
                                         <p className="text-sm text-silver">Upload more images or videos</p>
-                                        <p className="text-xs text-silver/70 mt-1">Images up to 5MB, videos up to 50MB</p>
+                                        <p className="text-xs text-silver/70 mt-1">Images up to 5MB, videos up to 100MB</p>
                                     </>
                                 )}
                             </div>

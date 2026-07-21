@@ -1,8 +1,9 @@
-﻿'use client'
+'use client'
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Upload, X, Loader2 } from 'lucide-react'
+import { uploadAdminMedia } from '@/lib/admin-media-upload'
 
 const CATEGORIES = [
     'Watches',
@@ -42,21 +43,8 @@ export default function NewProductPage() {
             const uploadedVideos: string[] = []
 
             for (const file of files) {
-                const data = new FormData()
-                data.append('media', file)
 
-                const res = await fetch('/api/upload', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: data
-                })
-
-                const result = await res.json()
-                if (!result.success) {
-                    throw new Error(result.error || result.message || `Upload failed for ${file.name}`)
-                }
+                const result = await uploadAdminMedia(file, token)
 
                 if (result.type === 'video') {
                     uploadedVideos.push(result.url)
@@ -71,7 +59,7 @@ export default function NewProductPage() {
                 videos: [...prev.videos, ...uploadedVideos],
             }))
         } catch (error: any) {
-            console.error('Error uploading image:', error)
+            console.error('Error uploading media:', error)
             alert(error?.message || 'Error uploading media')
         } finally {
             setUploading(false)
@@ -186,7 +174,7 @@ export default function NewProductPage() {
                                         <>
                                             <Upload className="h-8 w-8 text-silver mb-2" />
                                             <p className="text-sm text-silver">Click to upload multiple images or videos</p>
-                                            <p className="text-xs text-silver/70 mt-1">Images up to 5MB, videos up to 50MB</p>
+                                            <p className="text-xs text-silver/70 mt-1">Images up to 5MB, videos up to 100MB</p>
                                         </>
                                     )}
                                 </div>
