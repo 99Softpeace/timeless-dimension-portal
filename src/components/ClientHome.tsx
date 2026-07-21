@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
@@ -114,37 +114,64 @@ function AnimatedHeading({ text, initialDelay = 200, charDelay = 30 }: AnimatedH
 }
 
 export default function ClientHome() {
+  const [shouldLoadVideo, setShouldLoadVideo] = useState(false)
+
+  useEffect(() => {
+    const prefersReducedData = 'connection' in navigator && Boolean((navigator as any).connection?.saveData)
+    const isDesktop = window.matchMedia('(min-width: 768px)').matches
+
+    if (!isDesktop || prefersReducedData) return
+
+    const timer = window.setTimeout(() => setShouldLoadVideo(true), 1200)
+    return () => window.clearTimeout(timer)
+  }, [])
+
   return (
     <div className="overflow-x-hidden bg-white">
       <section className="relative min-h-screen overflow-hidden bg-black text-white">
-        <video
-          className="absolute inset-0 h-full w-full object-cover"
-          src={heroVideoUrl}
-          autoPlay
-          loop
-          muted
-          playsInline
-          preload="auto"
-          aria-hidden="true"
+        <Image
+          src="/assets/images/editorial/model1.jpg"
+          alt="Senator watches and fashion editorial"
+          fill
+          className="object-cover"
+          priority
+          sizes="100vw"
         />
+        {shouldLoadVideo && (
+          <video
+            className="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-700 data-[ready=true]:opacity-100"
+            src={heroVideoUrl}
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="metadata"
+            poster="/assets/images/editorial/model1.jpg"
+            aria-hidden="true"
+            onCanPlay={(event) => {
+              event.currentTarget.dataset.ready = 'true'
+            }}
+          />
+        )}
+        <div className="absolute inset-0 bg-black/35" />
 
         <div className="relative z-10 flex min-h-screen items-center justify-center px-6 pb-12 pt-32 md:px-12 lg:px-16">
           <div className="mx-auto flex max-w-6xl flex-col items-center text-center">
-            <FadeIn delay={100} duration={700}>
+            <FadeIn delay={0} duration={350}>
               <p className="mb-7 font-mono text-xs uppercase tracking-[0.35em] text-white/80">
                 Senator Watches
               </p>
             </FadeIn>
 
-            <AnimatedHeading text={`Shaping style\nwith timeless watches.`} />
+            <AnimatedHeading text={`Shaping style\nwith timeless watches.`} initialDelay={0} charDelay={8} />
 
-            <FadeIn delay={1200} duration={900} className="mx-auto mt-8 max-w-2xl">
+            <FadeIn delay={120} duration={350} className="mx-auto mt-8 max-w-2xl">
               <p className="text-lg font-light leading-relaxed text-white/85 md:text-xl">
                 Discover signature watches and refined accessories selected for presence, precision, and the way you arrive.
               </p>
             </FadeIn>
 
-            <FadeIn delay={1450} duration={900} className="mt-9 flex w-full flex-col items-center gap-6">
+            <FadeIn delay={180} duration={350} className="mt-9 flex w-full flex-col items-center gap-6">
               <p className="max-w-xl text-center text-xs uppercase tracking-[0.28em] text-white/70 sm:text-sm">
                 Watches. Bags. Clothes. Belts. Eyeglasses.
               </p>
@@ -202,7 +229,6 @@ export default function ClientHome() {
               fill
               className="object-cover"
               sizes="100vw"
-              priority
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
             <p className="absolute left-4 top-4 z-10 max-w-[230px] text-xs font-semibold leading-5 text-white md:left-7 md:top-7 md:max-w-[330px] md:text-sm">
