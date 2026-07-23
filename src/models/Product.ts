@@ -21,6 +21,9 @@ export interface IProduct {
   numReviews?: number
   createdAt?: Date
   updatedAt?: Date
+  newArrivalEmailQueuedAt?: Date
+  newArrivalEmailProcessingAt?: Date
+  newArrivalEmailSentAt?: Date
 }
 
 const productSchema = new Schema<IProduct>(
@@ -102,6 +105,9 @@ const productSchema = new Schema<IProduct>(
       type: Number,
       default: 0,
     },
+    newArrivalEmailQueuedAt: Date,
+    newArrivalEmailProcessingAt: Date,
+    newArrivalEmailSentAt: Date,
   },
   {
     timestamps: true,
@@ -193,7 +199,8 @@ function getProductModel() {
   const hasMediaPath = Boolean((existingModel as any).schema?.path('videos'))
   const hasColorsPath = Boolean((existingModel as any).schema?.path('colors'))
   const hasFeaturedStatic = typeof (existingModel as any).findFeatured === 'function'
-  if (!hasSlugPath || !hasIsActivePath || !hasMediaPath || !hasColorsPath || !hasFeaturedStatic) {
+  const hasNewArrivalEmailFields = Boolean((existingModel as any).schema?.path('newArrivalEmailQueuedAt'))
+  if (!hasSlugPath || !hasIsActivePath || !hasMediaPath || !hasColorsPath || !hasFeaturedStatic || !hasNewArrivalEmailFields) {
     delete (mongoose.models as any).Product
     return mongoose.model<IProduct>('Product', productSchema)
   }
@@ -204,5 +211,3 @@ function getProductModel() {
 const Product: Model<IProduct> = getProductModel()
 
 export default Product
-
-

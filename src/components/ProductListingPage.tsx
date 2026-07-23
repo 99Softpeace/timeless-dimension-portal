@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import Image from 'next/image'
 import ProductCard from '@/components/ProductCard'
 import { motion } from 'framer-motion'
-import { ChevronLeft, ChevronRight, Grid, List } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Grid, List, Search, X } from 'lucide-react'
 import type { StoreProduct } from '@/lib/product-data'
 
 type ProductFilter = 'all' | 'new' | 'best-seller' | 'sale' | 'accessories'
@@ -132,6 +132,8 @@ export default function ProductListingPage({ title, description, emptyMessage, f
   const [allProducts, setAllProducts] = useState<StoreProduct[]>(products)
   const [isLoading, setIsLoading] = useState(products.length === 0)
   const [currentPage, setCurrentPage] = useState(1)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [sortBy, setSortBy] = useState<'newest' | 'name-asc' | 'name-desc' | 'price-asc' | 'price-desc'>('newest')
   const theme = getTheme(title, category)
 
   useEffect(() => {
@@ -166,10 +168,21 @@ export default function ProductListingPage({ title, description, emptyMessage, f
     }
   }, [products])
 
-  const filteredProducts = useMemo(
-    () => allProducts.filter((product) => applyFilter(product, filter, category)),
-    [allProducts, category, filter]
-  )
+  const filteredProducts = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase()
+    const matches = allProducts.filter((product) =>
+      applyFilter(product, filter, category) &&
+      (!query || product.name.toLowerCase().includes(query) || product.category.toLowerCase().includes(query))
+    )
+
+    return [...matches].sort((a, b) => {
+      if (sortBy === 'name-asc') return a.name.localeCompare(b.name)
+      if (sortBy === 'name-desc') return b.name.localeCompare(a.name)
+      if (sortBy === 'price-asc') return a.price - b.price
+      if (sortBy === 'price-desc') return b.price - a.price
+      return 0
+    })
+  }, [allProducts, category, filter, searchQuery, sortBy])
   const totalPages = Math.max(1, Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE))
   const visibleProducts = useMemo(
     () => filteredProducts.slice((currentPage - 1) * PRODUCTS_PER_PAGE, currentPage * PRODUCTS_PER_PAGE),
@@ -178,7 +191,7 @@ export default function ProductListingPage({ title, description, emptyMessage, f
 
   useEffect(() => {
     setCurrentPage(1)
-  }, [category, filter])
+  }, [category, filter, searchQuery, sortBy])
 
   useEffect(() => {
     if (currentPage > totalPages) setCurrentPage(totalPages)
@@ -263,7 +276,43 @@ export default function ProductListingPage({ title, description, emptyMessage, f
               <h2 className="mt-3 text-3xl font-black tracking-tight text-slate-950 md:text-5xl">Shop {title}</h2>
             </div>
 
-            <div className="flex w-fit rounded-full border border-black/10 bg-white p-1 shadow-sm">
+            <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
+              <label className="relative block w-full sm:w-72">
+                <span className="sr-only">Search this collection</span>
+                <Search size={18} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="text"
+                  inputMode="search"
+                  value={searchQuery}
+                  onChange={(event) => setSearchQuery(event.target.value)}
+                  placeholder={`Search ${title.toLowerCase()}`}
+                  className="h-12 w-full rounded-full border border-black/10 bg-white pl-11 pr-11 text-sm font-medium text-slate-900 shadow-sm outline-none placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-black/5"
+                />
+                {searchQuery && (
+                  <button type="button" onClick={() => setSearchQuery('')} aria-label="Clear search" className="absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-900">
+                    <X size={16} />
+                  </button>
+                )}
+              </label>
+
+              <label className="relative block w-full sm:w-52">
+                <span className="sr-only">Sort products</span>
+                <select
+                  value={sortBy}
+                  onChange={(event) => setSortBy(event.target.value as typeof sortBy)}
+                  className="h-12 w-full cursor-pointer appearance-none rounded-full border border-black/10 bg-white px-5 pr-10 text-sm font-semibold text-slate-700 shadow-sm outline-none focus:border-slate-400 focus:ring-4 focus:ring-black/5"
+                  aria-label="Sort products"
+                >
+                  <option value="newest">Newest first</option>
+                  <option value="name-asc">Name: A to Z</option>
+                  <option value="name-desc">Name: Z to A</option>
+                  <option value="price-asc">Price: Low to high</option>
+                  <option value="price-desc">Price: High to low</option>
+                </select>
+                <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-slate-400">▼</span>
+              </label>
+
+              <div className="flex w-fit rounded-full border border-black/10 bg-white p-1 shadow-sm">
               <button
                 type="button"
                 onClick={() => setViewMode('grid')}
@@ -280,6 +329,7 @@ export default function ProductListingPage({ title, description, emptyMessage, f
               >
                 <List size={18} /> List
               </button>
+              </div>
             </div>
           </div>
 
@@ -303,10 +353,24 @@ export default function ProductListingPage({ title, description, emptyMessage, f
                 ))
               ) : (
                 <div className="col-span-full rounded-[2rem] border border-black/10 bg-white px-6 py-20 text-center shadow-sm">
-                  <p className="text-xl font-semibold text-slate-900">{emptyMessage}</p>
-                  <p className="mx-auto mt-3 max-w-md text-sm text-slate-500">
-                    Once products are uploaded from the admin backend, they will appear here automatically.
-                  </p>
+                  {searchQuery.trim() ? (
+                    <>
+                      <p className="text-xl font-semibold text-slate-900">No matching products found</p>
+                      <p className="mx-auto mt-3 max-w-md text-sm text-slate-500">
+                        We couldn’t find “{searchQuery.trim()}” in {title}. Try another product name or browse the full collection.
+                      </p>
+                      <button type="button" onClick={() => setSearchQuery('')} className="mt-6 rounded-full bg-slate-950 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-800">
+                        Clear search
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-xl font-semibold text-slate-900">This collection is coming soon</p>
+                      <p className="mx-auto mt-3 max-w-md text-sm text-slate-500">
+                        We're curating something special for this collection. Please check back soon for new pieces.
+                      </p>
+                    </>
+                  )}
                 </div>
               )}
             </div>
@@ -337,4 +401,3 @@ export default function ProductListingPage({ title, description, emptyMessage, f
     </motion.main>
   )
 }
-

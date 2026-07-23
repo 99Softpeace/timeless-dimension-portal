@@ -30,9 +30,9 @@ export default function Header() {
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-50 px-6 pt-6 md:px-12 lg:px-16">
-        <div className="liquid-glass rounded-xl px-4 py-2 flex items-center justify-between text-white">
-          <Link href="/" className="relative z-10 text-2xl font-semibold tracking-tight">
+      <header className="fixed top-0 left-0 right-0 z-50 px-3 pt-3 sm:px-6 sm:pt-6 md:px-12 lg:px-16">
+        <div className="liquid-glass flex items-center justify-between rounded-xl px-3 py-2 text-white sm:px-4">
+          <Link href="/" className="relative z-10 text-xl font-semibold tracking-tight sm:text-2xl">
             SENATOR
           </Link>
 
@@ -45,7 +45,7 @@ export default function Header() {
 
           </nav>
 
-          <div className="relative z-10 flex items-center gap-4">
+          <div className="relative z-10 flex shrink-0 items-center gap-2 sm:gap-3 lg:gap-4">
             {user ? (
               <div className="hidden sm:flex items-center gap-4">
                 <Link href="/orders" className="text-sm font-medium text-white/85 transition-colors hover:text-white">
@@ -137,4 +137,3 @@ export default function Header() {
     </>
   )
 }
-

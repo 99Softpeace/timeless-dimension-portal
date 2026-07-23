@@ -153,18 +153,20 @@ export async function POST(req: NextRequest) {
             stockQuantity,
             inStock: stockQuantity > 0,
             isFeatured,
-            isNew,
+            isNew: true,
             isBestSeller,
             ...(discount !== undefined && !Number.isNaN(discount) ? { discount } : {}),
-            isActive: true
+            isActive: true,
+            newArrivalEmailQueuedAt: new Date()
         })
 
         await product.save()
         clearStoreProductsCache()
+
         return NextResponse.json({
             success: true,
             data: product,
-            message: 'Product created successfully'
+            message: 'Product created successfully and queued for the next new-arrivals email.'
         }, { status: 201 })
     } catch (error: any) {
         console.error('Error creating product:', error)
@@ -311,4 +313,3 @@ export async function DELETE(req: NextRequest) {
         }, { status: 500 })
     }
 }
-
