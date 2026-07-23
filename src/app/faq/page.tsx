@@ -1,86 +1,14 @@
 'use client'
-
 import { useState } from 'react'
-import { Plus, Minus } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
-
-const faqs = [
-    {
-        question: "Do you offer nationwide delivery?",
-        answer: "Yes, we deliver bags, clothes, belts, eyeglasses, watches, and accessories to all states within Nigeria. Delivery times vary by location but typically take 2-5 business days."
-    },
-    {
-        question: "Are your products authentic?",
-        answer: "Absolutely. We only list products selected by Senator Accessories, and each item is checked before it is offered for sale."
-    },
-    {
-        question: "What is your return policy?",
-        answer: "We offer a 7-day return policy for eligible items in their original, unused condition. Please visit our Returns page for full details."
-    },
-    {
-        question: "How do I track my order?",
-        answer: "Once your order is shipped, you will receive a tracking number via email and SMS. You can also view your order status from your account."
-    },
-    {
-        question: "Do you offer warranty or after-sales support?",
-        answer: "Yes. Warranty and support depend on the product type and brand. Product-specific warranty details can be confirmed before purchase."
-    },
-    {
-        question: "Can I request help choosing an item?",
-        answer: "Yes. Contact our concierge team for help choosing bags, outfits, belts, frames, watches, and accessories for your occasion."
-    }
+import { ChevronDown, MessageCircle } from 'lucide-react'
+import { AnimatePresence, motion } from 'framer-motion'
+import Link from 'next/link'
+const faqs=[
+ {question:'Do you deliver nationwide?',answer:'Yes. We deliver to all states in Nigeria and the FCT. Lagos orders typically arrive in 1–2 business days, while other locations generally take 2–5 business days.'},
+ {question:'How will I know my order status?',answer:'You receive email updates when payment is confirmed and whenever your order moves through processing, shipping, and delivery. Logged-in customers can also check My Orders.'},
+ {question:'What is the return policy?',answer:'Eligible unused items can be submitted for return within seven days of delivery. Original packaging, tags, protective materials, and accessories must remain intact.'},
+ {question:'Can I pay on delivery?',answer:'Pay on delivery is available when shown during checkout. You can also pay securely online through Flutterwave.'},
+ {question:'How do I choose the right size?',answer:'Use the Size Guide for clothes, belts, eyeglasses, and watches. Contact us with the product name if you need help before ordering.'},
+ {question:'Do products include warranty support?',answer:'Warranty and after-sales support depend on the product type, brand, and condition. Contact us before purchase to confirm coverage for a specific item.'}
 ]
-
-export default function FAQPage() {
-    const [openIndex, setOpenIndex] = useState<number | null>(0)
-
-    return (
-        <div className="min-h-screen pt-24 pb-16 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-3xl mx-auto space-y-12">
-                <div className="text-center space-y-4">
-                    <h1 className="text-4xl md:text-5xl font-display font-bold text-gradient">
-                        Frequently Asked Questions
-                    </h1>
-                    <p className="text-silver-dark text-lg">
-                        Find answers to common questions about our products, delivery, and support.
-                    </p>
-                </div>
-
-                <div className="space-y-4">
-                    {faqs.map((faq, index) => (
-                        <div
-                            key={index}
-                            className="glass rounded-xl overflow-hidden border border-glass-border"
-                        >
-                            <button
-                                onClick={() => setOpenIndex(openIndex === index ? null : index)}
-                                className="w-full flex items-center justify-between p-6 text-left hover:bg-midnight-3 transition-colors"
-                            >
-                                <span className="font-semibold text-silver">{faq.question}</span>
-                                {openIndex === index ? (
-                                    <Minus className="text-teal" size={20} />
-                                ) : (
-                                    <Plus className="text-teal" size={20} />
-                                )}
-                            </button>
-                            <AnimatePresence>
-                                {openIndex === index && (
-                                    <motion.div
-                                        initial={{ height: 0, opacity: 0 }}
-                                        animate={{ height: 'auto', opacity: 1 }}
-                                        exit={{ height: 0, opacity: 0 }}
-                                        transition={{ duration: 0.3 }}
-                                    >
-                                        <div className="px-6 pb-6 text-silver-dark leading-relaxed border-t border-glass-border/50 pt-4">
-                                            {faq.answer}
-                                        </div>
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
-                        </div>
-                    ))}
-                </div>
-            </div>
-        </div>
-    )
-}
+export default function FAQPage(){const[open,setOpen]=useState<number|null>(0);return <main className="min-h-screen bg-[#f6f2ec] px-3 pb-20 pt-24 sm:px-6 sm:pt-28 lg:px-8"><div className="mx-auto max-w-5xl"><section className="rounded-[2rem] bg-slate-950 px-6 py-16 text-white sm:px-12 md:rounded-[3rem] md:py-20"><p className="font-mono text-xs font-semibold uppercase tracking-[.3em] text-teal-300">Help centre</p><h1 className="mt-5 text-5xl font-black leading-none tracking-[-.05em] sm:text-7xl">Questions, answered.</h1><p className="mt-7 max-w-xl leading-7 text-slate-300">Everything you need to know about ordering, delivery, payment, returns, and product support.</p></section><section className="space-y-3 py-8 md:py-10">{faqs.map((faq,index)=><article key={faq.question} className="overflow-hidden rounded-2xl border border-black/5 bg-white shadow-sm"><button type="button" onClick={()=>setOpen(open===index?null:index)} className="flex w-full items-center justify-between gap-5 px-5 py-5 text-left sm:px-7"><span className="text-base font-bold text-slate-950 sm:text-lg">{faq.question}</span><ChevronDown className={`shrink-0 text-teal-700 transition-transform ${open===index?'rotate-180':''}`} size={20}/></button><AnimatePresence initial={false}>{open===index&&<motion.div initial={{height:0,opacity:0}} animate={{height:'auto',opacity:1}} exit={{height:0,opacity:0}}><p className="border-t border-slate-100 px-5 py-5 leading-7 text-slate-600 sm:px-7">{faq.answer}</p></motion.div>}</AnimatePresence></article>)}</section><section className="flex flex-col items-start justify-between gap-5 rounded-[1.75rem] bg-teal-700 p-7 text-white sm:flex-row sm:items-center sm:p-9"><div><h2 className="text-2xl font-bold">Still need help?</h2><p className="mt-2 text-teal-50">Our team can help with a product or an existing order.</p></div><Link href="/contact" className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 font-semibold text-slate-950"><MessageCircle size={18}/>Contact us</Link></section></div></main>}

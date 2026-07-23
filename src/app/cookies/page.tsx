@@ -1,49 +1,8 @@
-import { Cookie, Settings, ShieldCheck } from 'lucide-react'
-
-export default function CookiesPage() {
-    return (
-        <div className="min-h-screen pt-24 pb-16 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-4xl mx-auto space-y-12">
-                <div className="text-center space-y-4">
-                    <h1 className="text-4xl md:text-5xl font-display font-bold text-gradient">
-                        Cookie Policy
-                    </h1>
-                    <p className="text-silver-dark text-lg">
-                        Understanding how we use cookies to improve your experience.
-                    </p>
-                </div>
-
-                <div className="space-y-8">
-                    <div className="glass p-8 rounded-2xl space-y-6">
-                        <h2 className="text-2xl font-bold text-silver flex items-center gap-3">
-                            <Cookie className="text-teal" /> What Are Cookies?
-                        </h2>
-                        <p className="text-silver-dark leading-relaxed">
-                            Cookies are small text files that are stored on your device when you visit a website. They help the website function properly, remember your preferences, and track usage patterns to improve performance.
-                        </p>
-                    </div>
-
-                    <div className="glass p-8 rounded-2xl space-y-6">
-                        <h2 className="text-2xl font-bold text-silver flex items-center gap-3">
-                            <Settings className="text-teal" /> How We Use Cookies
-                        </h2>
-                        <ul className="list-disc list-inside space-y-2 text-silver-dark pl-4">
-                            <li>To remember your login status and shopping cart contents.</li>
-                            <li>To understand how you use our website and identify areas for improvement.</li>
-                            <li>To deliver personalized content and advertisements.</li>
-                        </ul>
-                    </div>
-
-                    <div className="glass p-8 rounded-2xl space-y-6">
-                        <h2 className="text-2xl font-bold text-silver flex items-center gap-3">
-                            <ShieldCheck className="text-teal" /> Managing Cookies
-                        </h2>
-                        <p className="text-silver-dark leading-relaxed">
-                            You can choose to disable cookies through your browser settings. However, please note that some features of our website may not function correctly if cookies are disabled.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    )
-}
+import { Cookie, Settings, ShieldCheck, ToggleLeft } from 'lucide-react'
+import InfoPage from '@/components/InfoPage'
+export default function CookiesPage(){return <InfoPage eyebrow="Cookie policy" title="Small files, useful functions." intro="Cookies and browser storage help the store remember essential information and provide a smoother shopping experience." sections={[
+ {title:'What cookies are',icon:Cookie,content:<p>Cookies are small pieces of data stored by your browser. Similar browser storage may also be used to remember your session, preferences, and cart.</p>},
+ {title:'Essential functions',icon:ShieldCheck,content:<p>Essential storage supports sign-in, security, checkout, and cart recovery. Disabling it may prevent important parts of the store from working correctly.</p>},
+ {title:'Performance',icon:Settings,content:<p>Where enabled, performance information helps us understand page reliability and improve navigation without selling your personal information.</p>},
+ {title:'Your controls',icon:ToggleLeft,content:<p>You can remove or block cookies in your browser settings. Your browser’s privacy controls explain how to manage stored website data.</p>}
+ ]} note={<p>Continuing to use essential store features requires the browser storage necessary for those features to function.</p>}/>}
