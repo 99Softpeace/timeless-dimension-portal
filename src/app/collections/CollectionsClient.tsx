@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useMemo } from 'react'
 import { motion } from 'framer-motion'
@@ -8,6 +8,15 @@ import ProductCard from '@/components/ProductCard'
 import { ArrowRight } from 'lucide-react'
 import type { StoreProduct } from '@/lib/product-data'
 const collections = [
+  {
+    id: 'shoes',
+    name: 'Shoes & Sneakers',
+    subtitle: 'Every step, considered.',
+    description: 'Statement sneakers, smart shoes, and everyday footwear curated for comfort, polish, and presence.',
+    image: '/assets/images/shoes-hero.jpg',
+    categories: ['shoes', 'shoe', 'footwear', 'sneakers', 'sneaker'],
+    href: '/shoes',
+  },
   {
     id: 'bags',
     name: 'Bags & Carry',
@@ -75,7 +84,7 @@ export default function CollectionsClient({ products }: CollectionsClientProps) 
           transition={{ delay: 0.2 }}
           className="text-xl text-slate-600 font-light leading-relaxed"
         >
-          Explore bags, clothes, belts, eyeglasses, watches, jewelry, and accessories grouped from the products uploaded in the admin dashboard.
+          Explore shoes, bags, clothes, belts, eyeglasses, watches, jewelry, and accessories grouped from the products uploaded in the admin dashboard.
         </motion.p>
       </div>
 

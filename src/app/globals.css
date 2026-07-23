@@ -24,6 +24,10 @@ svg {
   overflow: hidden;
 }
 
+.header-glass {
+  overflow: visible;
+}
+
 .liquid-glass::before {
   content: '';
   position: absolute;

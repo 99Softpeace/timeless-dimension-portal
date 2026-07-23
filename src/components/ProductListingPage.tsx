@@ -20,6 +20,7 @@ type ProductListingPageProps = {
   category?: string
   products?: StoreProduct[]
   heroImage?: string
+  gender?: 'men' | 'women'
 }
 
 const categoryThemes: Record<string, { eyebrow: string; accent: string; bg: string; text: string; imagePosition: string }> = {
@@ -58,6 +59,13 @@ const categoryThemes: Record<string, { eyebrow: string; accent: string; bg: stri
     text: 'text-orange-50',
     imagePosition: 'object-center',
   },
+  shoes: {
+    eyebrow: 'Footwear With Character',
+    accent: 'from-orange-300/40 via-amber-900/15 to-transparent',
+    bg: 'bg-[#1d0c05]',
+    text: 'text-orange-50',
+    imagePosition: 'object-center',
+  },
   default: {
     eyebrow: 'Curated Collection',
     accent: 'from-teal-300/30 via-white/10 to-transparent',
@@ -89,6 +97,7 @@ function normalizeClientProduct(product: any): StoreProduct | null {
     price: Number(product.price || 0),
     image: product.image || product.images?.[0] || '/assets/images/heritage-classic-v2.png',
     category: String(product.category || 'Uncategorized'),
+    gender: ['men', 'women', 'unisex'].includes(product.gender) ? product.gender : 'unisex',
     isNew: Boolean(product.isNew),
     isBestSeller: Boolean(product.isBestSeller),
     isFeatured: Boolean(product.isFeatured),
@@ -104,12 +113,14 @@ function categoryMatches(productCategory: string, targetCategory: string) {
   if (target === 'clothes') return category.includes('cloth') || category.includes('wear') || category.includes('apparel')
   if (target === 'belts') return category.includes('belt')
   if (target === 'eyeglasses') return category.includes('eyeglass') || category.includes('glass') || category.includes('frame')
+  if (target === 'shoes') return category.includes('shoe') || category.includes('footwear') || category.includes('sneaker')
   return category.includes(target)
 }
 
-function applyFilter(product: StoreProduct, filter?: ProductFilter, category?: string) {
+function applyFilter(product: StoreProduct, filter?: ProductFilter, category?: string, gender?: 'men' | 'women') {
   const productCategory = product.category.toLowerCase()
-  if (category) return categoryMatches(productCategory, category)
+  if (category && !categoryMatches(productCategory, category)) return false
+  if (gender && product.gender !== gender) return false
   if (filter === 'new') return product.isNew
   if (filter === 'best-seller') return product.isBestSeller
   if (filter === 'sale') return Number(product.discount || 0) > 0
@@ -124,10 +135,11 @@ function getTheme(title: string, category?: string) {
   if (key.includes('cloth')) return categoryThemes.clothes
   if (key.includes('belt')) return categoryThemes.belts
   if (key.includes('eyeglass') || key.includes('glass')) return categoryThemes.eyeglasses
+  if (key.includes('shoe') || key.includes('footwear') || key.includes('sneaker')) return categoryThemes.shoes
   return categoryThemes.default
 }
 
-export default function ProductListingPage({ title, description, emptyMessage, filter = 'all', category, products = EMPTY_PRODUCTS, heroImage }: ProductListingPageProps) {
+export default function ProductListingPage({ title, description, emptyMessage, filter = 'all', category, products = EMPTY_PRODUCTS, heroImage, gender }: ProductListingPageProps) {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [allProducts, setAllProducts] = useState<StoreProduct[]>(products)
   const [isLoading, setIsLoading] = useState(products.length === 0)
@@ -171,7 +183,7 @@ export default function ProductListingPage({ title, description, emptyMessage, f
   const filteredProducts = useMemo(() => {
     const query = searchQuery.trim().toLowerCase()
     const matches = allProducts.filter((product) =>
-      applyFilter(product, filter, category) &&
+      applyFilter(product, filter, category, gender) &&
       (!query || product.name.toLowerCase().includes(query) || product.category.toLowerCase().includes(query))
     )
 
@@ -182,7 +194,7 @@ export default function ProductListingPage({ title, description, emptyMessage, f
       if (sortBy === 'price-desc') return b.price - a.price
       return 0
     })
-  }, [allProducts, category, filter, searchQuery, sortBy])
+  }, [allProducts, category, filter, gender, searchQuery, sortBy])
   const totalPages = Math.max(1, Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE))
   const visibleProducts = useMemo(
     () => filteredProducts.slice((currentPage - 1) * PRODUCTS_PER_PAGE, currentPage * PRODUCTS_PER_PAGE),
@@ -191,7 +203,7 @@ export default function ProductListingPage({ title, description, emptyMessage, f
 
   useEffect(() => {
     setCurrentPage(1)
-  }, [category, filter, searchQuery, sortBy])
+  }, [category, filter, gender, searchQuery, sortBy])
 
   useEffect(() => {
     if (currentPage > totalPages) setCurrentPage(totalPages)
@@ -236,12 +248,18 @@ export default function ProductListingPage({ title, description, emptyMessage, f
             </div>
 
             <div className="grid items-end gap-8 lg:grid-cols-[1.2fr_0.8fr]">
+              {category && (
+                <div className="absolute left-10 top-28 hidden gap-2 md:flex lg:left-14">
+                  <a href={`/${category.toLowerCase()}/men`} className={`flex-1 rounded-full px-4 py-2.5 text-center text-sm font-bold backdrop-blur-md transition md:flex-none ${gender === 'men' ? 'bg-white text-black' : 'border border-white/30 bg-black/20 text-white hover:bg-white/20'}`}>Men</a>
+                  <a href={`/${category.toLowerCase()}/women`} className={`flex-1 rounded-full px-4 py-2.5 text-center text-sm font-bold backdrop-blur-md transition md:flex-none ${gender === 'women' ? 'bg-white text-black' : 'border border-white/30 bg-black/20 text-white hover:bg-white/20'}`}>Women</a>
+                </div>
+              )}
               <div className="space-y-6">
                 <motion.h1
                   initial={{ opacity: 0, y: 24 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-                  className={`max-w-5xl text-[clamp(4rem,12vw,10rem)] font-black leading-[0.82] tracking-[-0.07em] ${theme.text}`}
+                  className={`max-w-5xl text-[clamp(3rem,15vw,10rem)] sm:text-[clamp(4rem,12vw,10rem)] font-black leading-[0.82] tracking-[-0.07em] ${theme.text}`}
                 >
                   {title}
                 </motion.h1>
@@ -275,6 +293,13 @@ export default function ProductListingPage({ title, description, emptyMessage, f
               <p className="font-mono text-xs uppercase tracking-[0.28em] text-slate-500">Browse Products</p>
               <h2 className="mt-3 text-3xl font-black tracking-tight text-slate-950 md:text-5xl">Shop {title}</h2>
             </div>
+
+            {category && (
+              <nav className="flex w-full items-center gap-1 rounded-full border border-black/10 bg-white p-1 shadow-sm md:hidden" aria-label={`${category} audience`}>
+                <a href={`/${category.toLowerCase()}/men`} className={`flex-1 rounded-full px-3 py-2.5 text-center text-sm font-semibold ${gender === 'men' ? 'bg-slate-950 text-white' : 'text-slate-500'}`}>Men</a>
+                <a href={`/${category.toLowerCase()}/women`} className={`flex-1 rounded-full px-3 py-2.5 text-center text-sm font-semibold ${gender === 'women' ? 'bg-slate-950 text-white' : 'text-slate-500'}`}>Women</a>
+              </nav>
+            )}
 
             <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
               <label className="relative block w-full sm:w-72">

@@ -35,6 +35,7 @@ export default function Footer() {
             <h4 className="font-mono text-xs uppercase tracking-widest text-slate-500">[01] Shop</h4>
             <ul className="space-y-4">
               <li><Link href="/watches" className="hover:underline decoration-1 underline-offset-4">Watches</Link></li>
+              <li><Link href="/shoes" className="hover:underline decoration-1 underline-offset-4">Shoes</Link></li>
               <li><Link href="/bags" className="hover:underline decoration-1 underline-offset-4">Bags</Link></li>
               <li><Link href="/clothes" className="hover:underline decoration-1 underline-offset-4">Clothes</Link></li>
               <li><Link href="/belts" className="hover:underline decoration-1 underline-offset-4">Belts</Link></li>

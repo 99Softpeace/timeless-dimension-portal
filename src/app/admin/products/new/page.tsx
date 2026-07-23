@@ -7,6 +7,7 @@ import { uploadAdminMedia } from '@/lib/admin-media-upload'
 
 const CATEGORIES = [
     'Watches',
+    'Shoes',
     'Bags',
     'Clothes',
     'Belts',
@@ -24,6 +25,7 @@ export default function NewProductPage() {
         description: '',
         price: '',
         category: 'Accessories',
+        gender: 'unisex' as 'men' | 'women' | 'unisex',
         stock: '',
         images: [] as string[],
         videos: [] as string[],
@@ -94,6 +96,7 @@ export default function NewProductPage() {
                     name: formData.name,
                     description: formData.description,
                     category: formData.category,
+                    gender: formData.gender,
                     images: formData.images,
                     videos: formData.videos,
                     colors: formData.colors.split(',').map((color) => color.trim()).filter(Boolean),
@@ -216,6 +219,19 @@ export default function NewProductPage() {
                                 <option key={cat} value={cat}>{cat}</option>
                             ))}
                         </select>
+                    </div>
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium text-silver">Audience</label>
+                        <select
+                            value={formData.gender}
+                            onChange={(e) => setFormData({ ...formData, gender: e.target.value as 'men' | 'women' | 'unisex' })}
+                            className="w-full bg-midnight/50 border border-glass-border rounded-lg px-4 py-2 text-white focus:outline-none focus:border-teal transition-colors"
+                        >
+                            <option value="unisex">Unisex / Everyone</option>
+                            <option value="men">Men</option>
+                            <option value="women">Women</option>
+                        </select>
+                        <p className="text-xs text-silver/60">Controls which Men or Women collection page displays this product.</p>
                     </div>
                 </div>
 

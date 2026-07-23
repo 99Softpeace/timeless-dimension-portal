@@ -6,6 +6,7 @@ export interface IProduct {
   description: string
   price: number
   category: string
+  gender?: 'men' | 'women' | 'unisex'
   images: string[]
   videos?: string[]
   colors?: string[]
@@ -49,6 +50,12 @@ const productSchema = new Schema<IProduct>(
     category: {
       type: String,
       required: true,
+    },
+    gender: {
+      type: String,
+      enum: ['men', 'women', 'unisex'],
+      default: 'unisex',
+      index: true,
     },
     slug: {
       type: String,
@@ -202,6 +209,7 @@ function getProductModel() {
     return mongoose.model<IProduct>('Product', productSchema)
   }
 
+  const hasGenderPath = Boolean((existingModel as any).schema?.path('gender'))
   const hasSlugPath = Boolean((existingModel as any).schema?.path('slug'))
   const hasIsActivePath = Boolean((existingModel as any).schema?.path('isActive'))
   const hasMediaPath = Boolean((existingModel as any).schema?.path('videos'))
@@ -209,7 +217,7 @@ function getProductModel() {
   const hasFeaturedStatic = typeof (existingModel as any).findFeatured === 'function'
   const hasNewArrivalEmailFields = Boolean((existingModel as any).schema?.path('newArrivalEmailQueuedAt'))
   const hasScheduledSaleFields = Boolean((existingModel as any).schema?.path('scheduledDiscount'))
-  if (!hasSlugPath || !hasIsActivePath || !hasMediaPath || !hasColorsPath || !hasFeaturedStatic || !hasNewArrivalEmailFields || !hasScheduledSaleFields) {
+  if (!hasGenderPath || !hasSlugPath || !hasIsActivePath || !hasMediaPath || !hasColorsPath || !hasFeaturedStatic || !hasNewArrivalEmailFields || !hasScheduledSaleFields) {
     delete (mongoose.models as any).Product
     return mongoose.model<IProduct>('Product', productSchema)
   }

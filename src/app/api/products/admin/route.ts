@@ -49,6 +49,8 @@ function normalizeProductPayload(body: any) {
     const name = String(body?.name || '').trim()
     const description = String(body?.description || '').trim()
     const category = String(body?.category || '').trim()
+    const genderValue = String(body?.gender || 'unisex').toLowerCase()
+    const gender = ['men', 'women', 'unisex'].includes(genderValue) ? genderValue : 'unisex'
     const price = Number(body?.price)
     const stockQuantity = Number(body?.stockQuantity ?? body?.stock ?? 0)
 
@@ -56,6 +58,7 @@ function normalizeProductPayload(body: any) {
         name,
         description,
         category,
+        gender,
         price,
         stockQuantity: Number.isNaN(stockQuantity) ? 0 : stockQuantity,
         images: normalizeMediaList(body?.images),
@@ -116,6 +119,7 @@ export async function POST(req: NextRequest) {
             name,
             description,
             category,
+            gender,
             price,
             stockQuantity,
             images,
@@ -151,6 +155,7 @@ export async function POST(req: NextRequest) {
             name,
             description,
             category,
+            gender,
             price,
             slug,
             images,
@@ -207,6 +212,7 @@ export async function PUT(req: NextRequest) {
             name,
             description,
             category,
+            gender,
             price,
             stockQuantity,
             images,
@@ -249,6 +255,7 @@ export async function PUT(req: NextRequest) {
             name,
             description,
             category,
+            gender,
             price,
             slug: nextSlug,
             images,
