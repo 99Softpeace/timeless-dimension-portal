@@ -35,6 +35,10 @@ export default function Footer() {
             <h4 className="font-mono text-xs uppercase tracking-widest text-slate-500">[01] Shop</h4>
             <ul className="space-y-4">
               <li><Link href="/watches" className="hover:underline decoration-1 underline-offset-4">Watches</Link></li>
+              <li><Link href="/bags" className="hover:underline decoration-1 underline-offset-4">Bags</Link></li>
+              <li><Link href="/clothes" className="hover:underline decoration-1 underline-offset-4">Clothes</Link></li>
+              <li><Link href="/belts" className="hover:underline decoration-1 underline-offset-4">Belts</Link></li>
+              <li><Link href="/eyeglasses" className="hover:underline decoration-1 underline-offset-4">Eyeglasses</Link></li>
               <li><Link href="/collections" className="hover:underline decoration-1 underline-offset-4">Collections</Link></li>
               <li><Link href="/new-arrivals" className="hover:underline decoration-1 underline-offset-4">New Arrivals</Link></li>
               <li><Link href="/accessories" className="hover:underline decoration-1 underline-offset-4">Accessories</Link></li>
@@ -46,7 +50,7 @@ export default function Footer() {
             <ul className="space-y-4">
               <li><Link href="/shipping" className="hover:underline decoration-1 underline-offset-4">Shipping</Link></li>
               <li><Link href="/returns" className="hover:underline decoration-1 underline-offset-4">Returns</Link></li>
-              <li><Link href="/warranty" className="hover:underline decoration-1 underline-offset-4">Warranty (10 Years)</Link></li>
+              <li><Link href="/size-guide" className="hover:underline decoration-1 underline-offset-4">Size Guide</Link></li>
               <li><Link href="/faq" className="hover:underline decoration-1 underline-offset-4">FAQs</Link></li>
             </ul>
           </div>
@@ -55,7 +59,6 @@ export default function Footer() {
             <h4 className="font-mono text-xs uppercase tracking-widest text-slate-500">[03] Senator</h4>
             <ul className="space-y-4">
               <li><Link href="/about" className="hover:underline decoration-1 underline-offset-4">Our Story</Link></li>
-              <li><Link href="/press" className="hover:underline decoration-1 underline-offset-4">Press</Link></li>
               <li><Link href="/contact" className="hover:underline decoration-1 underline-offset-4">Contact</Link></li>
             </ul>
           </div>
@@ -92,6 +95,7 @@ export default function Footer() {
           <div className="flex gap-6 mt-4 md:mt-0">
             <Link href="/privacy" className="hover:text-slate-900">PRIVACY</Link>
             <Link href="/terms" className="hover:text-slate-900">TERMS</Link>
+            <Link href="/cookies" className="hover:text-slate-900">COOKIES</Link>
           </div>
         </div>
       </div>
