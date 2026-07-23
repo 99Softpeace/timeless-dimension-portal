@@ -5,3 +5,5 @@ node_modules
 !.env.example
 public/uploads
 .codex-devserver*.log
+*.tsbuildinfo
+dev-server*.log
