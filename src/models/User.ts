@@ -61,7 +61,8 @@ const userSchema = new mongoose.Schema({
         type: Date
     },
     passwordResetToken: String,
-    passwordResetExpires: Date
+    passwordResetExpires: Date,
+    reengagementSentAt: Date
 }, {
     timestamps: true,
     toJSON: { virtuals: true },

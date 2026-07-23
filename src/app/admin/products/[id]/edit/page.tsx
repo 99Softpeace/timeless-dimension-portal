@@ -27,6 +27,10 @@ type ProductFormData = {
     isFeatured: boolean
     isNew: boolean
     isBestSeller: boolean
+    discount: string
+    scheduledDiscount: string
+    saleStartsAt: string
+    saleEndsAt: string
 }
 
 export default function EditProductPage() {
@@ -47,6 +51,10 @@ export default function EditProductPage() {
         isFeatured: false,
         isNew: false,
         isBestSeller: false,
+        discount: '',
+        scheduledDiscount: '',
+        saleStartsAt: '',
+        saleEndsAt: '',
     })
 
     useEffect(() => {
@@ -81,6 +89,10 @@ export default function EditProductPage() {
                         isFeatured: Boolean(product.isFeatured),
                         isNew: Boolean(product.isNew),
                         isBestSeller: Boolean(product.isBestSeller),
+                        discount: String(product.discount ?? ''),
+                        scheduledDiscount: String(product.scheduledDiscount ?? ''),
+                        saleStartsAt: product.saleStartsAt ? new Date(product.saleStartsAt).toISOString().slice(0, 16) : '',
+                        saleEndsAt: product.saleEndsAt ? new Date(product.saleEndsAt).toISOString().slice(0, 16) : '',
                     })
                 }
             } catch (error: any) {
@@ -168,6 +180,10 @@ export default function EditProductPage() {
                     isFeatured: formData.isFeatured,
                     isNew: formData.isNew,
                     isBestSeller: formData.isBestSeller,
+                    discount: formData.discount,
+                    scheduledDiscount: formData.scheduledDiscount,
+                    saleStartsAt: formData.saleStartsAt,
+                    saleEndsAt: formData.saleEndsAt,
                 }),
             })
 
@@ -338,6 +354,19 @@ export default function EditProductPage() {
                 </div>
 
 
+                <div className="space-y-3 rounded-xl border border-glass-border bg-midnight/30 p-4">
+                    <div><h3 className="font-semibold text-silver">Discount pricing</h3><p className="text-xs text-silver/60">Apply a discount immediately or schedule one for later.</p></div>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                        <label className="text-xs text-silver">Current discount %<input type="number" min="0" max="100" value={formData.discount} onChange={(e) => setFormData({...formData, discount:e.target.value})} className="mt-1 w-full rounded-lg border border-glass-border bg-midnight/60 px-3 py-2 text-white" /></label>
+                        <div className="rounded-lg border border-glass-border bg-midnight/50 p-3 text-sm text-silver"><span className="block text-xs text-silver/60">Price preview</span>{formData.discount && Number(formData.discount) > 0 ? <><span className="mr-2 line-through">₦{Number(formData.price || 0).toLocaleString()}</span><strong className="text-teal">₦{Math.round(Number(formData.price || 0) * (1 - Number(formData.discount) / 100)).toLocaleString()}</strong></> : <strong>₦{Number(formData.price || 0).toLocaleString()}</strong>}</div>
+                    </div>
+                    <div className="grid gap-3 sm:grid-cols-3">
+                        <label className="text-xs text-silver">Discount %<input type="number" min="0" max="100" value={formData.scheduledDiscount} onChange={(e) => setFormData({...formData, scheduledDiscount:e.target.value})} className="mt-1 w-full rounded-lg border border-glass-border bg-midnight/60 px-3 py-2 text-white" /></label>
+                        <label className="text-xs text-silver">Starts<input type="datetime-local" value={formData.saleStartsAt} onChange={(e) => setFormData({...formData, saleStartsAt:e.target.value})} className="mt-1 w-full rounded-lg border border-glass-border bg-midnight/60 px-3 py-2 text-white" /></label>
+                        <label className="text-xs text-silver">Ends<input type="datetime-local" value={formData.saleEndsAt} onChange={(e) => setFormData({...formData, saleEndsAt:e.target.value})} className="mt-1 w-full rounded-lg border border-glass-border bg-midnight/60 px-3 py-2 text-white" /></label>
+                    </div>
+                </div>
+
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     {[
                         ['isFeatured', 'Featured Product'],
@@ -377,9 +406,3 @@ export default function EditProductPage() {
         </div>
     )
 }
-
-
-
-
-
-

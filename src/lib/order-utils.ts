@@ -110,7 +110,13 @@ export async function buildOrderItems(cartItems: CheckoutCartItem[] | undefined)
       throw new Error(`Unknown cart item: ${id}`)
     }
 
-    const price = Number((product as any).price || 0)
+    if (dbProduct && (!(dbProduct as any).inStock || Number((dbProduct as any).stockQuantity || 0) < quantity)) {
+      throw new Error(String((dbProduct as any).name || 'Product') + ' does not have enough stock')
+    }
+
+    const basePrice = Number((product as any).price || 0)
+    const activeDiscount = Math.min(100, Math.max(0, Number((product as any).discount || 0)))
+    const price = Math.round(basePrice * (1 - activeDiscount / 100) * 100) / 100
     const name = String((product as any).name || 'Product')
     const image = String((product as any).image || (product as any).images?.[0] || '')
     const availableColors = Array.isArray((product as any).colors)
@@ -134,6 +140,18 @@ export async function buildOrderItems(cartItems: CheckoutCartItem[] | undefined)
 
   return { items, subtotal }
 }
-
-
-
+export async function reduceInventory(items: { product?: unknown; quantity: number; name: string }[]) {
+  for (const item of items) {
+    if (!item.product) continue
+    const product = await Product.findOneAndUpdate(
+      { _id: item.product, stockQuantity: { $gte: item.quantity } },
+      { $inc: { stockQuantity: -item.quantity } },
+      { new: true }
+    )
+    if (!product) throw new Error(`Not enough stock for ${item.name}`)
+    if (product.stockQuantity <= 0 && product.inStock) {
+      product.inStock = false
+      await product.save()
+    }
+  }
+}

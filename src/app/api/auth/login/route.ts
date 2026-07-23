@@ -51,7 +51,7 @@ export async function POST(req: Request) {
         const normalizedEmail = email.toLowerCase().trim()
 
         // Find user by email
-        const user = await (User as any).findByEmail(normalizedEmail)
+        const user = await User.findOne({ email: normalizedEmail })
         if (!user) {
             return NextResponse.json(
                 { success: false, message: 'Invalid email or password' },

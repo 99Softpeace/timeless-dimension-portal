@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic'
 const DEFAULT_PREFERENCES = {
   orderNotifications: true,
   lowStockAlerts: true,
-  weeklySummary: false,
+  weeklySummary: true,
   timezone: 'Africa/Lagos',
 }
 

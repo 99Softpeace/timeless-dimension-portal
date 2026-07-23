@@ -55,7 +55,6 @@ export default function Footer() {
             <h4 className="font-mono text-xs uppercase tracking-widest text-slate-500">[03] Senator</h4>
             <ul className="space-y-4">
               <li><Link href="/about" className="hover:underline decoration-1 underline-offset-4">Our Story</Link></li>
-              <li><Link href="/careers" className="hover:underline decoration-1 underline-offset-4">Careers</Link></li>
               <li><Link href="/press" className="hover:underline decoration-1 underline-offset-4">Press</Link></li>
               <li><Link href="/contact" className="hover:underline decoration-1 underline-offset-4">Contact</Link></li>
             </ul>

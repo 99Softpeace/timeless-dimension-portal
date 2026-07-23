@@ -12,6 +12,7 @@ import {
     generatePaymentReference,
     normalizeCurrency,
     toAmount,
+    reduceInventory,
 } from '@/lib/order-utils'
 import {
     sendOrderConfirmationEmail,
@@ -107,6 +108,8 @@ export async function POST(req: NextRequest) {
             notes: 'Customer selected pay on delivery. Delivery is free in and outside Lagos.',
         })
 
+        await reduceInventory(order.items as any)
+
         try {
             const user = await (User as any).findById(userId).select('email firstName lastName isActive')
             const customer = {
@@ -160,5 +163,3 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ success: false, message: 'Error creating order', error: error.message }, { status: 500 })
     }
 }
-
-

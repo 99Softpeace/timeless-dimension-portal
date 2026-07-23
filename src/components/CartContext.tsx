@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useReducer, ReactNode } from 'react'
+import { createContext, useContext, useEffect, useReducer, useRef, ReactNode } from 'react'
 
 export interface CartItem {
   id: string
@@ -25,6 +25,7 @@ type CartAction =
   | { type: 'CLEAR_CART' }
   | { type: 'TOGGLE_CART' }
   | { type: 'SET_CART_OPEN'; payload: boolean }
+  | { type: 'HYDRATE_CART'; payload: CartItem[] }
 
 const initialState: CartState = {
   items: [],
@@ -33,6 +34,9 @@ const initialState: CartState = {
 
 function cartReducer(state: CartState, action: CartAction): CartState {
   switch (action.type) {
+    case 'HYDRATE_CART':
+      return { ...state, items: action.payload }
+
     case 'ADD_ITEM': {
       const incomingCartKey = `${action.payload.id}::${action.payload.selectedColor || ''}`
       const existingItem = state.items.find(item => (item.cartKey || item.id) === incomingCartKey)
@@ -110,6 +114,37 @@ const CartContext = createContext<CartContextType | undefined>(undefined)
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(cartReducer, initialState)
+  const hydrated = useRef(false)
+
+  useEffect(() => {
+    let cancelled = false
+    async function hydrateCart() {
+      const localItems = (() => { try { return JSON.parse(localStorage.getItem('senator-cart') || '[]') } catch { return [] } })()
+      const token = localStorage.getItem('token')
+      let items = Array.isArray(localItems) ? localItems : []
+      if (token) {
+        try {
+          const response = await fetch('/api/cart', { headers: { Authorization: `Bearer ${token}` } })
+          const result = await response.json()
+          if (response.ok && Array.isArray(result.data) && result.data.length) items = result.data
+        } catch (error) { console.error('Could not restore saved cart:', error) }
+      }
+      if (!cancelled) { dispatch({ type: 'HYDRATE_CART', payload: items }); hydrated.current = true }
+    }
+    hydrateCart()
+    return () => { cancelled = true }
+  }, [])
+
+  useEffect(() => {
+    if (!hydrated.current) return
+    localStorage.setItem('senator-cart', JSON.stringify(state.items))
+    const token = localStorage.getItem('token')
+    if (!token) return
+    const timer = window.setTimeout(() => {
+      fetch('/api/cart', { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ items: state.items }) }).catch((error) => console.error('Could not save cart:', error))
+    }, 500)
+    return () => window.clearTimeout(timer)
+  }, [state.items])
 
   const addItem = (item: Omit<CartItem, 'quantity'>) => {
     dispatch({ type: 'ADD_ITEM', payload: item })
@@ -169,5 +204,3 @@ export function useCart() {
   }
   return context
 }
-
-

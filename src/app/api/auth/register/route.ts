@@ -18,7 +18,7 @@ export async function POST(req: Request) {
         const normalizedEmail = email.toLowerCase().trim()
 
         // Check if user already exists
-        const existingUser = await (User as any).findByEmail(normalizedEmail)
+        const existingUser = await User.findOne({ email: normalizedEmail })
         if (existingUser) {
             return NextResponse.json(
                 { success: false, message: 'User already exists with this email' },

@@ -24,6 +24,10 @@ export interface IProduct {
   newArrivalEmailQueuedAt?: Date
   newArrivalEmailProcessingAt?: Date
   newArrivalEmailSentAt?: Date
+  lowStockAlertedAt?: Date
+  saleStartsAt?: Date
+  saleEndsAt?: Date
+  scheduledDiscount?: number
 }
 
 const productSchema = new Schema<IProduct>(
@@ -108,6 +112,10 @@ const productSchema = new Schema<IProduct>(
     newArrivalEmailQueuedAt: Date,
     newArrivalEmailProcessingAt: Date,
     newArrivalEmailSentAt: Date,
+    lowStockAlertedAt: Date,
+    saleStartsAt: Date,
+    saleEndsAt: Date,
+    scheduledDiscount: { type: Number, min: 0, max: 100 },
   },
   {
     timestamps: true,
@@ -200,7 +208,8 @@ function getProductModel() {
   const hasColorsPath = Boolean((existingModel as any).schema?.path('colors'))
   const hasFeaturedStatic = typeof (existingModel as any).findFeatured === 'function'
   const hasNewArrivalEmailFields = Boolean((existingModel as any).schema?.path('newArrivalEmailQueuedAt'))
-  if (!hasSlugPath || !hasIsActivePath || !hasMediaPath || !hasColorsPath || !hasFeaturedStatic || !hasNewArrivalEmailFields) {
+  const hasScheduledSaleFields = Boolean((existingModel as any).schema?.path('scheduledDiscount'))
+  if (!hasSlugPath || !hasIsActivePath || !hasMediaPath || !hasColorsPath || !hasFeaturedStatic || !hasNewArrivalEmailFields || !hasScheduledSaleFields) {
     delete (mongoose.models as any).Product
     return mongoose.model<IProduct>('Product', productSchema)
   }

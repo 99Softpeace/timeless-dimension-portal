@@ -16,7 +16,7 @@ const adminPreferenceSchema = new Schema<IAdminPreference>(
     key: { type: String, required: true, unique: true, default: 'global' },
     orderNotifications: { type: Boolean, default: true },
     lowStockAlerts: { type: Boolean, default: true },
-    weeklySummary: { type: Boolean, default: false },
+    weeklySummary: { type: Boolean, default: true },
     timezone: { type: String, default: 'Africa/Lagos' },
     updatedBy: { type: Schema.Types.ObjectId, ref: 'User' },
   },

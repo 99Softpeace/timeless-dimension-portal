@@ -36,7 +36,7 @@ export default function Header() {
             SENATOR
           </Link>
 
-          <nav className="relative z-10 hidden md:flex items-center gap-8 text-sm">
+          <nav className="relative z-10 hidden lg:flex items-center gap-8 text-sm">
             {navLinks.map((link) => (
               <Link key={link.href} href={link.href} className="text-white/90 transition-colors hover:text-gray-300">
                 {link.label}
@@ -47,7 +47,7 @@ export default function Header() {
 
           <div className="relative z-10 flex shrink-0 items-center gap-2 sm:gap-3 lg:gap-4">
             {user ? (
-              <div className="hidden sm:flex items-center gap-4">
+              <div className="hidden lg:flex items-center gap-4">
                 <Link href="/orders" className="text-sm font-medium text-white/85 transition-colors hover:text-white">
                   My Orders
                 </Link>
@@ -60,7 +60,11 @@ export default function Header() {
                   <LogOut size={20} />
                 </button>
               </div>
-            ) : null}
+            ) : (
+              <Link href="/login" className="hidden h-10 items-center justify-center rounded-lg border border-white/25 px-4 text-sm font-semibold text-white transition hover:bg-white hover:text-slate-950 lg:inline-flex">
+                Sign In
+              </Link>
+            )}
 
             <button
               onClick={() => setIsCartOpen(true)}
@@ -77,7 +81,7 @@ export default function Header() {
 
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden text-white transition-colors hover:text-gray-300"
+              className="lg:hidden text-white transition-colors hover:text-gray-300"
               aria-label="Open menu"
             >
               {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -92,7 +96,7 @@ export default function Header() {
           opacity: isMenuOpen ? 1 : 0,
           pointerEvents: isMenuOpen ? 'auto' : 'none'
         }}
-        className="fixed inset-0 z-40 bg-black/95 backdrop-blur-xl md:hidden pt-28 px-6 text-white"
+        className="fixed inset-0 z-40 bg-black/95 backdrop-blur-xl lg:hidden pt-28 px-6 text-white"
       >
         <nav className="flex flex-col space-y-6 text-center">
           {navLinks.map((link) => (

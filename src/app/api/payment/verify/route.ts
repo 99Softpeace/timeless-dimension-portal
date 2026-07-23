@@ -15,6 +15,7 @@ import {
   generateOrderNumber,
   normalizeCurrency,
   toAmount,
+  reduceInventory,
   type CheckoutAddress,
   type CheckoutCartItem,
 } from '@/lib/order-utils'
@@ -392,6 +393,8 @@ export async function POST(req: NextRequest) {
       notes: verified.reference ? `Flutterwave V4 reference: ${verified.reference}` : undefined,
     })
 
+    await reduceInventory(order.items as any)
+
     try {
       const user = await (User as any).findById(userId).select(
         'email firstName lastName isActive'
@@ -456,5 +459,3 @@ export async function POST(req: NextRequest) {
     )
   }
 }
-
-

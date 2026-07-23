@@ -57,6 +57,8 @@ export interface IOrder extends Document {
   estimatedDelivery?: Date
   deliveredAt?: Date
   cancelledAt?: Date
+  reviewRequestSentAt?: Date
+  staleOrderAlertedAt?: Date
   cancellationReason?: string
   totalItems?: number
   statusDisplay?: string
@@ -155,7 +157,9 @@ const orderSchema = new Schema<IOrder>(
     estimatedDelivery: Date,
     deliveredAt: Date,
     cancelledAt: Date,
-    cancellationReason: String
+    cancellationReason: String,
+    reviewRequestSentAt: Date,
+    staleOrderAlertedAt: Date
   },
   {
     timestamps: true,
@@ -298,4 +302,3 @@ const Order =
   mongoose.model<IOrder>('Order', orderSchema)
 
 export default Order
-

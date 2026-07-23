@@ -10,6 +10,7 @@ export interface ProductCardItem {
   image: string
   price: number
   isNew?: boolean
+  discount?: number
 }
 
 interface ProductCardProps {
@@ -49,9 +50,11 @@ export default function ProductCard({ product, index }: ProductCardProps) {
           <h3 className="text-lg font-medium text-slate-900 font-sans tracking-tight">
             {product.name}
           </h3>
-          <p className="text-sm text-slate-500 font-sans">
-            ₦{product.price.toLocaleString()}
-          </p>
+          <div className="flex items-center justify-center gap-2 text-sm font-sans">
+            {product.discount && product.discount > 0 ? (
+              <><span className="text-slate-400 line-through">₦{product.price.toLocaleString()}</span><span className="font-semibold text-red-600">₦{Math.round(product.price * (1 - product.discount / 100)).toLocaleString()}</span></>
+            ) : <span className="text-slate-500">₦{product.price.toLocaleString()}</span>}
+          </div>
         </div>
       </Link>
     </motion.div>

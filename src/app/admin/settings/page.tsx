@@ -14,7 +14,7 @@ type AdminPreferences = {
 const DEFAULT_PREFERENCES: AdminPreferences = {
     orderNotifications: true,
     lowStockAlerts: true,
-    weeklySummary: false,
+    weeklySummary: true,
     timezone: 'Africa/Lagos',
 }
 

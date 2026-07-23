@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useEffect, useMemo, useState } from 'react'
 import Image from 'next/image'
@@ -133,6 +133,7 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
   }
 
   const activeImage = selectedImage || product.image
+  const salePrice = product.discount ? Math.round(product.price * (1 - product.discount / 100)) : product.price
 
   const handleColorSelect = (color: string, index: number) => {
     setSelectedColor(color)
@@ -149,7 +150,7 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
       addItem({
         id: product.id,
         name: product.name,
-        price: product.price,
+        price: salePrice,
         image: activeImage,
         slug: product.slug,
         selectedColor: selectedColor || undefined,
@@ -191,8 +192,8 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
               <span className="font-mono text-xs uppercase tracking-widest text-slate-500 mb-2 block">{product.category}</span>
               <h1 className="text-5xl md:text-6xl font-serif font-bold text-slate-900 mb-6 leading-tight">{product.name}</h1>
               <div className="flex items-baseline gap-4 border-b border-slate-100 pb-8">
-                <span className="text-3xl font-mono text-slate-900">&#8358;{product.price.toLocaleString()}</span>
-                {product.discount && <span className="text-lg text-red-500 font-medium">-{product.discount}%</span>}
+                <span className="text-3xl font-mono text-slate-900">&#8358;{salePrice.toLocaleString()}</span>
+                {product.discount && <><span className="text-base text-slate-400 line-through">&#8358;{product.price.toLocaleString()}</span><span className="text-lg text-red-500 font-medium">-{product.discount}%</span></>}
               </div>
             </div>
 
@@ -234,5 +235,3 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
     </div>
   )
 }
-
-

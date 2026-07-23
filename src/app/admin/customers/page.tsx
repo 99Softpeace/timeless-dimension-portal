@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { RefreshCcw, Trash2, Users } from 'lucide-react'
+import { RefreshCcw, Trash2, Users, UserCheck, UserX } from 'lucide-react'
 
 type AdminUser = {
   _id: string
@@ -88,34 +88,28 @@ export default function AdminCustomersPage() {
     }
   }
 
-  const deactivateUser = async (id: string) => {
-    const confirmed = window.confirm('Deactivate this customer account?')
-    if (!confirmed) return
-
+  const setAccountActive = async (user: AdminUser, isActive: boolean) => {
+    if (!window.confirm(`${isActive ? 'Unban' : 'Ban'} ${user.email}?`)) return
     try {
-      setRemovingId(id)
-      const res = await fetch('/api/users/admin', {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify({ id }),
-      })
+      setSavingId(user._id)
+      const res = await fetch('/api/users/admin', { method: 'PUT', headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) }, body: JSON.stringify({ id: user._id, isActive }) })
       const result = await res.json()
-
-      if (!res.ok || !result.success) {
-        throw new Error(result.message || 'Failed to deactivate user')
-      }
-
-      setUsers((prev) => prev.filter((user) => user._id !== id))
-    } catch (err: any) {
-      alert(err?.message || 'Failed to deactivate user')
-    } finally {
-      setRemovingId(null)
-    }
+      if (!res.ok || !result.success) throw new Error(result.message || 'Failed to update account')
+      setUsers((prev) => prev.map((item) => item._id === user._id ? result.data : item))
+    } catch (err: any) { alert(err?.message || 'Failed to update account') } finally { setSavingId(null) }
   }
 
+  const permanentlyDeleteUser = async (user: AdminUser) => {
+    const confirmed = window.confirm(`Permanently delete ${user.email}? This cannot be undone.`)
+    if (!confirmed || !window.confirm('Final confirmation: permanently delete this account?')) return
+    try {
+      setRemovingId(user._id)
+      const res = await fetch('/api/users/admin', { method: 'DELETE', headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) }, body: JSON.stringify({ id: user._id, permanent: true }) })
+      const result = await res.json()
+      if (!res.ok || !result.success) throw new Error(result.message || 'Failed to delete account')
+      setUsers((prev) => prev.filter((item) => item._id !== user._id))
+    } catch (err: any) { alert(err?.message || 'Failed to delete account') } finally { setRemovingId(null) }
+  }
   const customersCount = users.filter((user) => user.role === 'customer').length
 
   return (
@@ -183,7 +177,7 @@ export default function AdminCustomersPage() {
                 <th className="px-4 py-3 text-xs uppercase tracking-wider text-teal">Email</th>
                 <th className="px-4 py-3 text-xs uppercase tracking-wider text-teal">Role</th>
                 <th className="px-4 py-3 text-xs uppercase tracking-wider text-teal">Joined</th>
-                <th className="px-4 py-3 text-xs uppercase tracking-wider text-teal">Last Login</th>
+                <th className="px-4 py-3 text-xs uppercase tracking-wider text-teal">Status</th>
                 <th className="px-4 py-3 text-xs uppercase tracking-wider text-teal">Action</th>
               </tr>
             </thead>
@@ -242,14 +236,14 @@ export default function AdminCustomersPage() {
                       {user.lastLogin ? new Date(user.lastLogin).toLocaleString() : 'Never'}
                     </td>
                     <td className="px-4 py-4">
-                      <button
-                        onClick={() => void deactivateUser(user._id)}
-                        disabled={removingId === user._id}
-                        className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-red-500/20 text-red-300 hover:bg-red-500/30 disabled:opacity-60"
-                      >
-                        <Trash2 size={14} />
-                        {removingId === user._id ? 'Removing...' : 'Deactivate'}
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button onClick={() => void setAccountActive(user, !user.isActive)} disabled={savingId === user._id} className={`inline-flex items-center gap-1 rounded-lg px-3 py-2 text-sm disabled:opacity-60 ${user.isActive ? 'bg-amber-500/20 text-amber-300 hover:bg-amber-500/30' : 'bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30'}`}>
+                          {user.isActive ? <UserX size={14} /> : <UserCheck size={14} />}{user.isActive ? 'Ban' : 'Unban'}
+                        </button>
+                        <button onClick={() => void permanentlyDeleteUser(user)} disabled={removingId === user._id} className="inline-flex items-center gap-1 rounded-lg bg-red-500/20 px-3 py-2 text-sm text-red-300 hover:bg-red-500/30 disabled:opacity-60">
+                          <Trash2 size={14} />{removingId === user._id ? 'Deleting...' : 'Delete'}
+                        </button>
+                      </div>
                     </td>
                   </motion.tr>
                 ))

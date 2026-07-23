@@ -65,6 +65,9 @@ function normalizeProductPayload(body: any) {
         isNew: Boolean(body?.isNew),
         isBestSeller: Boolean(body?.isBestSeller),
         discount: body?.discount === undefined || body?.discount === '' ? undefined : Number(body.discount),
+        scheduledDiscount: body?.scheduledDiscount === undefined || body?.scheduledDiscount === '' ? undefined : Number(body.scheduledDiscount),
+        saleStartsAt: body?.saleStartsAt ? new Date(body.saleStartsAt) : undefined,
+        saleEndsAt: body?.saleEndsAt ? new Date(body.saleEndsAt) : undefined,
     }
 }
 
@@ -122,6 +125,9 @@ export async function POST(req: NextRequest) {
             isNew,
             isBestSeller,
             discount,
+            scheduledDiscount,
+            saleStartsAt,
+            saleEndsAt,
         } = normalizeProductPayload(body)
 
         if (!name || !description || !category || Number.isNaN(price)) {
@@ -210,6 +216,9 @@ export async function PUT(req: NextRequest) {
             isNew,
             isBestSeller,
             discount,
+            scheduledDiscount,
+            saleStartsAt,
+            saleEndsAt,
         } = normalizeProductPayload(body)
 
         if (!id) {
@@ -251,6 +260,9 @@ export async function PUT(req: NextRequest) {
             isNew,
             isBestSeller,
             discount: discount !== undefined && !Number.isNaN(discount) ? discount : undefined,
+            scheduledDiscount: scheduledDiscount !== undefined && !Number.isNaN(scheduledDiscount) ? scheduledDiscount : undefined,
+            saleStartsAt,
+            saleEndsAt,
         }, { new: true, runValidators: true })
         if (!product) {
             return NextResponse.json({
