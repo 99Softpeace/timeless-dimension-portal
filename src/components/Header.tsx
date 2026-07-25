@@ -50,6 +50,7 @@ export default function Header() {
                     <div className="overflow-hidden rounded-xl border border-white/10 bg-slate-950/95 p-1.5 shadow-xl shadow-black/25 backdrop-blur-xl">
                       <Link href={`${link.href}/men`} className="block rounded-lg px-3 py-2.5 font-medium text-white/70 transition hover:bg-white/10 hover:text-white">Men</Link>
                       <Link href={`${link.href}/women`} className="block rounded-lg px-3 py-2.5 font-medium text-white/70 transition hover:bg-white/10 hover:text-white">Women</Link>
+                      <Link href={`${link.href}/unisex`} className="block rounded-lg px-3 py-2.5 font-medium text-white/70 transition hover:bg-white/10 hover:text-white">Unisex</Link>
                     </div>
                   </div>
                 )}
@@ -128,9 +129,10 @@ export default function Header() {
                     </button>
                     <div className={`grid overflow-hidden transition-all duration-200 ${mobileCategoryOpen === link.href ? 'grid-rows-[1fr] pb-4 opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
                       <div className="min-h-0">
-                        <div className="grid grid-cols-2 gap-2 rounded-xl bg-white/[0.05] p-2 text-center text-sm font-semibold">
+                        <div className="grid grid-cols-3 gap-2 rounded-xl bg-white/[0.05] p-2 text-center text-sm font-semibold">
                           <Link href={`${link.href}/men`} onClick={() => { setIsMenuOpen(false); setMobileCategoryOpen(null) }} className="rounded-lg px-2 py-3 text-white/65 active:bg-white/10">Men</Link>
                           <Link href={`${link.href}/women`} onClick={() => { setIsMenuOpen(false); setMobileCategoryOpen(null) }} className="rounded-lg bg-white px-2 py-3 text-black active:bg-white/80">Women</Link>
+                          <Link href={`${link.href}/unisex`} onClick={() => { setIsMenuOpen(false); setMobileCategoryOpen(null) }} className="rounded-lg px-2 py-3 text-white/65 active:bg-white/10">Unisex</Link>
                         </div>
                       </div>
                     </div>

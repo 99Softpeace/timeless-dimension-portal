@@ -21,7 +21,7 @@ type ProductFormData = {
     description: string
     price: string
     category: string
-    gender: 'men' | 'women' | 'unisex'
+    gender: '' | 'men' | 'women' | 'unisex'
     stock: string
     images: string[]
     videos: string[]
@@ -46,7 +46,7 @@ export default function EditProductPage() {
         description: '',
         price: '',
         category: 'Accessories',
-        gender: 'unisex',
+        gender: '',
         stock: '',
         images: [],
         videos: [],
@@ -85,7 +85,7 @@ export default function EditProductPage() {
                         description: product.description || '',
                         price: String(product.price ?? ''),
                         category: product.category || 'Accessories',
-                        gender: ['men', 'women', 'unisex'].includes(product.gender) ? product.gender : 'unisex',
+                        gender: ['men', 'women', 'unisex'].includes(product.gender) ? product.gender : '',
                         stock: String(product.stockQuantity ?? 0),
                         images: Array.isArray(product.images) ? product.images : [],
                         videos: Array.isArray(product.videos) ? product.videos : [],
@@ -310,10 +310,12 @@ export default function EditProductPage() {
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-silver">Audience</label>
                         <select
+                            required
                             value={formData.gender}
-                            onChange={(e) => setFormData({ ...formData, gender: e.target.value as 'men' | 'women' | 'unisex' })}
+                            onChange={(e) => setFormData({ ...formData, gender: e.target.value as '' | 'men' | 'women' | 'unisex' })}
                             className="w-full bg-midnight/50 border border-glass-border rounded-lg px-4 py-2 text-white focus:outline-none focus:border-teal transition-colors"
                         >
+                            <option value="" disabled>Select audience</option>
                             <option value="unisex">Unisex / Everyone</option>
                             <option value="men">Men</option>
                             <option value="women">Women</option>

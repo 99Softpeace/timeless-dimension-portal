@@ -36,7 +36,7 @@ export function normalizeProduct(product: any): StoreProduct {
     price: Number(object.price || 0),
     image: object.image || object.images?.[0] || '/assets/images/heritage-classic-v2.png',
     category: String(object.category || 'Uncategorized'),
-    gender: ['men', 'women', 'unisex'].includes(object.gender) ? object.gender : 'unisex',
+    gender: ['men', 'women', 'unisex'].includes(object.gender) ? object.gender : undefined,
     isNew: Boolean(object.isNew),
     isBestSeller: Boolean(object.isBestSeller),
     isFeatured: Boolean(object.isFeatured),

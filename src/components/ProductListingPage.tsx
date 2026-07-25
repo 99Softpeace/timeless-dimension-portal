@@ -20,7 +20,7 @@ type ProductListingPageProps = {
   category?: string
   products?: StoreProduct[]
   heroImage?: string
-  gender?: 'men' | 'women'
+  gender?: 'men' | 'women' | 'unisex'
 }
 
 const categoryThemes: Record<string, { eyebrow: string; accent: string; bg: string; text: string; imagePosition: string }> = {
@@ -97,7 +97,7 @@ function normalizeClientProduct(product: any): StoreProduct | null {
     price: Number(product.price || 0),
     image: product.image || product.images?.[0] || '/assets/images/heritage-classic-v2.png',
     category: String(product.category || 'Uncategorized'),
-    gender: ['men', 'women', 'unisex'].includes(product.gender) ? product.gender : 'unisex',
+    gender: ['men', 'women', 'unisex'].includes(product.gender) ? product.gender : undefined,
     isNew: Boolean(product.isNew),
     isBestSeller: Boolean(product.isBestSeller),
     isFeatured: Boolean(product.isFeatured),
@@ -117,7 +117,7 @@ function categoryMatches(productCategory: string, targetCategory: string) {
   return category.includes(target)
 }
 
-function applyFilter(product: StoreProduct, filter?: ProductFilter, category?: string, gender?: 'men' | 'women') {
+function applyFilter(product: StoreProduct, filter?: ProductFilter, category?: string, gender?: 'men' | 'women' | 'unisex') {
   const productCategory = product.category.toLowerCase()
   if (category && !categoryMatches(productCategory, category)) return false
   if (gender && product.gender !== gender) return false
@@ -252,6 +252,7 @@ export default function ProductListingPage({ title, description, emptyMessage, f
                 <div className="absolute left-10 top-28 hidden gap-2 md:flex lg:left-14">
                   <a href={`/${category.toLowerCase()}/men`} className={`flex-1 rounded-full px-4 py-2.5 text-center text-sm font-bold backdrop-blur-md transition md:flex-none ${gender === 'men' ? 'bg-white text-black' : 'border border-white/30 bg-black/20 text-white hover:bg-white/20'}`}>Men</a>
                   <a href={`/${category.toLowerCase()}/women`} className={`flex-1 rounded-full px-4 py-2.5 text-center text-sm font-bold backdrop-blur-md transition md:flex-none ${gender === 'women' ? 'bg-white text-black' : 'border border-white/30 bg-black/20 text-white hover:bg-white/20'}`}>Women</a>
+                  <a href={`/${category.toLowerCase()}/unisex`} className={`flex-1 rounded-full px-4 py-2.5 text-center text-sm font-bold backdrop-blur-md transition md:flex-none ${gender === 'unisex' ? 'bg-white text-black' : 'border border-white/30 bg-black/20 text-white hover:bg-white/20'}`}>Unisex</a>
                 </div>
               )}
               <div className="space-y-6">
@@ -298,6 +299,7 @@ export default function ProductListingPage({ title, description, emptyMessage, f
               <nav className="flex w-full items-center gap-1 rounded-full border border-black/10 bg-white p-1 shadow-sm md:hidden" aria-label={`${category} audience`}>
                 <a href={`/${category.toLowerCase()}/men`} className={`flex-1 rounded-full px-3 py-2.5 text-center text-sm font-semibold ${gender === 'men' ? 'bg-slate-950 text-white' : 'text-slate-500'}`}>Men</a>
                 <a href={`/${category.toLowerCase()}/women`} className={`flex-1 rounded-full px-3 py-2.5 text-center text-sm font-semibold ${gender === 'women' ? 'bg-slate-950 text-white' : 'text-slate-500'}`}>Women</a>
+                <a href={`/${category.toLowerCase()}/unisex`} className={`flex-1 rounded-full px-3 py-2.5 text-center text-sm font-semibold ${gender === 'unisex' ? 'bg-slate-950 text-white' : 'text-slate-500'}`}>Unisex</a>
               </nav>
             )}
 

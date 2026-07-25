@@ -25,7 +25,7 @@ export default function NewProductPage() {
         description: '',
         price: '',
         category: 'Accessories',
-        gender: 'unisex' as 'men' | 'women' | 'unisex',
+        gender: '' as '' | 'men' | 'women' | 'unisex',
         stock: '',
         images: [] as string[],
         videos: [] as string[],
@@ -223,10 +223,12 @@ export default function NewProductPage() {
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-silver">Audience</label>
                         <select
+                            required
                             value={formData.gender}
-                            onChange={(e) => setFormData({ ...formData, gender: e.target.value as 'men' | 'women' | 'unisex' })}
+                            onChange={(e) => setFormData({ ...formData, gender: e.target.value as '' | 'men' | 'women' | 'unisex' })}
                             className="w-full bg-midnight/50 border border-glass-border rounded-lg px-4 py-2 text-white focus:outline-none focus:border-teal transition-colors"
                         >
+                            <option value="" disabled>Select audience</option>
                             <option value="unisex">Unisex / Everyone</option>
                             <option value="men">Men</option>
                             <option value="women">Women</option>

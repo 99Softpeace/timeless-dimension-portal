@@ -49,8 +49,8 @@ function normalizeProductPayload(body: any) {
     const name = String(body?.name || '').trim()
     const description = String(body?.description || '').trim()
     const category = String(body?.category || '').trim()
-    const genderValue = String(body?.gender || 'unisex').toLowerCase()
-    const gender = ['men', 'women', 'unisex'].includes(genderValue) ? genderValue : 'unisex'
+    const genderValue = String(body?.gender || '').toLowerCase()
+    const gender = ['men', 'women', 'unisex'].includes(genderValue) ? genderValue : ''
     const price = Number(body?.price)
     const stockQuantity = Number(body?.stockQuantity ?? body?.stock ?? 0)
 
@@ -134,11 +134,11 @@ export async function POST(req: NextRequest) {
             saleEndsAt,
         } = normalizeProductPayload(body)
 
-        if (!name || !description || !category || Number.isNaN(price)) {
+        if (!name || !description || !category || !gender || Number.isNaN(price)) {
             return NextResponse.json({
                 success: false,
                 message: 'Missing required product fields',
-                error: 'name, description, category, and valid price are required'
+                error: 'name, description, category, audience, and valid price are required'
             }, { status: 400 })
         }
 
@@ -234,11 +234,11 @@ export async function PUT(req: NextRequest) {
             }, { status: 400 })
         }
 
-        if (!name || !description || !category || Number.isNaN(price)) {
+        if (!name || !description || !category || !gender || Number.isNaN(price)) {
             return NextResponse.json({
                 success: false,
                 message: 'Missing required product fields',
-                error: 'name, description, category, and valid price are required'
+                error: 'name, description, category, audience, and valid price are required'
             }, { status: 400 })
         }
 

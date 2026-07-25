@@ -54,7 +54,6 @@ const productSchema = new Schema<IProduct>(
     gender: {
       type: String,
       enum: ['men', 'women', 'unisex'],
-      default: 'unisex',
       index: true,
     },
     slug: {
@@ -210,6 +209,7 @@ function getProductModel() {
   }
 
   const hasGenderPath = Boolean((existingModel as any).schema?.path('gender'))
+  const hasAutomaticGenderDefault = (existingModel as any).schema?.path('gender')?.defaultValue !== undefined
   const hasSlugPath = Boolean((existingModel as any).schema?.path('slug'))
   const hasIsActivePath = Boolean((existingModel as any).schema?.path('isActive'))
   const hasMediaPath = Boolean((existingModel as any).schema?.path('videos'))
@@ -217,7 +217,7 @@ function getProductModel() {
   const hasFeaturedStatic = typeof (existingModel as any).findFeatured === 'function'
   const hasNewArrivalEmailFields = Boolean((existingModel as any).schema?.path('newArrivalEmailQueuedAt'))
   const hasScheduledSaleFields = Boolean((existingModel as any).schema?.path('scheduledDiscount'))
-  if (!hasGenderPath || !hasSlugPath || !hasIsActivePath || !hasMediaPath || !hasColorsPath || !hasFeaturedStatic || !hasNewArrivalEmailFields || !hasScheduledSaleFields) {
+  if (!hasGenderPath || hasAutomaticGenderDefault || !hasSlugPath || !hasIsActivePath || !hasMediaPath || !hasColorsPath || !hasFeaturedStatic || !hasNewArrivalEmailFields || !hasScheduledSaleFields) {
     delete (mongoose.models as any).Product
     return mongoose.model<IProduct>('Product', productSchema)
   }

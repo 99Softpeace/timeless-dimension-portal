@@ -1,13 +1,5 @@
-import ProductListingPage from '@/components/ProductListingPage'
+import { redirect } from 'next/navigation'
 
-export default function ShoesPage() {
-  return (
-    <ProductListingPage
-      title="Shoes"
-      description="Step into everyday comfort and standout style with our curated footwear collection."
-      emptyMessage="No shoes are available at the moment."
-      category="Shoes"
-      heroImage="/assets/images/shoes-hero.jpg"
-    />
-  )
+export default function Page() {
+  redirect('/shoes/men')
 }

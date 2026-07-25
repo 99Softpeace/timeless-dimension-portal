@@ -1,13 +1,5 @@
-import ProductListingPage from '@/components/ProductListingPage'
+import { redirect } from 'next/navigation'
 
-export default function BagsPage() {
-  return (
-    <ProductListingPage
-      title="Bags"
-      description="Structured bags and carry pieces made to complete polished everyday looks."
-      emptyMessage="No bags are available at the moment."
-      category="Bags"
-      heroImage="/assets/images/editorial/model5.jpg"
-    />
-  )
+export default function Page() {
+  redirect('/bags/men')
 }
