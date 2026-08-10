@@ -26,6 +26,7 @@ export default function CheckoutContent() {
     postalCode: '',
     country: 'Nigeria',
     paymentMethod: 'card',
+    customerNote: '',
   })
 
   useEffect(() => {
@@ -52,7 +53,7 @@ export default function CheckoutContent() {
   }, [router])
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
@@ -117,6 +118,7 @@ export default function CheckoutContent() {
           quantity: item.quantity,
           selectedColor: item.selectedColor,
         })),
+        customerNote: formData.customerNote,
         shippingAddress: {
           firstName: formData.firstName,
           lastName: formData.lastName,
@@ -289,6 +291,21 @@ export default function CheckoutContent() {
                         />
                       ))}
                     </div>
+
+                    <div className="mt-4">
+                      <label htmlFor="customerNote" className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
+                        Short description for your order
+                      </label>
+                      <textarea
+                        id="customerNote"
+                        name="customerNote"
+                        rows={4}
+                        placeholder="Tell us what you want, your preferred style, size, color, or any other detail."
+                        value={formData.customerNote}
+                        onChange={handleInputChange}
+                        className="w-full bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 text-slate-800 dark:text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition"
+                      />
+                    </div>
                   </motion.div>
                 )}
 
@@ -381,6 +398,12 @@ export default function CheckoutContent() {
                       <span>Delivery:</span>
                       <span>Free in and outside Lagos</span>
                     </div>
+                    {formData.customerNote.trim() ? (
+                      <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900 dark:border-emerald-900/40 dark:bg-emerald-950/20 dark:text-emerald-200">
+                        <p className="font-semibold">Customer note</p>
+                        <p className="mt-1">{formData.customerNote}</p>
+                      </div>
+                    ) : null}
                   </motion.div>
                 )}
               </AnimatePresence>

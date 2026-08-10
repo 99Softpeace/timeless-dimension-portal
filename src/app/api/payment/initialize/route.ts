@@ -7,7 +7,7 @@ import { encryptFlutterwaveValue, flutterwaveRequest } from '@/lib/flutterwave-v
 import { amountsMatch, buildAddress, buildOrderItems, generateOrderNumber, generatePaymentReference, normalizeCurrency, toAmount, type CheckoutAddress, type CheckoutCartItem } from '@/lib/order-utils'
 
 type CardInput = { number?: string; expiryMonth?: string; expiryYear?: string; cvv?: string; pin?: string }
-type Body = { amount?: number | string; currency?: string; email?: string; phone?: string; name?: string; firstName?: string; lastName?: string; paymentMethod?: 'card' | 'bank_transfer'; card?: CardInput; cartItems?: CheckoutCartItem[]; shippingAddress?: CheckoutAddress; billingAddress?: CheckoutAddress }
+type Body = { amount?: number | string; currency?: string; email?: string; phone?: string; name?: string; firstName?: string; lastName?: string; paymentMethod?: 'card' | 'bank_transfer'; card?: CardInput; cartItems?: CheckoutCartItem[]; shippingAddress?: CheckoutAddress; billingAddress?: CheckoutAddress; customerNote?: string; description?: string }
 
 const actionRedirect = (action: any) => action?.redirect_url?.url || action?.redirect_url || action?.url || null
 
@@ -32,8 +32,10 @@ export async function POST(req: NextRequest) {
     if (Number.isFinite(clientAmount) && !amountsMatch(subtotal, clientAmount)) return NextResponse.json({ success: false, message: 'Amount mismatch' }, { status: 400 })
     const shippingAddress = buildAddress(body.shippingAddress, phone)
     const billingAddress = buildAddress(body.billingAddress || body.shippingAddress, phone)
+    const customerNote = String(body.customerNote || body.description || '').trim()
+    const orderNotes = [`Flutterwave V4 ${paymentMethod} initialized`, customerNote ? `Customer note: ${customerNote}` : ''].filter(Boolean).join(' | ')
     const reference = generatePaymentReference('FLW4')
-    const order = await Order.create({ orderNumber: generateOrderNumber(), user: userId, items, shippingAddress, billingAddress, subtotal, shippingCost: 0, tax: 0, discount: 0, total: subtotal, currency, status: 'pending', paymentStatus: 'pending', paymentMethod, paymentReference: reference, notes: `Flutterwave V4 ${paymentMethod} initialized` })
+    const order = await Order.create({ orderNumber: generateOrderNumber(), user: userId, items, shippingAddress, billingAddress, subtotal, shippingCost: 0, tax: 0, discount: 0, total: subtotal, currency, status: 'pending', paymentStatus: 'pending', paymentMethod, paymentReference: reference, notes: orderNotes })
 
     const customerSearch = await flutterwaveRequest<{ data: any }>('/customers/search?page=1&size=10', { method: 'POST', body: JSON.stringify({ email }) })
     const matches = Array.isArray(customerSearch.data) ? customerSearch.data : customerSearch.data?.customers || customerSearch.data?.items || (customerSearch.data?.id ? [customerSearch.data] : [])

@@ -88,6 +88,11 @@ export async function POST(req: NextRequest) {
             phone || body?.billingAddress?.phone
         )
         const billingAddress = buildAddress(body?.billingAddress || body?.shippingAddress, shippingAddress.phone)
+        const customerNote = String(body?.customerNote || body?.description || '').trim()
+        const orderNotes = [
+            'Customer selected pay on delivery. Delivery is free in and outside Lagos.',
+            customerNote ? `Customer note: ${customerNote}` : ''
+        ].filter(Boolean).join(' | ')
 
         const order = await Order.create({
             orderNumber: generateOrderNumber(),
@@ -105,7 +110,7 @@ export async function POST(req: NextRequest) {
             paymentStatus: 'pending',
             paymentMethod: 'cash_on_delivery',
             paymentReference: generatePaymentReference('COD'),
-            notes: 'Customer selected pay on delivery. Delivery is free in and outside Lagos.',
+            notes: orderNotes,
         })
 
         await reduceInventory(order.items as any)
