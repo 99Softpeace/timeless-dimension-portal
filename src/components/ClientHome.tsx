@@ -176,18 +176,12 @@ export default function ClientHome() {
               <p className="max-w-xl text-center text-xs uppercase tracking-[0.28em] text-white/70 sm:text-sm">
                 Watches. Bags. Clothes. Belts. Eyeglasses.
               </p>
-              <div className="flex w-full flex-col justify-center gap-3 sm:w-auto sm:flex-row">
+              <div className="flex w-full justify-center sm:w-auto">
                 <Link
-                  href="/watches"
+                  href="/shop"
                   className="rounded-full bg-white px-8 py-4 text-center text-sm font-semibold uppercase tracking-[0.2em] text-black transition-transform hover:scale-105"
                 >
-                  Explore Watches
-                </Link>
-                <Link
-                  href="/bags"
-                  className="liquid-glass rounded-full px-8 py-4 text-center text-sm font-semibold uppercase tracking-[0.2em] text-white transition-transform hover:scale-105"
-                >
-                  Explore Bags
+                  Explore
                 </Link>
               </div>
             </FadeIn>
